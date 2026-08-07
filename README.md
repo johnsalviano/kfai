@@ -40,8 +40,24 @@ tem arquivos para os dois. Copie o que preferir:
 | 9Router | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
 
 **Roteador próprio:** rode `python router.py`, preencha `router.conf` (copie o
-`.example`), escolha por rota `full` (texto intacto) ou `eco` (resume histórico
-antigo para economizar tokens). O 9Router fica só para quem preferir ele.
+`.example`), escolha por rota `full` (texto intacto), `eco` (resume histórico
+antigo para economizar tokens) ou `auto` (o roteador decide por heurística: tema
+complexo → `full`, pergunta simples → `eco`). O 9Router fica só para quem preferir ele.
+
+Recursos que o roteador próprio tem de fábrica:
+
+- **Fallback automático**: cada rota aceita vários uplinks; se um cair ou falhar,
+  a chamada segue para o próximo da lista.
+- **Cooldown (circuit breaker)**: um uplink que falhou (429, 401, 5xx, timeout)
+  fica em quarentena e é pulado nas próximas chamadas (`KFAI_COOLDOWN_SEC`, padrão 60s).
+- **Modo `auto`**: heurística determinística (sem custo de LLM) para escolher
+  `full` vs `eco` por request — complexidade do prompt, presença de tools e tamanho.
+- **Compressão de saída de ferramentas**: saídas longas de `tool` (logs, git, etc.)
+  são colapsadas (linhas repetidas omitidas) e truncadas para caber no contexto.
+- **Cache em memória**: chamadas repetidas idênticas (non-stream) respondem
+  instantaneamente sem reprocessar (`KFAI_CACHE_SEC` 300s, até `KFAI_CACHE_MAX` 200).
+- **Log JSONL**: cada request registrado em `logs/router.log` (rota, uplink, modo,
+  cache, bytes, tempo). Variáveis: `KFAI_LOG_FILE`, `KFAI_ROUTER_PORT`.
 
 ## Ligar só quando usar (sem processo sempre rodando)
 

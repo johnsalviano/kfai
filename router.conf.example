@@ -2,7 +2,8 @@
 # Formato (separado por |, 1 rota por linha):
 #   rota|modelo_uplink|base_url|NOME_DA_VARIAVEL_DA_CHAVE|modo
 #
-# modo: full (padrao, texto intacto) | eco (resume historico antigo + poda por token)
+# modo: full (padrao, texto intacto) | eco (resume historico + compressao de
+#       saida de ferramenta) | auto (escolhe eco/full por request, via heuristica)
 # Se nao informar o modo, assume o da env KFAI_ECO_MODE (default full).
 #
 # Copie este arquivo para router.conf e preencha com suas chaves (variaveis de ambiente).
@@ -14,9 +15,15 @@
 # gemini-2.5-flash|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1|KFAI_GEMINI_KEY|eco
 # NVIDIA NIM
 # nvidia/z-ai/glm-5.2|z-ai/glm-5.2|https://integrate.api.nvidia.com/v1|KFAI_NVIDIA_KEY|full
+# Rota inteligente: pedido simples -> eco, complexo -> full
+# gemini-auto|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1|KFAI_GEMINI_KEY|auto
 #
 # Ajustes (env):
-#   KFAI_ECO_MODE=full|eco      modo padrao quando linha nao define
+#   KFAI_ECO_MODE=full|eco|auto  modo padrao quando linha nao define
 #   KFAI_ECO_MODEL=llama3.2:3b  modelo local usado p/ resumir historico
 #   KFAI_ECO_MAX_TOKENS=8000    orcamento aprox de tokens mantidos
-#   KFAI_ECO_KEEP_TURNS=6      ultimos turnos mantidos sem compressao
+#   KFAI_ECO_KEEP_TURNS=6       ultimos turnos mantidos sem compressao
+#   KFAI_COOLDOWN_SEC=60        cooldown (s) apos falha de um uplink (429/5xx/timeout)
+#   KFAI_CACHE_SEC=300          cache exato p/ respostas nao-stream; 0 desliga
+#   KFAI_CACHE_MAX=200          max de entradas no cache em memoria
+#   KFAI_LOG_FILE=logs/router.log  log JSONL; vazio desliga
