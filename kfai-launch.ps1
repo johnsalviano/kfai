@@ -5,14 +5,18 @@
 #   .\kfai-launch.ps1 -App hermes     abre o Hermes no terminal atual
 #   .\kfai-launch.ps1 -App "C:\caminho\app.exe"  abre qualquer executavel
 #   .\kfai-launch.ps1 -App opencode -KeepOn   abre mas NAO desliga os servicos ao fechar
+#   .\kfai-launch.ps1 -App aionui -With9Router  liga o 9Router junto (porta 20128)
 [CmdletBinding()]
 param(
   [string]$App = "aionui",
-  [switch]$KeepOn
+  [switch]$KeepOn,
+  [switch]$With9Router
 )
 
 $Root   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Start  = Join-Path $Root "kfai-start.ps1"
+$StartArgs = @()
+if($With9Router){ $StartArgs += "-With9Router" }
 
 # --- apps conhecidos: nome -> (tipo, caminho, nome do processo) ---
 $known = @{
@@ -38,8 +42,8 @@ if($known.ContainsKey($App.ToLower())){
 }
 
 # --- 1) liga servicos (se ainda nao estiverem) ---
-Write-Host "[kfai] Ligando router + ollama..."
-& $Start
+if($With9Router){ Write-Host "[kfai] Ligando router + ollama + 9Router..." } else { Write-Host "[kfai] Ligando router + ollama..." }
+& $Start @StartArgs
 
 # --- 2) abre o agente e espera fechar ---
 if($info.Type -eq "cli"){
@@ -60,7 +64,7 @@ if(-not $KeepOn){
     Write-Host "[kfai] Outro agente de IA ainda esta aberto. Servicos mantidos."
   } else {
     Write-Host "[kfai] Agente fechado. Desligando servicos..."
-    & $Start -Stop
+    & $Start -Stop @StartArgs
   }
 } else {
   Write-Host "[kfai] -KeepOn: servicos mantidos rodando."

@@ -5,12 +5,14 @@
 #   .\kfai-start.ps1 -Status   mostra o que esta rodando
 #   .\kfai-start.ps1 -Register adiciona ao login do Windows (autostart)
 #   .\kfai-start.ps1 -Unregister remove do login
+#   .\kfai-start.ps1 -With9Router  tambem liga/para o 9Router (porta 20128)
 [CmdletBinding()]
 param(
   [switch]$Stop,
   [switch]$Status,
   [switch]$Register,
-  [switch]$Unregister
+  [switch]$Unregister,
+  [switch]$With9Router
 )
 
 $Root   = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -20,6 +22,9 @@ if(-not $Pythonw){ $Pythonw = (Join-Path (Split-Path (Get-Command python).Source
 # Servidor puro (sem GUI de bandeja): ollama.exe serve em background.
 # "ollama app.exe" e a GUI - nao usar: abre bandeja e consome recursos a toa.
 $OllamaApp = "C:\Users\USUARIO\AppData\Local\Programs\Ollama\ollama.exe"
+# 9Router: CLI npm global. -tray sobe bandeja; nos rodamos SEM bandeja, escondido.
+$Node     = (Get-Command node -ErrorAction SilentlyContinue).Source
+$NineCli  = "C:\Users\USUARIO\AppData\Roaming\npm\node_modules\9router\cli.js"
 $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $RunName = "KFAI Router"
 $OllamaRunName = "KFAI Ollama"
@@ -31,9 +36,11 @@ function Test-Port([int]$port){
 if($Status){
   $r = if(Test-Port 20129){ "LIGADO (porta 20129)" } else { "desligado" }
   $o = if(Test-Port 11434){ "LIGADO (porta 11434)" } else { "desligado" }
+  $n = if(Test-Port 20128){ "LIGADO (porta 20128)" } else { "desligado" }
   $a = if((Get-ItemProperty $RunKey -ErrorAction SilentlyContinue).$RunName){ "ativo" } else { "inativo" }
   Write-Host "Router   : $r"
   Write-Host "Ollama   : $o"
+  Write-Host "9Router  : $n"
   Write-Host "Autostart: $a"
   exit 0
 }
@@ -43,7 +50,14 @@ if($Stop){
     Where-Object { $_.CommandLine -match 'router\.py' } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
   Get-Process ollama,"ollama app" -ErrorAction SilentlyContinue | Stop-Process -Force
-  Write-Host "Router e Ollama parados."
+  if($With9Router){
+    Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+      Where-Object { $_.CommandLine -match '9router\\' } |
+      ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Write-Host "Router, Ollama e 9Router parados."
+  } else {
+    Write-Host "Router e Ollama parados."
+  }
   exit 0
 }
 
@@ -77,6 +91,16 @@ if(-not (Test-Port 20129)){
   Start-Sleep -Seconds 3
 } else {
   Write-Host "Roteador ja estava ligado."
+}
+if($With9Router){
+  if(-not (Test-Port 20128)){
+    if(-not (Test-Path $Node) -or -not (Test-Path $NineCli)){ Write-Error "9Router nao encontrado (node=$Node, cli=$NineCli)"; exit 1 }
+    Write-Host "Iniciando 9Router (sem bandeja, escondido)..."
+    Start-Process -FilePath $Node -ArgumentList "`"$NineCli`" -n --skip-update" -WindowStyle Hidden
+    Start-Sleep -Seconds 8
+  } else {
+    Write-Host "9Router ja estava ligado."
+  }
 }
 Write-Host "Pronto. Tudo rodando sem janelas."
 if(-not (Test-Port 11434)){ Write-Host "AVISO: Ollama nao respondeu ainda. Se o PC e fraco, ele pode demorar." }
