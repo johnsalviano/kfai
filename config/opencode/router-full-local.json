@@ -9,29 +9,20 @@
         "apiKey": "{env:KFAI_ROUTER_KEY}"
       },
       "models": {
-        "cloud-plus-local": {
-          "name": "KFAI - Cloud + Local (nuvem 1a, local fallback)",
+        "full-local": {
+          "name": "KFAI - Full Local (somente Ollama)",
           "limit": { "context": 200000, "output": 65536 }
         },
         "full-cloud": {
           "name": "KFAI - Full Cloud (nuvem gratuita)",
           "limit": { "context": 200000, "output": 65536 }
         },
-        "full-local": {
-          "name": "KFAI - Full Local (somente Ollama)",
+        "cloud-plus-local": {
+          "name": "KFAI - Cloud + Local (nuvem 1a, local fallback)",
           "limit": { "context": 200000, "output": 65536 }
         }
       }
-    },
-    "ollama": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama (local)",
-      "options": {
-        "baseURL": "http://localhost:11434/v1",
-        "apiKey": "ollama"
-      },
-      "models": {}
     }
   },
-  "model": "kfai/cloud-plus-local"
+  "model": "kfai/full-local"
 }

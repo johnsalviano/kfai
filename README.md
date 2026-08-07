@@ -36,13 +36,22 @@ tem arquivos para os dois. Copie o que preferir:
 
 | Prefere | Arquivos |
 |---|---|
-| Roteador próprio (sem 9Router ligado) | `router-full-cloud.json`, `router-cloud-plus-local.json` |
+| Roteador próprio (sem 9Router ligado) | `router-full-cloud.json`, `router-cloud-plus-local.json`, `router-full-local.json` |
 | 9Router | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
 
 **Roteador próprio:** rode `python router.py`, preencha `router.conf` (copie o
 `.example`), escolha por rota `full` (texto intacto), `eco` (resume histórico
 antigo para economizar tokens) ou `auto` (o roteador decide por heurística: tema
 complexo → `full`, pergunta simples → `eco`). O 9Router fica só para quem preferir ele.
+
+Os **3 combos padrão** já vêm prontos no `router.conf.example`. Cada linha é um
+"uplink" (provedor); linhas com a mesma rota formam a lista de fallback:
+
+- **`full-cloud`** — só nuvem gratuita (Gemini, Groq, Cerebras, OpenRouter `:free`,
+  Mistral, NVIDIA NIM). Para PC fraco que não roda IA local, use **só** este.
+- **`cloud-plus-local`** — nuvem primeiro; quando os tokens acabam (429), cai
+  automaticamente para o Ollama local (últimos uplinks da lista).
+- **`full-local`** — somente Ollama local (100% offline).
 
 Recursos que o roteador próprio tem de fábrica:
 

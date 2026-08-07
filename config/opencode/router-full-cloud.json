@@ -10,16 +10,16 @@
       },
       "models": {
         "full-cloud": {
-          "name": "KFAI - Full Cloud (roteador proprio, fallback automatico)",
+          "name": "KFAI - Full Cloud (nuvem gratuita)",
           "limit": { "context": 200000, "output": 65536 }
         },
-        "gemini-2.5-flash": {
-          "name": "Gemini Flash via router.conf",
-          "limit": { "context": 1048576, "output": 65536 }
+        "full-local": {
+          "name": "KFAI - Full Local (somente Ollama)",
+          "limit": { "context": 200000, "output": 65536 }
         },
-        "nvidia/z-ai/glm-5.2": {
-          "name": "NVIDIA GLM 5.2 via router.conf",
-          "limit": { "context": 131072, "output": 32768 }
+        "cloud-plus-local": {
+          "name": "KFAI - Cloud + Local (nuvem 1a, local fallback)",
+          "limit": { "context": 200000, "output": 65536 }
         }
       }
     }

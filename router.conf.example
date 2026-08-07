@@ -1,22 +1,61 @@
 # router.conf - exposicao do KFAI (arquivo local, NAO eh commitado)
-# Formato (separado por |, 1 rota por linha):
+# Formato (separado por |, 1 uplink por linha):
 #   rota|modelo_uplink|base_url|NOME_DA_VARIAVEL_DA_CHAVE|modo
+#
+# UPLINKS: linhas com a MESMA rota formam a lista de fallback daquela rota.
+# O router tenta o 1o uplink; se falhar (429/5xx/timeout), marca cooldown e
+# segue para o proximo. Isso cria os 3 combos padrao:
+#
+#   full-cloud        -> so IA da nuvem gratuita (ou paga que da tokens gratis)
+#   cloud-plus-local  -> nuvem primeiro; quando acaba token, cai no Ollama local
+#   full-local        -> somente Ollama local (offline)
 #
 # modo: full (padrao, texto intacto) | eco (resume historico + compressao de
 #       saida de ferramenta) | auto (escolhe eco/full por request, via heuristica)
 # Se nao informar o modo, assume o da env KFAI_ECO_MODE (default full).
 #
-# Copie este arquivo para router.conf e preencha com suas chaves (variaveis de ambiente).
+# Copie este arquivo para router.conf e preencha com suas chaves (variaveis de
+# ambiente). Provedores que so dão trial credit (expira) tem o nome marcado
+# com "(trial)" - troque quando quiser. Todos aceitam API key gratuita sem cartao.
 #
-# Exemplos:
-# Ollama local (chave vazia)
-# llama3.2:3b|llama3.2:3b|http://localhost:11434/v1||full
-# Gemini (chave em variavel) com economia de tokens
-# gemini-2.5-flash|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1|KFAI_GEMINI_KEY|eco
-# NVIDIA NIM
-# nvidia/z-ai/glm-5.2|z-ai/glm-5.2|https://integrate.api.nvidia.com/v1|KFAI_NVIDIA_KEY|full
-# Rota inteligente: pedido simples -> eco, complexo -> full
-# gemini-auto|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1|KFAI_GEMINI_KEY|auto
+# ============================== 1) FULL CLOUD ==============================
+# Nuvem gratis (free tier permanente) + paga com token gratis.
+# O 1o com chave preenchida responde; os demais sao fallback.
+#
+# Google Gemini Flash (free tier ~1500 req/dia, 1M contexto, multimodal)
+full-cloud|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1beta/openai|KFAI_GEMINI_KEY|full
+# Groq (free tier, Llama 3.3 70B rapido ~700 tok/s, 1M tokens/dia)
+full-cloud|llama-3.3-70b-versatile|https://api.groq.com/openai/v1|KFAI_GROQ_KEY|full
+# Cerebras (free tier, Llama 3.3 70B ~2000 tok/s)
+full-cloud|llama-3.3-70b|https://api.cerebras.ai/v1|KFAI_CEREBRAS_KEY|full
+# OpenRouter - modelos :free (variedade, 50 req/dia; 1000/dia com $10 topup)
+full-cloud|meta-llama/llama-3.3-70b-instruct:free|https://openrouter.ai/api/v1|KFAI_OPENROUTER_KEY|full
+# Mistral La Plateforme (free experimental, ~1B tokens/mes)
+full-cloud|mistral-small-latest|https://api.mistral.ai/v1|KFAI_MISTRAL_KEY|full
+# NVIDIA NIM (trial ~30-90 dias, 100+ open models)
+full-cloud|z-ai/glm-5.2|https://integrate.api.nvidia.com/v1|KFAI_NVIDIA_KEY|full
+# Cloudflare Workers AI (free tier ~10k neuronios/dia)
+# full-cloud|gpt-oss-120b|https://api.cloudflare.com/client/v4/accounts/SEU_ID/ai/v1|KFAI_CLOUDFLARE_KEY|full
+#
+# =========================== 2) CLOUD + LOCAL =============================
+# Mesma lista de nuvem gratis, mas com o Ollama local no FINAL da lista:
+# quando a nuvem acabar os tokens (429), o router cai para o seu PC.
+# Use o modelo local que o install.ps1 escolheu para a sua maquina.
+cloud-plus-local|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1beta/openai|KFAI_GEMINI_KEY|full
+cloud-plus-local|llama-3.3-70b-versatile|https://api.groq.com/openai/v1|KFAI_GROQ_KEY|full
+cloud-plus-local|meta-llama/llama-3.3-70b-instruct:free|https://openrouter.ai/api/v1|KFAI_OPENROUTER_KEY|full
+cloud-plus-local|llama3.2:3b|http://localhost:11434/v1||full
+# cloud-plus-local|qwen2.5:7b|http://localhost:11434/v1||full   # PC com GPU 6GB+
+#
+# ============================= 3) FULL LOCAL ==============================
+# Somente Ollama local. Escolha o modelo do seu PC (install.ps1 decide).
+full-local|llama3.2:3b|http://localhost:11434/v1||full
+# full-local|qwen2.5:7b|http://localhost:11434/v1||full           # PC com GPU 6GB+
+# full-local|qwen2.5:3b|http://localhost:11434/v1||full           # PC com 8-16GB RAM
+# full-local|qwen2.5:1.5b|http://localhost:11434/v1||full         # PC muito fraco
+#
+# PC fraco (nao roda Ollama): use SOMENTE full-cloud. Nao crie full-local
+# nem cloud-plus-local (o install.ps1 ja faz isso sozinho).
 #
 # Ajustes (env):
 #   KFAI_ECO_MODE=full|eco|auto  modo padrao quando linha nao define

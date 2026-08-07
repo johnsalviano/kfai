@@ -270,9 +270,7 @@ def call_upl(route, body):
             last = e
             used = up
             mark_cooldown(up)
-            if e.code in (429, 401, 403, 500, 502, 503, 504):
-                continue
-            raise Retryable(e.code, body.get("model", ""))
+            continue
         except (urllib.error.URLError, TimeoutError, OSError):
             last = type("Err", (), {"code": 0})()
             used = up

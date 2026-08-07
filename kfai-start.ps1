@@ -17,7 +17,9 @@ $Root   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Router = Join-Path $Root "router.py"
 $Pythonw = (Get-Command pythonw -ErrorAction SilentlyContinue).Source
 if(-not $Pythonw){ $Pythonw = (Join-Path (Split-Path (Get-Command python).Source) "pythonw.exe") }
-$OllamaApp = "C:\Users\USUARIO\AppData\Local\Programs\Ollama\ollama app.exe"
+# Servidor puro (sem GUI de bandeja): ollama.exe serve em background.
+# "ollama app.exe" e a GUI - nao usar: abre bandeja e consome recursos a toa.
+$OllamaApp = "C:\Users\USUARIO\AppData\Local\Programs\Ollama\ollama.exe"
 $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $RunName = "KFAI Router"
 $OllamaRunName = "KFAI Ollama"
@@ -48,7 +50,7 @@ if($Stop){
 if($Register){
   $ps = (Get-Command powershell).Source
   New-ItemProperty -Path $RunKey -Name $RunName -PropertyType String -Value "`"$ps`" -NoProfile -WindowStyle Hidden -File `"$Root\kfai-start.ps1`"" -Force | Out-Null
-  New-ItemProperty -Path $RunKey -Name $OllamaRunName -PropertyType String -Value "`"$OllamaApp`"" -Force | Out-Null
+  New-ItemProperty -Path $RunKey -Name $OllamaRunName -PropertyType String -Value "`"$OllamaApp`" serve" -Force | Out-Null
   Write-Host "Autostart no login ativado (router + ollama)."
   exit 0
 }
@@ -62,8 +64,8 @@ if($Unregister){
 
 # --- inicio normal ---
 if(-not (Test-Port 11434)){
-  Write-Host "Iniciando Ollama (bandeja, sem janela)..."
-  Start-Process -FilePath $OllamaApp -WindowStyle Hidden
+  Write-Host "Iniciando servidor Ollama (ollama.exe serve, sem GUI)..."
+  Start-Process -FilePath $OllamaApp -ArgumentList "serve" -WindowStyle Hidden
   Start-Sleep -Seconds 8
 } else {
   Write-Host "Ollama ja estava ligado."
