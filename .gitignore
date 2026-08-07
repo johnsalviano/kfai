@@ -1,0 +1,27 @@
+# Credenciais e dados pessoais - NUNCA commit
+*.key
+*.pem
+*auth*.json
+*.env
+.env
+data.sqlite
+data.sqlite*
+*.db
+*.db-shm
+*.db-wal
+machine-id
+jwt-secret
+cli-secret
+SUA_CHAVE*
+*.secret
+
+# Os de escrita
+node_modules
+package.json
+package-lock.json
+bun.lock
+dist/
+build/
+__pycache__/
+.venv/
+*.log
