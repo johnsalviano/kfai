@@ -15,7 +15,7 @@ function Write-Step([string]$m){ Write-Host "`n== $m ==" -ForegroundColor Cyan }
 
 function Get-HardwareInfo {
   $ramGb = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
-  $cpu = (Get-CimInstance Win32_Processor | Measure-Object Name -First 1).Name
+  $cpu = (Get-CimInstance Win32_Processor | Select-Object -First 1).Name
   $gpus = Get-CimInstance Win32_VideoController
   $adapter = $gpus | Sort-Object AdapterRAM -Descending | Select-Object -First 1
   $vramGb = if($adapter.AdapterRAM){ [math]::Round($adapter.AdapterRAM / 1GB, 1) } else { 0 }
@@ -51,7 +51,11 @@ if($useLocal){
   ollama pull $model
   Write-Host "Modelo local pronto: $model" -ForegroundColor Green
 } else {
-  Write-Step "Seu PC nao roda modelo local (RAM >= 3 GB). Kit usara Full Cloud."
+  if($model -eq $null){
+    Write-Step "Seu PC nao roda modelo local (pouca memoria). Kit usara Full Cloud."
+  } else {
+    Write-Step "IA local pulada por opcao. Baixe depois com: ollama pull $model"
+  }
 }
 
 Write-Step "Guia de proximos passos"
