@@ -43,6 +43,12 @@ o caminho passo a passo.
 O KFAI não inclui, lê nem compartilha chaves, tokens ou dados pessoais de
 ninguém. Toda credencial nasce como `SUA_CHAVE_AQUI` para você preencher.
 
+O instalador se autoprotege contra cópias adulteradas:
+
+- só executa se vier do repositório oficial (`github.com/johnsalviano/kfai`);
+- no final, mostra o SHA-256 do próprio script para você conferir contra o
+  valor publicado na página oficial do repositório.
+
 ## Licença
 
 Veja [docs/CREDITOS.md](docs/CREDITOS.md) para atribuição das ferramentas. O kit

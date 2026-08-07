@@ -11,7 +11,32 @@ param(
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 
+$CanonicalRepoUrl = 'https://github.com/johnsalviano/kfai'
+
 function Write-Step([string]$m){ Write-Host "`n== $m ==" -ForegroundColor Cyan }
+
+function Test-OfficialOrigin {
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  $origin = (& git -C $Root remote get-url origin 2>$null)
+  $ErrorActionPreference = $prevEap
+  $origin = if($origin){ $origin.Trim() } else { '' }
+  if($origin -and $origin -ne $CanonicalRepoUrl){
+    Write-Step "ALERTA: origem deste script nao e a oficial"
+    Write-Host "Origin : $origin" -ForegroundColor Red
+    Write-Host "Oficial: $CanonicalRepoUrl" -ForegroundColor Yellow
+    Write-Host "Voce pode estar usando uma copia adulterada. Rode o KFAI a partir do repositorio oficial." -ForegroundColor Red
+    return $false
+  }
+  return $true
+}
+
+function Show-IntegrityHash {
+  $h = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash
+  Write-Host "`nIntegridade (SHA-256) deste instalador:"
+  Write-Host $h -ForegroundColor Green
+  Write-Host "Compare com o valor publicado na pagina oficial do repositorio KFAI." -ForegroundColor Yellow
+}
 
 function Get-HardwareInfo {
   $ramGb = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1)
@@ -30,6 +55,8 @@ function ChooseLocalModel($hw){
   if($hw.Ram -ge 32){ return 'qwen2.5:14b' }
   return 'qwen2.5:7b'
 }
+
+if(-not (Test-OfficialOrigin)){ exit 1 }
 
 Write-Step "KFAI - Kit de Ferramentas de Agente de IA"
 $hw = Get-HardwareInfo
@@ -68,4 +95,5 @@ Write-Host @"
    - Full Local      -> config\opencode\full-local.json  (troque KFAI_LOCAL_MODEL pelo modelo, se necessario)
    Pronto! Use as skills da pasta skills\ para otimizar seu PC.
 "@ -ForegroundColor Cyan
+Show-IntegrityHash
 Write-Host "`nKFAI instalado. Curto e simples." -ForegroundColor Green
