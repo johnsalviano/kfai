@@ -37,8 +37,10 @@ if($Status){
 }
 
 if($Stop){
-  Get-Process pythonw,python -ErrorAction SilentlyContinue | Stop-Process -Force
-  Get-Process ollama -ErrorAction SilentlyContinue | Stop-Process -Force
+  Get-CimInstance Win32_Process -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -match 'router\.py' } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  Get-Process ollama,"ollama app" -ErrorAction SilentlyContinue | Stop-Process -Force
   Write-Host "Router e Ollama parados."
   exit 0
 }

@@ -43,6 +43,29 @@ tem arquivos para os dois. Copie o que preferir:
 `.example`), escolha por rota `full` (texto intacto) ou `eco` (resume histórico
 antigo para economizar tokens). O 9Router fica só para quem preferir ele.
 
+## Ligar só quando usar (sem processo sempre rodando)
+
+Por padrão, nada fica rodando ocioso. O launcher liga router + Ollama **quando
+você abre o agente** e desliga quando você o fecha:
+
+```powershell
+.\kfai-launch.ps1 -App aionui      # abre o AionUi
+.\kfai-launch.ps1 -App opencode    # abre o opencode no terminal
+.\kfai-launch.ps1 -App hermes      # abre o Hermes
+.\kfai-launch.ps1 -App "C:\caminho\app.exe"   # qualquer executavel
+```
+
+Se você fechar um agente mas **outro ainda estiver aberto** (ex.: AionUi aberto
+e você fecha o opencode), os serviços continuam — só desligam quando o último
+agente fecha. Use `-KeepOn` para manter os serviços após fechar o agente.
+
+O atalho do AionUi no menu Iniciar já aponta para o launcher (backup em
+`backup-AionUi.lnk`). Para abrir um agente SEM launcher e mesmo assim ter os
+serviços, ligue manualmente com `.\kfai-start.ps1`.
+
+**Modo "sempre ligado" (opcional):** se preferir que tudo suba no login sem
+abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
+
 ## Documentação
 
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
