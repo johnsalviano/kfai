@@ -1,0 +1,13 @@
+# router.conf - exposicao do KFAI (arquivo local, NAO eh commitado)
+# Formato (separado por |, 1 rota por linha):
+#   rota|modelo_uplink|base_url|NOME_DA_VARIAVEL_DA_CHAVE
+# Se base_url for local (Ollama) a chave pode ficar "".
+#
+# Copie este arquivo para router.conf e preencha com suas chaves (variaveis de ambiente).
+#
+# Exemplos:
+# ollama local (ou usar DSP)
+# qwen3:8b|qwen3:8b|http://localhost:11434/v1|
+# Gemini (chave em variavel) e NVIDIA NIM
+# gemini-2.5-flash|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1|KFAI_GEMINI_KEY
+# nvidia/z-ai/glm-5.2|z-ai/glm-5.2|https://integrate.api.nvidia.com/v1|KFAI_NVIDIA_KEY
