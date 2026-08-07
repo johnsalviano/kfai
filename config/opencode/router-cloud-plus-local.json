@@ -1,0 +1,33 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "kfai": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "KFAI Router",
+      "options": {
+        "baseURL": "http://localhost:20129/v1",
+        "apiKey": "{env:KFAI_ROUTER_KEY}"
+      },
+      "models": {
+        "cloud-plus-local": {
+          "name": "KFAI - Cloud + Local (router proprio)",
+          "limit": { "context": 200000, "output": 65536 }
+        },
+        "gemini-2.5-flash": {
+          "name": "Gemini Flash via router.conf",
+          "limit": { "context": 1048576, "output": 65536 }
+        }
+      }
+    },
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://localhost:11434/v1",
+        "apiKey": "ollama"
+      },
+      "models": {}
+    }
+  },
+  "model": "kfai/cloud-plus-local"
+}

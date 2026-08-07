@@ -31,6 +31,18 @@ o caminho passo a passo.
 | **Cloud + Local** | nuvem primeiro; se o limite acabar, usa IA local | equilíbrio, quase sempre |
 | **Full Local** | 100% offline (Ollama) | sem internet ou por privacidade; só se seu PC aguentar |
 
+Ambos os caminhos (9Router e o roteador próprio do KFAI): a pasta `config/opencode/`
+tem arquivos para os dois. Copie o que preferir:
+
+| Prefere | Arquivos |
+|---|---|
+| Roteador próprio (sem 9Router ligado) | `router-full-cloud.json`, `router-cloud-plus-local.json` |
+| 9Router | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
+
+**Roteador próprio:** rode `python router.py`, preencha `router.conf` (copie o
+`.example`), escolha por rota `full` (texto intacto) ou `eco` (resume histórico
+antigo para economizar tokens). O 9Router fica só para quem preferir ele.
+
 ## Documentação
 
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
