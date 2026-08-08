@@ -15,6 +15,9 @@ cli-secret
 SUA_CHAVE*
 *.secret
 router.conf
+# Chave PIX de doacoes (placeholder no README - preencher so na hora, nunca no git)
+COLE_SUA_CHAVE*
+PASTE_YOUR_PIX*
 
 # Os de escrita
 node_modules

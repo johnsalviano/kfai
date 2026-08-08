@@ -1,5 +1,7 @@
 # KFAI — Kit de Ferramentas de Agente de IA
 
+**🇧🇷 Português · [🇺🇸 English](README.en.md)**
+
 ![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-blue)
 ![Plataforma](https://img.shields.io/badge/Plataforma-Windows%2010%2F11-lightgrey)
 ![Linguagem](https://img.shields.io/badge/Linguagem-PowerShell%20%2B%20Python-purple)
@@ -171,9 +173,21 @@ abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 - [Guia de chaves gratuitas](docs/GUIA-CHAVES-GRATIS.md) — como gerar sua API key grátis de cada provedor
 - [Créditos](docs/CREDITOS.md) — quem fez cada ferramenta
 
-## 🔐 Segurança
+## ❤️ Apoie o projeto
 
-O KFAI **não inclui, lê nem compartilha** chaves, tokens ou dados pessoais de
+O KFAI é **100% gratuito e sem anúncios** — feito no tempo livre, com carinho.
+Se o projeto te ajudou e você quiser retribuir, qualquer valor é bem-vindo e
+**faz diferença real** para continuar mantendo, corrigindo e melhorando:
+
+> **PIX:** `COLE_SUA_CHAVE_PIX_AQUI` *(chave aleatória — criada só para doações,
+> sem expor dados pessoais)*
+
+Se preferir não doar, tudo bem também! Você já ajuda muito ao:
+- ⭐ dar uma estrela no repositório;
+- 🐛 reportar bugs em [issues](https://github.com/johnsalviano/kfai/issues);
+- 📣 divulgar o projeto para alguém que possa aproveitar.
+
+## 🔐 SegurançaO KFAI **não inclui, lê nem compartilha** chaves, tokens ou dados pessoais de
 ninguém. Toda credencial nasce como `SUA_CHAVE_AQUI` para você preencher — e os
 valores reais ficam apenas na sua máquina, nunca neste repositório.
 
