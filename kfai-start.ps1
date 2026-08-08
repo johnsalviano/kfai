@@ -27,8 +27,45 @@ param(
 
 $Root   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Router = Join-Path $Root "router.py"
-$Pythonw = (Get-Command pythonw -ErrorAction SilentlyContinue).Source
-if(-not $Pythonw){ $Pythonw = (Join-Path (Split-Path (Get-Command python).Source) "pythonw.exe") }
+
+# Acha um pythonw.exe de VERDADE (sem console). O do PATH pode ser um launcher
+# de venv criado pelo uv que relanca o script com o python.exe base (com
+# console) - e esse processo filho abre a janela preta. Preferimos pythonw
+# fora de venv; se so existir o do venv, usamos o pythonw do "home" dele.
+function Find-Pythonw {
+  $cands = @()
+  # uv pythons standalone (nao sao venv)
+  Get-ChildItem "$env:APPDATA\uv\python" -Recurse -Filter "pythonw.exe" -ErrorAction SilentlyContinue |
+    ForEach-Object { $cands += $_.FullName }
+  # installs python.org por-usuario
+  Get-ChildItem "$env:LOCALAPPDATA\Programs\Python" -Recurse -Filter "pythonw.exe" -ErrorAction SilentlyContinue |
+    ForEach-Object { $cands += $_.FullName }
+  # C:\Python*
+  Get-ChildItem "C:\" -Directory -Filter "Python*" -ErrorAction SilentlyContinue |
+    ForEach-Object { $p = Join-Path $_.FullName "pythonw.exe"; if(Test-Path -LiteralPath $p){ $cands += $p } }
+  # pythonw do PATH (ultimo recurso)
+  $pw = (Get-Command pythonw -ErrorAction SilentlyContinue).Source
+  if($pw){ $cands += $pw }
+  $visto = @{}
+  foreach($c in $cands){
+    if(-not $c -or -not (Test-Path -LiteralPath $c) -or $visto[$c]){ continue }
+    $visto[$c] = $true
+    # Se for o de um venv (tem pyvenv.cfg na pasta raiz do venv), usa o pythonw
+    # do "home" apontado pelo proprio venv (o real, sem console).
+    $venvCfg = Join-Path (Split-Path -Parent (Split-Path -Parent $c)) "pyvenv.cfg"
+    if(Test-Path -LiteralPath $venvCfg){
+      $m = Select-String -Path $venvCfg -Pattern '^home\s*=\s*(.+)$' | Select-Object -First 1
+      if($m -and $m.Matches[0].Groups[1].Value){
+        $baseW = Join-Path $m.Matches[0].Groups[1].Value.Trim() "pythonw.exe"
+        if(Test-Path -LiteralPath $baseW){ return $baseW }
+      }
+      continue
+    }
+    return $c
+  }
+  return $null
+}
+$Pythonw = Find-Pythonw
 $RunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
 $RunName = "KFAI Router"
 $OllamaRunName = "KFAI Ollama"
