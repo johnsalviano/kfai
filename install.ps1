@@ -194,23 +194,94 @@ Write-Host "RAM: $($hw.Ram) GB | CPU: $($hw.Cpu) | GPU VRAM: $($hw.Vram) GB ($($
 $model = ChooseLocalModel $hw
 $useLocal = ($model -ne $null -and -not $SkipOllama)
 
+# --- verifica se o Ollama esta instalado (antes de tentar usar) ---
+function Test-OllamaInstalled {
+  $cmd = (Get-Command ollama -ErrorAction SilentlyContinue).Source
+  $serverUp = $false
+  try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", 11434); $serverUp = $true } catch {}
+  return @{ Cmd = $cmd; ServerUp = $serverUp }
+}
+
+# --- verifica se um modelo ja esta baixado no Ollama (sem duplicar download) ---
+function Test-OllamaModel {
+  param([string]$Name)
+  try {
+    $tags = Invoke-RestMethod -Uri "http://127.0.0.1:11434/api/tags" -TimeoutSec 10
+    if($null -eq $tags.models){ return $false }
+    $found = $false
+    foreach($m in $tags.models){
+      if($m.name -eq $Name -or $m.name.StartsWith("$($Name):")){ $found = $true; break }
+    }
+    return $found
+  } catch { return $false }
+}
+
+# --- verifica se o 9Router esta instalado (CLI npm global OU 9router-src) ---
+function Test-NineRouterInstalled {
+  $cliNpm = "$env:APPDATA\npm\node_modules\9router\cli.js"
+  $src    = "$env:USERPROFILE\9router-src\package.json"
+  $viaNpm = Test-Path $cliNpm
+  $viaSrc = Test-Path $src
+  $portUp = $false
+  try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", 20128); $portUp = $true } catch {}
+  if($viaNpm -or $viaSrc){ return @{ Ok=$true; ViaNpm=$viaNpm; ViaSrc=$viaSrc; PortUp=$portUp } }
+  return @{ Ok=$false; ViaNpm=$false; ViaSrc=$false; PortUp=$portUp }
+}
+
 Write-Host ""
 if($useLocal){
-  Write-Step "Modelo local escolhido para seu PC: $model"
-  if(-not (Get-Command ollama -ErrorAction SilentlyContinue)){
-    Write-Host "Ollama nao encontrado. Abrindo guia de instalacao..." -ForegroundColor Yellow
+  Write-Step "IA local - passo 1: Ollama"
+  $ollama = Test-OllamaInstalled
+  if(-not $ollama.Cmd){
+    Write-Host "Ollama NAO instalado. Abrindo guia de instalacao..." -ForegroundColor Yellow
     Start-Process "https://ollama.com/download/windows"
     Write-Host "Instale o Ollama, rode este script de novo." -ForegroundColor Yellow
     exit 1
   }
-  Write-Host "Baixando modelo via ollama pull (pode levar alguns minutos)..."
-  ollama pull $model
-  Write-Host "Modelo local pronto: $model" -ForegroundColor Green
+  Write-Host "Ollama instalado: $($ollama.Cmd)"
+
+  Write-Step "IA local - passo 2: modelo $model"
+  if(Test-OllamaModel -Name $model){
+    Write-Host "Modelo $model JA esta baixado. Nada a fazer." -ForegroundColor Green
+  } else {
+    Write-Host "Modelo $model nao encontrado. Baixando via ollama pull (pode levar alguns minutos)..."
+    ollama pull $model
+    if(Test-OllamaModel -Name $model){
+      Write-Host "Modelo local pronto: $model" -ForegroundColor Green
+    } else {
+      Write-Host "AVISO: nao consegui confirmar o download do modelo. Rode 'ollama pull $model' depois." -ForegroundColor Yellow
+    }
+  }
 } else {
   if($model -eq $null){
     Write-Step "Seu PC nao roda modelo local (pouca memoria). Kit usara Full Cloud."
   } else {
     Write-Step "IA local pulada por opcao. Baixe depois com: ollama pull $model"
+  }
+}
+
+Write-Step "Passo: 9Router (roteador de IA em nuvem)"
+$nine = Test-NineRouterInstalled
+if($nine.Ok){
+  $how = if($nine.ViaNpm){ "CLI npm global" } elseif($nine.ViaSrc){ "9router-src (build local)" }
+  Write-Host "9Router JA instalado ($how)."
+  if($nine.PortUp){
+    Write-Host "E ja esta rodando na porta 20128." -ForegroundColor Green
+  } else {
+    Write-Host "Instalado mas nao esta rodando. Inicie com kfai-start.ps1 -With9Router." -ForegroundColor Yellow
+  }
+} else {
+  Write-Host "9Router NAO instalado. Instalando via npm (pacote oficial)..." -ForegroundColor Yellow
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  npm install -g 9router 2>&1 | Out-Null
+  $npmOk = ($LASTEXITCODE -eq 0)
+  $ErrorActionPreference = $prevEap
+  if($npmOk -and (Test-NineRouterInstalled).Ok){
+    Write-Host "9Router instalado com sucesso (CLI npm global)." -ForegroundColor Green
+  } else {
+    Write-Host "Nao consegui instalar o 9Router automaticamente." -ForegroundColor Red
+    Write-Host "Instale manualmente: npm install -g 9router" -ForegroundColor Yellow
   }
 }
 
