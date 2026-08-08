@@ -56,9 +56,11 @@ Os **3 combos padrão** já vêm prontos no `router.conf.example`. Cada linha é
 Recursos que o roteador próprio tem de fábrica:
 
 - **Fallback automático**: cada rota aceita vários uplinks; se um cair ou falhar,
-  a chamada segue para o próximo da lista.
-- **Cooldown (circuit breaker)**: um uplink que falhou (429, 401, 5xx, timeout)
-  fica em quarentena e é pulado nas próximas chamadas (`KFAI_COOLDOWN_SEC`, padrão 60s).
+  a chamada segue para o próximo da lista. **Só erros recuperáveis** (429 de
+  rate limit, 5xx, timeout) disparam fallback/cooldown — erros de configuração
+  (400, 401, 403, 404) não caem para outro provedor, pois são problema do pedido.
+- **Cooldown (circuit breaker)**: um uplink que falhou de forma recuperável fica
+  em quarentena e é pulado nas próximas chamadas (`KFAI_COOLDOWN_SEC`, padrão 60s).
 - **Modo `auto`**: heurística determinística (sem custo de LLM) para escolher
   `full` vs `eco` por request — complexidade do prompt, presença de tools e tamanho.
 - **Compressão de saída de ferramentas**: saídas longas de `tool` (logs, git, etc.)
@@ -67,6 +69,29 @@ Recursos que o roteador próprio tem de fábrica:
   instantaneamente sem reprocessar (`KFAI_CACHE_SEC` 300s, até `KFAI_CACHE_MAX` 200).
 - **Log JSONL**: cada request registrado em `logs/router.log` (rota, uplink, modo,
   cache, bytes, tempo). Variáveis: `KFAI_LOG_FILE`, `KFAI_ROUTER_PORT`.
+
+## IA local com contexto que funciona (não quebra o agente)
+
+O Ollama usa contexto **4.096 tokens por padrão** e **trunca silenciosamente**
+o que passar disso — isso faz o agente local "esquecer" o meio da tarefa e as
+**tool calls falharem**. O KFAI resolve isso em dois pontos:
+
+1. **`kfai-start.ps1`** define `OLLAMA_KEEP_ALIVE=30m` (o modelo fica na RAM,
+   sem cold start de 3–10s a cada request) e `OLLAMA_NUM_PARALLEL=2`.
+2. **Router próprio**: quando um uplink é o Ollama local, o router injeta
+   `options.num_ctx` no request (`KFAI_NUM_CTX`, padrão **32768**). Config de
+   falha/erro só para 429/5xx/timeout.
+3. **Modelo derivado `-32k`**: o instalador cria um modelo com `num_ctx 32768`
+   gravado nele (ex.: `qwen2.5-coder-32k`). Use esse nome no config do opencode
+   (`config/opencode/full-local.json`, campo `KFAI_LOCAL_MODEL`).
+
+> Recomendação oficial do Ollama para agentes com tool calling: contexto **≥64k**.
+> Se seu PC aguentar (VRAM livre), pode criar `-64k` com o mesmo método:
+> `FROM <modelo>` + `PARAMETER num_ctx 65536` num Modelfile, depois
+> `ollama create <modelo>-64k -f Modelfile`.
+
+O instalador também aproveita o comando **`ollama launch opencode`** (Ollama 0.15+):
+configura o opencode com o modelo local automaticamente, sem JSON manual.
 
 ## Ligar só quando usar (sem processo sempre rodando)
 

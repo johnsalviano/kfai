@@ -8,7 +8,13 @@
         "baseURL": "http://localhost:11434/v1",
         "apiKey": "ollama"
       },
-      "models": {}
+      "models": {
+        "KFAI_LOCAL_MODEL": {
+          "name": "KFAI Local (num_ctx 32k)",
+          "tools": true,
+          "limit": { "context": 32768, "output": 8192 }
+        }
+      }
     }
   },
   "model": "ollama/KFAI_LOCAL_MODEL"

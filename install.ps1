@@ -216,6 +216,35 @@ function Test-OllamaModel {
   } catch { return $false }
 }
 
+# --- cria o modelo derivado -32k (num_ctx 32768 baked) para agentes locais ---
+# O Ollama usa contexto 4096 por padrao e trunca silenciosamente, quebrando
+# tool calling. Modelos com "tools" precisam de contexto grande.
+function Ensure-NumCtxModel {
+  param([string]$BaseModel)
+  if(-not $BaseModel){ return "" }
+  $base = ($BaseModel -replace ':.*$', '')
+  $derived = "$base-32k"
+  if(Test-OllamaModel -Name $derived){
+    Write-Host "Modelo $derived ja existe (contexto 32k)." -ForegroundColor DarkGray
+    return $derived
+  }
+  Write-Host "Criando $derived (contexto 32k para agentes)..." -ForegroundColor Cyan
+  $mf = Join-Path $env:TEMP "Modelfile-kfai"
+  try {
+    Set-Content -Path $mf -Value "FROM $BaseModel`nPARAMETER num_ctx 32768" -Encoding utf8
+    $null = ollama create $derived -f $mf 2>&1
+    if(Test-OllamaModel -Name $derived){
+      Write-Host "$derived criado. Agora o agente local nao quebra por contexto 4096." -ForegroundColor Green
+      return $derived
+    }
+    Write-Host "AVISO: nao criei $derived. O agente local pode truncar contexto." -ForegroundColor Yellow
+    return $BaseModel
+  } catch {
+    Write-Host "AVISO: nao criei $derived. O agente local pode truncar contexto." -ForegroundColor Yellow
+    return $BaseModel
+  }
+}
+
 # --- verifica se o 9Router esta instalado (CLI npm global OU 9router-src) ---
 function Test-NineRouterInstalled {
   $cliNpm = "$env:APPDATA\npm\node_modules\9router\cli.js"
@@ -347,6 +376,13 @@ if($useLocal){
       Write-Host "AVISO: nao consegui confirmar o download do modelo. Rode 'ollama pull $model' depois." -ForegroundColor Yellow
     }
   }
+
+  # contexto 32k para o agente local (o default 4096 quebra tool calling)
+  if(Test-OllamaModel -Name $model){
+    $script:NumCtxModel = Ensure-NumCtxModel -BaseModel $model
+  } else {
+    $script:NumCtxModel = $model
+  }
 } else {
   if($model -eq $null){
     Write-Step "Seu PC nao roda modelo local (pouca memoria). Kit usara Full Cloud."
@@ -410,6 +446,7 @@ Write-Host @"
    - Full Cloud      -> config\opencode\full-cloud.json
    - Cloud + Local   -> config\opencode\cloud-plus-local.json
    - Full Local      -> config\opencode\full-local.json  (troque KFAI_LOCAL_MODEL pelo modelo, se necessario)
+$(if($script:NumCtxModel){ "   Modelo local recomendado (contexto 32k): $($script:NumCtxModel)`n" })
    Pronto! Use as skills da pasta skills\ para otimizar seu PC.
 "@ -ForegroundColor Cyan
 Show-IntegrityHash

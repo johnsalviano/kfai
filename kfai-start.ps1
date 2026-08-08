@@ -134,6 +134,10 @@ function Test-OllamaWorking{
 
 function Start-Ollama{
   if(-not $script:OllamaCmd){ Write-Error "Ollama nao encontrado nesta maquina."; return $false }
+  # Mantem o modelo na RAM 30min (evita cold start de 3-10s a cada request) e permite
+  # requisições paralelas. Usuario pode sobrescrever com env vars proprias.
+  if(-not $env:OLLAMA_KEEP_ALIVE){ $env:OLLAMA_KEEP_ALIVE = "30m" }
+  if(-not $env:OLLAMA_NUM_PARALLEL){ $env:OLLAMA_NUM_PARALLEL = "2" }
   if(-not (Test-Port 11434)){
     if($script:OllamaCmd -match ' app\.exe$'){
       Write-Host "Iniciando Ollama (GUI de bandeja - unica opcao instalada)..."
