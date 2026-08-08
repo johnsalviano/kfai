@@ -133,9 +133,9 @@ Se você fechar um agente mas **outro ainda estiver aberto** (ex.: AionUi aberto
 e você fecha o opencode), os serviços continuam — só desligam quando o último
 agente fecha. Use `-KeepOn` para manter os serviços após fechar o agente.
 
-O atalho do AionUi no menu Iniciar já aponta para o launcher (backup em
-`backup-AionUi.lnk`). Para abrir um agente SEM launcher e mesmo assim ter os
-serviços, ligue manualmente com `.\kfai-start.ps1`.
+O atalho do AionUi no menu Iniciar já aponta para o launcher. Para abrir um
+agente SEM launcher e mesmo assim ter os serviços, ligue manualmente com
+`.\kfai-start.ps1`.
 
 **Modo "sempre ligado" (opcional):** se preferir que tudo suba no login sem
 abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
