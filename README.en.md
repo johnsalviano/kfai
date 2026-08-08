@@ -191,6 +191,29 @@ If you'd rather not donate, that's fine too! You already help a lot by:
 - 🐛 reporting bugs in [issues](https://github.com/johnsalviano/kfai/issues);
 - 📣 sharing the project with someone who might benefit from it.
 
+### 📜 Donation rules (scam protection)
+
+For everyone's safety, please read before donating:
+
+- **Donations are voluntary and irrevocable.** This is **not** a purchase: you
+  receive no product or service in return, so there is **no "buyer's remorse"
+  refund** — this matches Brazil's Central Bank stance on Pix donations.
+  Before confirming, think it through: **only donate if you really mean it.**
+- **Refunds only for fraud or operational failure**, and **always through the
+  official channel**: open the **MED (Special Refund Mechanism)** at **your
+  bank**, within 80 days of the transaction. Don't ask the project to refund you
+  directly, and the project never refunds directly — the official banking
+  process decides, with analysis and evidence.
+- **The "mistaken Pix" scam:** some scammers send a Pix, then contact the
+  account owner asking for a refund to a **different** account/key and also
+  trigger the MED, trying to get paid twice. **Never refund money outside the
+  banking system for a Pix you don't recognize** — any refund must follow your
+  bank's flow, back to the **same** original key.
+- **The project never asks for your data or charges anything** beyond the
+  voluntary donation. Be wary of any "support" or "fake donor" asking for
+  confirmation, passwords or a "guarantee Pix" — that's a scam; ignore and
+  report it.
+
 ## 🔐 Security
 
 KFAI **does not include, read or share** anyone's keys, tokens or personal data.

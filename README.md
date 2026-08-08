@@ -189,7 +189,31 @@ Se preferir não doar, tudo bem também! Você já ajuda muito ao:
 - 🐛 reportar bugs em [issues](https://github.com/johnsalviano/kfai/issues);
 - 📣 divulgar o projeto para alguém que possa aproveitar.
 
-## 🔐 SegurançaO KFAI **não inclui, lê nem compartilha** chaves, tokens ou dados pessoais de
+### 📜 Regras da doação (proteção contra golpes)
+
+Para a segurança de todos, leia antes de doar:
+
+- **A doação é voluntária e irrevogável.** Ela **não** é uma compra: você não
+  recebe produto nem serviço em troca, então **não existe "reembolso por
+  arrependimento"** — é o mesmo entendimento do Banco Central para doações via
+  Pix. Antes de confirmar, reflita: **só doe se for de verdade mesmo.**
+- **Devolução só em caso de fraude ou falha operacional**, e **sempre pelo
+  caminho oficial**: abrindo o **MED (Mecanismo Especial de Devolução)** no
+  **seu banco**, em até 80 dias da transação. Não peça devolução diretamente ao
+  projeto e nem o projeto devolve direto — quem decide é o circuito bancário
+  oficial, com análise e provas.
+- **Golpe do "Pix por engano":** alguns golpistas enviam um Pix, depois
+  procuram o dono da chave pedindo devolução para **outra** conta/chave e ainda
+  acionam o MED, tentando receber duas vezes. **Nunca devolva dinheiro por fora
+  de um Pix que você não conhece** — qualquer devolução deve seguir o fluxo do
+  seu banco, para a **mesma** chave de origem.
+- **O projeto nunca pede seus dados nem cobra nada** além da doação voluntária.
+  Desconfie de qualquer "suporte" ou "falso doador" pedindo confirmação,
+  senha ou um "Pix de garantia" — isso é golpe, ignore e denuncie.
+
+## 🔐 Segurança
+
+O KFAI **não inclui, lê nem compartilha** chaves, tokens ou dados pessoais de
 ninguém. Toda credencial nasce como `SUA_CHAVE_AQUI` para você preencher — e os
 valores reais ficam apenas na sua máquina, nunca neste repositório.
 
