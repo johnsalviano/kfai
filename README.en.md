@@ -279,7 +279,7 @@ The own router also protects against abuse:
 > differs, the file may have been tampered with and **must not** be run)*
 
 > **Current `KFAI-Instalador.exe` hash (check before running):**<br>
-> `5E22AFB7CC87491C4F801A0C8B7CE0BC365E8A7226F51725E397697B25B7C10F`<br>
+> `EAC715F2AFEFC884134C533F995ED20985F61CA7F8EF496977DBD96BAFB379CE`<br>
 > *(if you downloaded the executable, check **this** value — the executable
 > prints the `.exe` hash at the end, not the script's)*
 

@@ -275,7 +275,7 @@ O roteador próprio também se protege contra abuso:
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `5E22AFB7CC87491C4F801A0C8B7CE0BC365E8A7226F51725E397697B25B7C10F`<br>
+> `EAC715F2AFEFC884134C533F995ED20985F61CA7F8EF496977DBD96BAFB379CE`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
 
