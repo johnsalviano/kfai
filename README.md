@@ -21,13 +21,21 @@ te ajuda a otimizar seu próprio computador para aproveitá-las melhor.
 
 ## 🚀 Como instalar
 
-1. Baixe e instale [Ollama](https://ollama.com/download/windows) *(opcional, só se quiser IA local)*.
-2. Instale o [9Router](https://9router.com) e o [Opencode](https://opencode.ai).
-3. Rode o instalador:
+Você pode rodar o instalador de **duas formas** — escolha a que preferir:
 
-```powershell
-.\install.ps1
-```
+| Prefere | Faça |
+|---|---|
+| Script (transparente, dá para ler tudo) | `.\install.ps1` no PowerShell |
+| Executável (não depende da Execution Policy) | baixe o `KFAI-Instalador.exe` na página de [releases](https://github.com/johnsalviano/kfai/releases) e dê dois cliques |
+
+> O executável é apenas o instalador compilado — o kit em si continua sendo
+> scripts abertos (você pode ler tudo antes de usar). O `.exe` existe para quem
+> tem o PowerShell com políticas de execução que bloqueiam scripts.
+
+Antes, instale as dependências:
+
+1. [Ollama](https://ollama.com/download/windows) *(opcional, só se quiser IA local)*.
+2. [9Router](https://9router.com) e [Opencode](https://opencode.ai).
 
 O instalador **detecta o seu hardware** (RAM, CPU, GPU), escolhe o modelo local
 certo para a sua máquina e mostra o caminho passo a passo — sem pedir
@@ -172,9 +180,11 @@ valores reais ficam apenas na sua máquina, nunca neste repositório.
 O instalador se autoprotege contra cópias adulteradas:
 
 - só executa se vier do repositório oficial (`github.com/johnsalviano/kfai`);
-- **avisa e para** se o remote não for o oficial **ou se não houver remote**
-  (caso de ZIP/cópia repassada por terceiros — sempre confira o hash abaixo);
-- no final, mostra o **SHA-256 do próprio script** para você conferir contra o
+- se o remote não for o oficial, **para** imediatamente (sinal de cópia adulterada);
+- se **não houver remote** (ZIP, executável ou cópia repassada por terceiros),
+  **avisa e pede confirmação** antes de continuar — você confirma que baixou do
+  repositório oficial e confere o hash abaixo;
+- no final, mostra o **SHA-256 do próprio instalador** para você conferir contra o
   valor publicado abaixo (mantido atualizado a cada versão).
 
 O roteador próprio também se protege contra abuso:
@@ -185,9 +195,14 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `6AC577134794BE73CC6AFA62E57F4E498236C9D4DE9920674026651AFF5B9F6F`<br>
+> `AA850FD54D15E3A2239C4212930D24CB436EE0DB3A030779D6E575CF60094936`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
+
+> **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
+> `5E22AFB7CC87491C4F801A0C8B7CE0BC365E8A7226F51725E397697B25B7C10F`<br>
+> *(se você baixou o executável, confira **este** valor — o executável imprime o
+> hash do `.exe` no final, não o do script)*
 
 ## Licença
 

@@ -9,7 +9,17 @@ param(
   [switch]$SkipOllama
 )
 $ErrorActionPreference = 'Stop'
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+# Descobre a pasta deste instalador de forma resiliente:
+# - quando rodado como .ps1, usa $PSScriptRoot (ou $MyInvocation...);
+# - quando compilado em .exe (ps2exe), $PSCommandPath/$MyInvocation ficam vazios
+#   e a pasta e a mesma do proprio executavel.
+$Root = $PSScriptRoot
+if(-not $Root -and $MyInvocation.MyCommand.Path){ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path }
+if(-not $Root){
+  try { $Root = Split-Path -Parent ([Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) } catch {}
+}
+if(-not $Root){ $Root = Get-Location }
 
 $CanonicalRepoUrl = 'https://github.com/johnsalviano/kfai'
 
@@ -21,16 +31,28 @@ function Test-OfficialOrigin {
   $origin = (& git -C $Root remote get-url origin 2>$null)
   $ErrorActionPreference = $prevEap
   $origin = if($origin){ $origin.Trim() } else { '' }
+  # Normaliza para comparar igual: '.../kfai.git' e '.../kfai' sao o mesmo repo.
+  $originNormalized  = ($origin  -replace '\.git$', '')
+  $canonicalNormalized = ($CanonicalRepoUrl -replace '\.git$', '')
   if(-not $origin){
-    # Sem remote: veio de ZIP/extraido ou copia manual. Nao da para confirmar a origem.
-    Write-Step "ALERTA: nao consegui confirmar a origem deste script"
+    # Sem remote: veio de ZIP/extraido, copia manual ou executavel compilado.
+    # Nao da para confirmar a origem por git — avisamos e pedimos confirmacao
+    # explicita ao usuario (para nao travar o instalador em executavel).
+    Write-Step "ALERTA: nao consegui confirmar a origem deste instalador"
     Write-Host "Nao ha repositorio git (remote) nesta pasta. Copias extraidas de ZIP" -ForegroundColor Yellow
     Write-Host "ou repassadas por terceiros PODEM ser adulteradas." -ForegroundColor Yellow
-    Write-Host "Confira o SHA-256 no final contra o publicado em $CanonicalRepoUrl" -ForegroundColor Yellow
+    Write-Host "Confira o SHA-256 mostrado no final contra o publicado em $CanonicalRepoUrl" -ForegroundColor Yellow
     Write-Host "ou rode o instalador a partir do repositorio oficial." -ForegroundColor Yellow
+    try {
+      $resp = Read-Host "Voce baixou este instalador do repositorio oficial $CanonicalRepoUrl? (s/N)"
+    } catch {
+      $resp = ''
+    }
+    if($resp -match '^(s|sim|y|yes)$'){ return $true }
+    Write-Host "Instalacao cancelada pelo usuario. Baixe do repositorio oficial para continuar." -ForegroundColor Red
     return $false
   }
-  if($origin -ne $CanonicalRepoUrl){
+  if($originNormalized -ne $canonicalNormalized){
     Write-Step "ALERTA: origem deste script nao e a oficial"
     Write-Host "Origin : $origin" -ForegroundColor Red
     Write-Host "Oficial: $CanonicalRepoUrl" -ForegroundColor Yellow
@@ -41,7 +63,16 @@ function Test-OfficialOrigin {
 }
 
 function Show-IntegrityHash {
-  $h = (Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash
+  # Em .ps1 o caminho e o proprio script; em .exe (ps2exe) e o executavel em si.
+  $self = $PSCommandPath
+  if(-not $self){
+    try { $self = [Diagnostics.Process]::GetCurrentProcess().MainModule.FileName } catch {}
+  }
+  if(-not $self){
+    Write-Host "Nao consegui calcular o hash proprio." -ForegroundColor Yellow
+    return
+  }
+  $h = (Get-FileHash -LiteralPath $self -Algorithm SHA256).Hash
   Write-Host "`nIntegridade (SHA-256) deste instalador:"
   Write-Host $h -ForegroundColor Green
   Write-Host "Compare com o valor publicado na pagina oficial do repositorio KFAI." -ForegroundColor Yellow

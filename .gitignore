@@ -22,10 +22,11 @@ package.json
 package-lock.json
 bun.lock
 dist/
-build/
 __pycache__/
 .venv/
 *.log
 logs/
 # Atalho local da maquina do autor (tem caminho pessoal)
 *.lnk
+# Executavel compilado (artefato de build - vai so para a pagina de releases)
+KFAI-Instalador.exe
