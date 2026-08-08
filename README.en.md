@@ -179,6 +179,7 @@ revert).
 - [What is KFAI](docs/O-QUE-E-KFAI.md) *(in Portuguese)*
 - [Setup guide](docs/GUIA-CONFIGURACAO.md) *(in Portuguese)*
 - [Free API keys guide](docs/GUIA-CHAVES-GRATIS.md) *(in Portuguese)* — how to get a free API key from each provider
+- `kfai-config-chaves.ps1` — helper that shows which keys are missing and opens each provider's site
 - [Models by hardware](docs/MODELOS-POR-HARDWARE.md) *(in Portuguese)* — which local model to download on your PC
 - [Credits](docs/CREDITOS.md) *(in Portuguese)* — who made each tool
 
@@ -278,12 +279,12 @@ The own router also protects against abuse:
   doesn't know the token.
 
 > **Current `install.ps1` hash (check before running):**<br>
-> `C9328D6C9954FBCCBF81AD477ACFBBBC945EC7C24E9C3F83DA43696832B91A88`<br>
+> `8431C2114D83E8C3CC4CDC05F2CE1FCD8793AEBEFF4837D0367ECDBE4BEE55D3`<br>
 > *(the script itself prints the same value at the end of the install — if it
 > differs, the file may have been tampered with and **must not** be run)*
 
 > **Current `KFAI-Instalador.exe` hash (check before running):**<br>
-> `73B4B7023F80D9A923A34CA1A4994331E76D8D7FB0F8D673A4D22A931667BE75`<br>
+> `30B755ACB1DFC55E5FCD6DBF7C976D5EC3DF053FAEC6C8578634FC847282DD54`<br>
 > *(if you downloaded the executable, check **this** value — the executable
 > prints the `.exe` hash at the end, not the script's)*
 

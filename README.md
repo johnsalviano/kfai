@@ -176,6 +176,7 @@ abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
 - [Guia de configuração](docs/GUIA-CONFIGURACAO.md)
 - [Guia de chaves gratuitas](docs/GUIA-CHAVES-GRATIS.md) — como gerar sua API key grátis de cada provedor
+- `kfai-config-chaves.ps1` — assistente que mostra quais chaves faltam e abre o site de cada provedor
 - [Modelos por hardware](docs/MODELOS-POR-HARDWARE.md) — qual modelo local baixar no seu PC
 - [Créditos](docs/CREDITOS.md) — quem fez cada ferramenta
 
@@ -273,12 +274,12 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `C9328D6C9954FBCCBF81AD477ACFBBBC945EC7C24E9C3F83DA43696832B91A88`<br>
+> `8431C2114D83E8C3CC4CDC05F2CE1FCD8793AEBEFF4837D0367ECDBE4BEE55D3`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `73B4B7023F80D9A923A34CA1A4994331E76D8D7FB0F8D673A4D22A931667BE75`<br>
+> `30B755ACB1DFC55E5FCD6DBF7C976D5EC3DF053FAEC6C8578634FC847282DD54`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
 
