@@ -6,28 +6,16 @@
       "name": "9Router",
       "options": {
         "baseURL": "http://localhost:20128/v1",
-        "apiKey": "{env:KFAI_NINEROUTER_KEY}"
+        "apiKey": "9router"
       },
       "models": {
-        "combo-full-cloud": {
-          "name": "KFAI - Full Cloud (chaves gratuitas)",
+        "todas-free": {
+          "name": "KFAI - Full Cloud (todos os gratis do 9Router)",
           "limit": { "context": 200000, "output": 65536 }
         },
-        "oc/deepseek-v4-flash-free": {
-          "name": "Cloud Free: DeepSeek V4 Flash",
-          "limit": { "context": 128000, "output": 8192 }
-        },
-        "oc/mimo-v2.5-free": {
-          "name": "Cloud Free: Mimo V2.5",
-          "limit": { "context": 128000, "output": 8192 }
-        },
-        "oc/ling-3.0-flash-free": {
-          "name": "Cloud Free: Ling 3.0 Flash",
-          "limit": { "context": 128000, "output": 8192 }
-        },
-        "oc/nemotron-3-ultra-free": {
-          "name": "Cloud Free: Nemotron 3 Ultra",
-          "limit": { "context": 128000, "output": 8192 }
+        "gemini/gemini-3-flash-preview": {
+          "name": "Cloud Free: Gemini 3 Flash",
+          "limit": { "context": 1048576, "output": 65536 }
         },
         "nvidia/z-ai/glm-5.2": {
           "name": "Cloud NVIDIA: GLM 5.2 (gratuito)",
@@ -41,12 +29,12 @@
           "name": "Cloud NVIDIA: MiniMax M3",
           "limit": { "context": 131072, "output": 32768 }
         },
-        "ps/poolside/laguna-s-2.1": {
+        "ps/laguna-s-2.1": {
           "name": "Cloud Poolside: Laguna S 2.1",
           "limit": { "context": 128000, "output": 8192 }
         }
       }
     }
   },
-  "model": "9router/combo-full-cloud"
+  "model": "9router/todas-free"
 }

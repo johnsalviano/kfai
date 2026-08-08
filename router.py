@@ -65,11 +65,11 @@ class NotRetryable(Exception):
 
 
 def is_retryable_status(code):
-    """429 (rate limit), 5xx e timeouts merecem fallback/cooldown.
-    400/401/403/404 sao erros de configuracao: propagam sem fallback."""
+    """429 (rate limit), 401 (auth), 5xx e timeouts merecem fallback/cooldown.
+    400/403/404 sao erros de configuracao: propagam sem fallback."""
     if code >= 500:
         return True
-    if code in (429,):
+    if code in (429, 401):
         return True
     return False
 
@@ -277,6 +277,14 @@ def call_upl(route, body):
     for up in route:
         if now_cooldown(up):
             continue
+        # Uplink de NUVEM REMOTA sem chave configurada: nao tem como autenticar.
+        # Pula (cooldown) em vez de mandar "Bearer ollama" e levar um 400.
+        # Servicos LOCAIS (Ollama 11434, 9Router 20128) aceitam sem chave.
+        if not up["key"]:
+            host_local = any(h in up["base"] for h in ("localhost", "127.0.0.1"))
+            if not host_local:
+                mark_cooldown(up)
+                continue
         mode = decide_mode(up["mode"], body)
         b = dict(body)
         if mode == "eco":

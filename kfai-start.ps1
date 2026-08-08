@@ -5,15 +5,17 @@
 #   .\kfai-start.ps1 -Status   mostra o que esta rodando + compatibilidade do PC
 #   .\kfai-start.ps1 -Register adiciona ao login do Windows (autostart)
 #   .\kfai-start.ps1 -Unregister remove do login
-#   .\kfai-start.ps1 -With9Router  prefere IA local; so cai pro 9Router
-#                                  (porta 20128) se o PC nao suportar IA local
-#                                  ou o Ollama falhar. NUNCA os dois ao mesmo tempo.
+#   .\kfai-start.ps1 -With9Router  SO IA em nuvem via 9Router (porta 20128);
+#                                  nao sobe o Ollama local. Para PC fraco.
+#
+# O 9Router e o GATEWAY de nuvem do KFAI (full-cloud / cloud-plus-local): ele
+# sobe SEMPRE que estiver instalado. O Ollama sobe se o PC aguentar IA local.
+# Os dois podem rodar ao mesmo tempo (portas diferentes; o router.conf decide).
 #
 # No inicio SEMPRE verifica:
 #   1) se o PC aguenta IA local (RAM/VRAM/CPU);
 #   2) qual o comando correto do Ollama e do 9Router instalados na maquina
 #      (os caminhos podem mudar de maquina para maquina).
-# Se o PC nao suportar IA local, usa o 9Router como padrao.
 [CmdletBinding()]
 param(
   [switch]$Stop,
@@ -226,7 +228,7 @@ if($Status){
   Write-Host "Ollama : $(if($script:OllamaCmd){$script:OllamaCmd}else{'nao encontrado'})"
   if($script:NineCmd){ Write-Host "9Router: $($script:NineCmd.Node) $($script:NineCmd.Cli)" } else { Write-Host "9Router: nao encontrado" }
   if($o -eq "LIGADO (porta 11434)" -and $n -eq "LIGADO (porta 20128)"){
-    Write-Host "AVISO: Ollama e 9Router ligados AO MESMO TEMPO (nao recomendado)."
+    Write-Host "Nota: Ollama e 9Router ligados juntos (normal no novo router.conf)."
   }
   exit 0
 }
@@ -264,31 +266,25 @@ if($Unregister){
 
 # --- inicio normal ---
 if($With9Router){
-  if(-not $Compat.Ok){
-    # PC fraco: nao tenta IA local. 9Router vira o padrao.
-    Write-Host "PC nao suporta IA local ($($Compat.Motivo))."
-    Write-Host "Usando 9Router como padrao (IA em nuvem)."
+  # Modo so-nuvem (PC fraco): nao sobe Ollama local.
+  if(-not $script:NineCmd){ Write-Error "9Router nao encontrado; -With9Router nao e possivel."; exit 1 }
+  Write-Host "Modo 9Router (IA em nuvem). Ollama local desligado."
+  Stop-OllamaAndRouter
+  Start-NineRouter | Out-Null
+} else {
+  # Modo padrao: 9Router (gateway de nuvem) + Ollama local (se o PC aguentar).
+  if($script:NineCmd){
     Start-NineRouter | Out-Null
   } else {
-    # PC suporta: prefere o local; so cai pro 9Router se o Ollama falhar.
+    Write-Host "AVISO: 9Router nao encontrado. Full Cloud / Cloud + Local ficam sem nuvem."
+  }
+  if(-not $Compat.Ok){
+    Write-Host "PC NAO SUPORTA IA LOCAL ($($Compat.Motivo)). So IA em nuvem (9Router)."
+    Start-KfaiRouter
+  } else {
     Start-Ollama | Out-Null
     Start-KfaiRouter
-    if(Test-OllamaWorking){
-      Write-Host "Ollama local OK (tem modelo). Usando IA local. 9Router fica desligado."
-    } else {
-      Write-Host "Ollama local indisponivel (sem modelo ou sem resposta). Caindo para o 9Router..."
-      Stop-OllamaAndRouter
-      Start-NineRouter | Out-Null
-      Write-Host "Usando 9Router (IA em nuvem). Ollama local desligado."
-    }
+    if(-not (Test-Port 11434)){ Write-Host "AVISO: Ollama nao respondeu ainda. Se o PC e fraco, ele pode demorar." }
   }
-} else {
-  if(-not $Compat.Ok){
-    Write-Host "AVISO: PC nao suporta IA local ($($Compat.Motivo))."
-    Write-Host "Rode com -With9Router para usar IA em nuvem (9Router)."
-  }
-  Start-Ollama | Out-Null
-  Start-KfaiRouter
-  if(-not (Test-Port 11434)){ Write-Host "AVISO: Ollama nao respondeu ainda. Se o PC e fraco, ele pode demorar." }
 }
 Write-Host "Pronto. Tudo rodando sem janelas."

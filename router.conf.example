@@ -6,7 +6,7 @@
 # O router tenta o 1o uplink; se falhar (429/5xx/timeout), marca cooldown e
 # segue para o proximo. Isso cria os 3 combos padrao:
 #
-#   full-cloud        -> so IA da nuvem gratuita (ou paga que da tokens gratis)
+#   full-cloud        -> so IA da nuvem gratuita (via 9Router)
 #   cloud-plus-local  -> nuvem primeiro; quando acaba token, cai no Ollama local
 #   full-local        -> somente Ollama local (offline)
 #
@@ -14,41 +14,42 @@
 #       saida de ferramenta) | auto (escolhe eco/full por request, via heuristica)
 # Se nao informar o modo, assume o da env KFAI_ECO_MODE (default full).
 #
-# Copie este arquivo para router.conf e preencha com suas chaves (variaveis de
-# ambiente). Provedores que so dão trial credit (expira) tem o nome marcado
-# com "(trial)" - troque quando quiser. Todos aceitam API key gratuita sem cartao.
+# Copie este arquivo para router.conf. Duas formas de usar nuvem:
+#
+# A) 9Router como gateway (RECOMENDADO): as chaves gratuitas ficam cadastradas
+#    no app do 9Router (porta 20128). O router KFAI encaminha para ele usando
+#    a rota "todas-free" (todos os modelos gratuitos). Nao precisa de env vars.
+#    Pre-requisito: 9Router instalado, configurado com as chaves e rodando.
+#
+# B) Provedores diretos: use as linhas comentadas com os provedores abaixo e
+#    defina as variaveis de ambiente KFAI_*_KEY com suas chaves (ex.:
+#    $env:KFAI_GEMINI_KEY = "...").
 #
 # ============================== 1) FULL CLOUD ==============================
-# Nuvem gratis (free tier permanente) + paga com token gratis.
-# O 1o com chave preenchida responde; os demais sao fallback.
-#
-# Google Gemini Flash (free tier ~1500 req/dia, 1M contexto, multimodal)
-full-cloud|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1beta/openai|KFAI_GEMINI_KEY|full
-# Groq (free tier, Llama 3.3 70B rapido ~700 tok/s, 1M tokens/dia)
-full-cloud|llama-3.3-70b-versatile|https://api.groq.com/openai/v1|KFAI_GROQ_KEY|full
-# Cerebras (free tier, Llama 3.3 70B ~2000 tok/s)
-full-cloud|llama-3.3-70b|https://api.cerebras.ai/v1|KFAI_CEREBRAS_KEY|full
-# OpenRouter - modelos :free (variedade, 50 req/dia; 1000/dia com $10 topup)
-full-cloud|meta-llama/llama-3.3-70b-instruct:free|https://openrouter.ai/api/v1|KFAI_OPENROUTER_KEY|full
-# Mistral La Plateforme (free experimental, ~1B tokens/mes)
-full-cloud|mistral-small-latest|https://api.mistral.ai/v1|KFAI_MISTRAL_KEY|full
-# NVIDIA NIM (trial ~30-90 dias, 100+ open models)
-full-cloud|z-ai/glm-5.2|https://integrate.api.nvidia.com/v1|KFAI_NVIDIA_KEY|full
+# Opcao A - via 9Router (usa as chaves cadastradas no app):
+full-cloud|todas-free|http://localhost:20128/v1||full
+# Opcao B - provedores diretos (troque a secao acima pelas linhas abaixo e
+#           preencha as env vars KFAI_*_KEY):
+# full-cloud|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1beta/openai|KFAI_GEMINI_KEY|full
+# full-cloud|llama-3.3-70b-versatile|https://api.groq.com/openai/v1|KFAI_GROQ_KEY|full
+# full-cloud|llama-3.3-70b|https://api.cerebras.ai/v1|KFAI_CEREBRAS_KEY|full
+# full-cloud|meta-llama/llama-3.3-70b-instruct:free|https://openrouter.ai/api/v1|KFAI_OPENROUTER_KEY|full
+# full-cloud|mistral-small-latest|https://api.mistral.ai/v1|KFAI_MISTRAL_KEY|full
+# full-cloud|z-ai/glm-5.2|https://integrate.api.nvidia.com/v1|KFAI_NVIDIA_KEY|full
 # Cloudflare Workers AI (free tier ~10k neuronios/dia)
 # full-cloud|gpt-oss-120b|https://api.cloudflare.com/client/v4/accounts/SEU_ID/ai/v1|KFAI_CLOUDFLARE_KEY|full
 #
 # =========================== 2) CLOUD + LOCAL =============================
-# Mesma lista de nuvem gratis, mas com o Ollama local no FINAL da lista:
-# quando a nuvem acabar os tokens (429), o router cai para o seu PC.
-# Use o modelo local que o install.ps1 escolheu para a sua maquina.
-cloud-plus-local|gemini-2.5-flash|https://generativelanguage.googleapis.com/v1beta/openai|KFAI_GEMINI_KEY|full
-cloud-plus-local|llama-3.3-70b-versatile|https://api.groq.com/openai/v1|KFAI_GROQ_KEY|full
-cloud-plus-local|meta-llama/llama-3.3-70b-instruct:free|https://openrouter.ai/api/v1|KFAI_OPENROUTER_KEY|full
+# Nuvem primeiro (via 9Router); quando falhar/limite (429), cai para o Ollama
+# local. Use o modelo local que o install.ps1 escolheu para a sua maquina.
+cloud-plus-local|todas-free|http://localhost:20128/v1||full
+cloud-plus-local|qwen2.5-coder:latest|http://localhost:11434/v1||full
 cloud-plus-local|llama3.2:3b|http://localhost:11434/v1||full
 # cloud-plus-local|qwen2.5:7b|http://localhost:11434/v1||full   # PC com GPU 6GB+
 #
 # ============================= 3) FULL LOCAL ==============================
 # Somente Ollama local. Escolha o modelo do seu PC (install.ps1 decide).
+full-local|qwen2.5-coder:latest|http://localhost:11434/v1||full
 full-local|llama3.2:3b|http://localhost:11434/v1||full
 # full-local|qwen2.5:7b|http://localhost:11434/v1||full           # PC com GPU 6GB+
 # full-local|qwen2.5:3b|http://localhost:11434/v1||full           # PC com 8-16GB RAM

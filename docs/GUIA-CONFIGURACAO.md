@@ -65,8 +65,15 @@ perfis pagos (Anthropic e OpenAI).
 ## Passo 4 — Gerar suas chaves gratuitas
 
 Siga o [Guia de Chaves Gratuitas](GUIA-CHAVES-GRATIS.md) para gerar as chaves de
-OpenRouter, Gemini, NVIDIA e Cloudflare (todas grátis). O 9Router funciona mesmo
-sem chave, mas com mais chaves você tem mais IAs no combo.
+OpenRouter, Gemini, NVIDIA e Cloudflare (todas grátis). **Cole as chaves no
+9Router** (menu de providers/conexões do app). O 9Router fica rodando em segundo
+plano e o router KFAI encaminha os combos de nuvem para ele — ou seja, com as
+chaves dentro do 9Router, os combos **Full Cloud** e **Cloud + Local** passam a
+funcionar sem precisar mexer em variáveis de ambiente.
+
+> **Por que assim?** O 9Router guarda as chaves dele em um banco local seguro.
+> O router KFAI não copia suas chaves: ele só pede ao 9Router para responder,
+> e o 9Router usa as chaves que você já cadastrou.
 
 ## Passo 5 — Usar as skills (otimizar seu PC)
 
@@ -87,7 +94,7 @@ Cada skill tem um `SKILL.md` (o "manual") e scripts para executar em baixo.
   seu PC se a nuvem estiver sem cota.
 - Se seu PC for bem básico (menos de 3GB de RAM), o instalador não força IA
   local — use **Full Cloud**.
-- Guarde suas chaves só em variável de ambiente (`KFAI_NINEROUTER_KEY`), nunca
-  em arquivo que você vá compartilhar.
+- Suas chaves ficam **dentro do 9Router** (banco local seguro). Não compartilhe
+  e não coloque em arquivo que você vá mandar para alguém.
 
 Pronto! Seu kit de agentes de IA está no ar. 🎉
