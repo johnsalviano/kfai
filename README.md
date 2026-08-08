@@ -80,19 +80,22 @@ você abre o agente** e desliga quando você o fecha:
 .\kfai-launch.ps1 -App "C:\caminho\app.exe"   # qualquer executavel
 ```
 
-**Usa o 9Router (porta 20128)?** Adicione `-With9Router` para ele subir junto
-somente enquanto o agente estiver aberto — em vez de ficar rodando o dia todo:
+**Usa o 9Router (porta 20128)?** Adicione `-With9Router` para preferir a IA
+**local** e usar o 9Router só como reserva quando o Ollama local falhar (sem
+servidor ou sem modelo). Os dois **nunca** ficam ligados ao mesmo tempo:
 
 ```powershell
-.\kfai-launch.ps1 -App aionui -With9Router   # abre AionUi + router + ollama + 9Router
+.\kfai-launch.ps1 -App aionui -With9Router   # prefere local; cai pro 9Router se falhar
 .\kfai-launch.ps1 -App opencode -With9Router
 ```
 
-O 9Router sobe **sem bandeja e sem janela** (via `cli.js -n`), e o `-Stop`
-mata a árvore inteira (CLI + servidor Next). Sem a flag, o launcher não mexe
-no 9Router — ideal para quem prefere deixá-lo sempre ligado no login (o
-`9router.vbs` na pasta Inicializar). O status mostra as 3 portas
-(`kfai-start.ps1 -Status`).
+O launcher sobe o Ollama primeiro e testa se ele responde e tem modelo
+(`/api/tags`). Se OK → usa o local e o 9Router fica desligado. Se falhar →
+derruba o local e sobe o 9Router (sem bandeja e sem janela, via `cli.js -n`).
+O `-Stop` mata a árvore inteira (CLI + servidor Next). Sem a flag, o launcher
+não mexe no 9Router — ideal para quem prefere deixá-lo sempre ligado no login
+(o `9router.vbs` na pasta Inicializar). O `kfai-start.ps1 -Status` mostra as 3
+portas e avisa se os dois estiverem ligados ao mesmo tempo.
 
 Se você fechar um agente mas **outro ainda estiver aberto** (ex.: AionUi aberto
 e você fecha o opencode), os serviços continuam — só desligam quando o último

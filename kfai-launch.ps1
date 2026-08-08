@@ -5,7 +5,7 @@
 #   .\kfai-launch.ps1 -App hermes     abre o Hermes no terminal atual
 #   .\kfai-launch.ps1 -App "C:\caminho\app.exe"  abre qualquer executavel
 #   .\kfai-launch.ps1 -App opencode -KeepOn   abre mas NAO desliga os servicos ao fechar
-#   .\kfai-launch.ps1 -App aionui -With9Router  liga o 9Router junto (porta 20128)
+#   .\kfai-launch.ps1 -App aionui -With9Router  prefere IA local; so cai pro 9Router se o Ollama falhar
 [CmdletBinding()]
 param(
   [string]$App = "aionui",
