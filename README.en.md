@@ -181,8 +181,10 @@ KFAI is **100% free and ad-free** — built in spare time, with care.
 If the project helped you and you'd like to give back, any amount is welcome and
 **makes a real difference** in keeping it maintained, fixed and improved:
 
-> **PIX:** `PASTE_YOUR_PIX_KEY_HERE` *(random key — created only for donations,
-> without exposing personal data)*
+> **PIX:** `edb2e588-8dc5-4991-ab61-62f113a066c6` *(random key — created only for
+> donations, without exposing personal data)*
+>
+> 📱 **QR Code:** [pay via Nubank](https://nubank.com.br/cobrar/1bq05j/6a768524-3eb0-45dd-b768-328bd62b3f5c)
 
 If you'd rather not donate, that's fine too! You already help a lot by:
 - ⭐ starring the repository;

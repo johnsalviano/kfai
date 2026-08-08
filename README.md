@@ -179,8 +179,10 @@ O KFAI é **100% gratuito e sem anúncios** — feito no tempo livre, com carinh
 Se o projeto te ajudou e você quiser retribuir, qualquer valor é bem-vindo e
 **faz diferença real** para continuar mantendo, corrigindo e melhorando:
 
-> **PIX:** `COLE_SUA_CHAVE_PIX_AQUI` *(chave aleatória — criada só para doações,
-> sem expor dados pessoais)*
+> **PIX:** `edb2e588-8dc5-4991-ab61-62f113a066c6` *(chave aleatória — criada só
+> para doações, sem expor dados pessoais)*
+>
+> 📱 **QR Code:** [pagamento via Nubank](https://nubank.com.br/cobrar/1bq05j/6a768524-3eb0-45dd-b768-328bd62b3f5c)
 
 Se preferir não doar, tudo bem também! Você já ajuda muito ao:
 - ⭐ dar uma estrela no repositório;
