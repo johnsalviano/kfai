@@ -182,7 +182,7 @@ Se o projeto te ajudou e você quiser retribuir, qualquer valor é bem-vindo e
 > **PIX:** `edb2e588-8dc5-4991-ab61-62f113a066c6` *(chave aleatória — criada só
 > para doações, sem expor dados pessoais)*
 >
-> 📱 **QR Code:** [pagamento via Nubank](https://nubank.com.br/cobrar/1bq05j/6a768524-3eb0-45dd-b768-328bd62b3f5c)
+> 📱 **QR Code:** [pagamento via Nubank](https://nubank.com.br/cobrar/1bq05j/6a7686af-8d68-4c76-bde7-5ae91eabd152)
 
 Se preferir não doar, tudo bem também! Você já ajuda muito ao:
 - ⭐ dar uma estrela no repositório;

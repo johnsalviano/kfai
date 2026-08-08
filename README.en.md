@@ -184,7 +184,7 @@ If the project helped you and you'd like to give back, any amount is welcome and
 > **PIX:** `edb2e588-8dc5-4991-ab61-62f113a066c6` *(random key — created only for
 > donations, without exposing personal data)*
 >
-> 📱 **QR Code:** [pay via Nubank](https://nubank.com.br/cobrar/1bq05j/6a768524-3eb0-45dd-b768-328bd62b3f5c)
+> 📱 **QR Code:** [pay via Nubank](https://nubank.com.br/cobrar/1bq05j/6a7686af-8d68-4c76-bde7-5ae91eabd152)
 
 If you'd rather not donate, that's fine too! You already help a lot by:
 - ⭐ starring the repository;
