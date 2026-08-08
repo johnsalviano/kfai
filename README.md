@@ -81,21 +81,28 @@ você abre o agente** e desliga quando você o fecha:
 ```
 
 **Usa o 9Router (porta 20128)?** Adicione `-With9Router` para preferir a IA
-**local** e usar o 9Router só como reserva quando o Ollama local falhar (sem
-servidor ou sem modelo). Os dois **nunca** ficam ligados ao mesmo tempo:
+**local** e usar o 9Router só como reserva. Os dois **nunca** ficam ligados ao
+mesmo tempo:
 
 ```powershell
 .\kfai-launch.ps1 -App aionui -With9Router   # prefere local; cai pro 9Router se falhar
 .\kfai-launch.ps1 -App opencode -With9Router
 ```
 
-O launcher sobe o Ollama primeiro e testa se ele responde e tem modelo
-(`/api/tags`). Se OK → usa o local e o 9Router fica desligado. Se falhar →
-derruba o local e sobe o 9Router (sem bandeja e sem janela, via `cli.js -n`).
-O `-Stop` mata a árvore inteira (CLI + servidor Next). Sem a flag, o launcher
-não mexe no 9Router — ideal para quem prefere deixá-lo sempre ligado no login
-(o `9router.vbs` na pasta Inicializar). O `kfai-start.ps1 -Status` mostra as 3
-portas e avisa se os dois estiverem ligados ao mesmo tempo.
+**Verificação automática no início** (o launcher decide sozinho):
+
+1. **O PC aguenta IA local?** checa RAM (≥ 8 GB), VRAM da GPU (via `nvidia-smi`)
+   e CPU. Sem isso, o Ollama não roda — o launcher **usa o 9Router como padrão**
+   e nem tenta subir o local.
+2. **Qual comando existe na máquina?** os caminhos do Ollama (`ollama.exe serve`
+   ou `ollama app.exe`) e do 9Router (`cli.js` do npm global ou build standalone
+   `server.js`) são descobertos em tempo real, pois mudam de PC para PC.
+3. Se o PC suporta: sobe o Ollama, testa se responde e tem modelo (`/api/tags`).
+   OK → usa o local. Falhou → derruba o local e sobe o 9Router.
+
+`kfai-start.ps1 -Status` mostra as 3 portas **e o resultado da verificação**
+(compatível ou não, com os caminhos encontrados). Para forçar só nuvem mesmo em
+PC capaz, defina `KFAI_FORCE_NO_LOCAL=1`.
 
 Se você fechar um agente mas **outro ainda estiver aberto** (ex.: AionUi aberto
 e você fecha o opencode), os serviços continuam — só desligam quando o último
