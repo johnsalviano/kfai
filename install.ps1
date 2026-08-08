@@ -349,6 +349,73 @@ function Test-AionUiInstalled {
   return @{ Ok=$true; Exe=$exe; Version=$ver }
 }
 
+# --- local do config global do opencode do USUARIO (mesmo lugar em .ps1 e .exe) ---
+function Get-OpencodeGlobalPath {
+  $xdg = $env:XDG_CONFIG_HOME
+  $dir = if($xdg){ Join-Path $xdg "opencode" } else { Join-Path $env:USERPROFILE ".config\opencode" }
+  New-Item -ItemType Directory -Path $dir -Force | Out-Null
+  return (Join-Path $dir "opencode.json")
+}
+
+# --- aplica o provider KFAI (router local) no opencode.json global do usuario ---
+# Sempre roda: o opencode usa o MESMO arquivo tanto na instalacao .ps1 quanto no
+# .exe, e e um arquivo de texto (JSON) que o instalador pode editar com seguranca.
+function Apply-OpencodeCombos {
+  $path = Get-OpencodeGlobalPath
+  Write-Host "Config global do opencode: $path"
+
+  # backup do arquivo atual (se existir) antes de tocar
+  if(Test-Path -LiteralPath $path){
+    $bakDir = Join-Path (Split-Path -Parent $path) "backup"
+    New-Item -ItemType Directory -Path $bakDir -Force | Out-Null
+    $bak = Join-Path $bakDir ("opencode.json.bak-{0:yyyyMMdd-HHmmss}" -f (Get-Date))
+    Copy-Item -LiteralPath $path -Destination $bak -Force
+    Write-Host "Backup da config atual em: $bak" -ForegroundColor DarkGray
+  }
+
+  $cfg = $null
+  if(Test-Path -LiteralPath $path){
+    try { $cfg = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json } catch { $cfg = $null }
+  }
+  if($null -eq $cfg){ $cfg = [pscustomobject]@{ provider = @{} } }
+  if($null -eq $cfg.provider){ $cfg | Add-Member -NotePropertyName provider -NotePropertyValue @{} }
+
+  # provider KFAI Router (combos) - preserva o que o usuario ja tiver em "kfai"
+  $kfai = [pscustomobject]@{
+    npm   = "@ai-sdk/openai-compatible"
+    name  = "KFAI Router"
+    options = @{
+      baseURL = "http://localhost:20129/v1"
+      apiKey  = "{env:KFAI_ROUTER_KEY}"
+    }
+    models = @{
+      "full-cloud" = @{ name = "KFAI - Full Cloud (nuvem gratuita)"; limit = @{ context = 200000; output = 65536 } }
+      "full-local" = @{ name = "KFAI - Full Local (somente Ollama)"; limit = @{ context = 200000; output = 65536 } }
+      "cloud-plus-local" = @{ name = "KFAI - Cloud + Local (nuvem 1a, local fallback)"; limit = @{ context = 200000; output = 65536 } }
+    }
+  }
+  $cfg.provider | Add-Member -NotePropertyName kfai -NotePropertyValue $kfai -Force
+
+  $cfg | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $path -Encoding utf8
+  Write-Host "Combos do KFAI adicionados ao opencode (provider kfai: full-cloud, cloud-plus-local, full-local)." -ForegroundColor Green
+}
+
+# --- aplica os combos no AionUi, quando der (so funciona DENTRO do AionUi) ---
+# Se este instalador rodar de dentro do AionUi (aioncore disponivel), aplica na
+# hora. Caso contrario, avisa como fazer (script kfai-aionui-combos.ps1).
+function Apply-AionUiCombos {
+  if($env:AIONUI_HELPER_BIN -and (Test-Path -LiteralPath $env:AIONUI_HELPER_BIN)){
+    Write-Host "AionUi detectado no ambiente. Aplicando combos e removendo perfis pagos..." -ForegroundColor Cyan
+    $aux = Join-Path $Root "kfai-aionui-combos.ps1"
+    if(Test-Path -LiteralPath $aux){
+      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $aux
+      return
+    }
+  }
+  Write-Host "AionUi nao aplica combos agora (so funciona dentro do app)." -ForegroundColor Yellow
+  Write-Host "Para aplicar no AionUi, abra o app e rode: .\kfai-aionui-combos.ps1" -ForegroundColor Yellow
+}
+
 # --- relatorio de apps e dependencias (instalado? versao? atualizado?) ---
 function Show-AppsReport {
   Write-Step "Verificacao de apps e dependencias"
@@ -478,14 +545,20 @@ if($script:OcOutdated){
   }
 }
 
+Write-Step "Combos de IA - opencode + AionUi"
+Write-Host "Vou adicionar os combos do KFAI (provider kfai) no opencode e, se possivel, no AionUi."
+Apply-OpencodeCombos
+Apply-AionUiCombos
+
 Write-Step "Guia de proximos passos"
 Write-Host @"
 1. Abra o 9Router e ative as conexoes gratuitas de sua escolha.
 2. Adicione suas chaves gratuitas (links em docs/GUIA-CHAVES-GRATIS.md).
-3. Copie o config de combo desejado para o opencode:
-   - Full Cloud      -> config\opencode\full-cloud.json
-   - Cloud + Local   -> config\opencode\cloud-plus-local.json
-   - Full Local      -> config\opencode\full-local.json  (troque KFAI_LOCAL_MODEL pelo modelo, se necessario)
+3. Escolha o combo ja instalado no opencode (mudar o modelo):
+   - kfai/full-cloud      -> so IAs gratuitas da nuvem
+   - kfai/cloud-plus-local-> nuvem primeiro, seu PC de reserva
+   - kfai/full-local      -> somente seu PC (Ollama)
+   Tambem pode trocar o arquivo inteiro usando os presets em config\opencode\.
 $(if($script:NumCtxModel){ "   Modelo local recomendado (contexto 32k): $($script:NumCtxModel)`n" })
    Pronto! Use as skills da pasta skills\ para otimizar seu PC.
 "@ -ForegroundColor Cyan

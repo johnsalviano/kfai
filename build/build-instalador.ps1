@@ -31,7 +31,9 @@ if(-not (Get-Command Invoke-ps2exe -ErrorAction SilentlyContinue)){
 }
 
 Write-Host "Gerando executavel a partir de install.ps1..." -ForegroundColor Cyan
-Invoke-ps2exe -InputFile $In -OutputFile $Out -NoError -NoOutput -Verbose:$false
+# Sem -NoError/-NoOutput: essas flags do ps2exe suprimem TODA saida e prompts
+# do exe (tela preta "sem nada"). O instalador precisa mostrar o que faz.
+Invoke-ps2exe -InputFile $In -OutputFile $Out -Verbose:$false
 
 if(-not (Test-Path -LiteralPath $Out)){
   Write-Error "Falha ao gerar o executavel."

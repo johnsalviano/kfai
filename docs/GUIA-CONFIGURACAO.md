@@ -34,16 +34,33 @@ O script:
 
 ## Passo 3 — Escolher o combo
 
-Separe qual vai usar e copie o arquivo para o seu `opencode.json`:
+O instalador do KFAI já adiciona o **provider `kfai`** (router local) ao seu
+`opencode.json` automaticamente. Para escolher o combo, basta trocar o modelo
+no opencode:
 
-| Você quer | Copie para o seu Opencode |
+| Você quer | Modelo no opencode |
 |---|---|
-| só internet, IA da nuvem | `config/opencode/full-cloud.json` |
-| nuvem + seu PC de reserva | `config/opencode/cloud-plus-local.json` |
-| tudo offline (200%) | `config/opencode/full-local.json` |
+| só internet, IA da nuvem | `kfai/full-cloud` |
+| nuvem + seu PC de reserva | `kfai/cloud-plus-local` |
+| tudo offline (200%) | `kfai/full-local` |
+
+Se preferir configurar à mão, também existem presets completos em
+`config/opencode/` (`full-cloud.json`, `cloud-plus-local.json`,
+`full-local.json`) para copiar para o seu `opencode.json`.
 
 No **Full Local**, se preciso, troque o nome do modelo no arquivo
 (`KFAI_LOCAL_MODEL`) pelo que o instalador baixou.
+
+### Aplicar combos no AionUi (interface gráfica)
+
+Se você usa o **AionUi**, abra o app e rode (no PowerShell do próprio AionUi):
+
+```powershell
+.\kfai-aionui-combos.ps1
+```
+
+Esse script adiciona o provider **KFAI Router** com os três combos e remove os
+perfis pagos (Anthropic e OpenAI).
 
 ## Passo 4 — Gerar suas chaves gratuitas
 

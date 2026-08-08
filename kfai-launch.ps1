@@ -55,7 +55,13 @@ if($info.Type -eq "cli"){
   # roda no console atual (openmode TUI / hermes)
   & $info.Exe
 } else {
-  $p = Start-Process -FilePath $info.Exe -PassThru
+  # App grafico (AionUi). Redireciona saida para logs: desacopla o app do console,
+  # entao fechar esta janela NAO derruba o app (que segue em segundo plano).
+  $logDir = Join-Path $Root "logs"
+  New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+  $outLog = Join-Path $logDir "app.stdout.log"
+  $errLog = Join-Path $logDir "app.stderr.log"
+  $p = Start-Process -FilePath $info.Exe -PassThru -WindowStyle Hidden -RedirectStandardOutput $outLog -RedirectStandardError $errLog
   $p.WaitForExit()
 }
 

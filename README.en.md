@@ -55,8 +55,12 @@ required, and nothing is downloaded twice.
 | **Cloud + Local** | cloud first; if the limit runs out, uses local AI | balance, almost always |
 | **Full Local** | 100% offline (Ollama) | no internet or for privacy; only if your PC can handle it |
 
-Both paths (9Router and KFAI's own router): the `config/opencode/` folder has
-files for both. Copy whichever you prefer:
+The KFAI installer already sets the combos up: it adds the **`kfai`** provider
+to your `opencode.json` (Full Cloud, Cloud + Local, Full Local) and, if you use
+AionUi, `kfai-aionui-combos.ps1` adds the same inside the app and removes paid
+profiles.
+
+There are also ready-made files for manual setup in `config/opencode/`:
 
 | Prefer | Files |
 |---|---|
@@ -274,12 +278,12 @@ The own router also protects against abuse:
   doesn't know the token.
 
 > **Current `install.ps1` hash (check before running):**<br>
-> `AA850FD54D15E3A2239C4212930D24CB436EE0DB3A030779D6E575CF60094936`<br>
+> `C9328D6C9954FBCCBF81AD477ACFBBBC945EC7C24E9C3F83DA43696832B91A88`<br>
 > *(the script itself prints the same value at the end of the install — if it
 > differs, the file may have been tampered with and **must not** be run)*
 
 > **Current `KFAI-Instalador.exe` hash (check before running):**<br>
-> `EAC715F2AFEFC884134C533F995ED20985F61CA7F8EF496977DBD96BAFB379CE`<br>
+> `73B4B7023F80D9A923A34CA1A4994331E76D8D7FB0F8D673A4D22A931667BE75`<br>
 > *(if you downloaded the executable, check **this** value — the executable
 > prints the `.exe` hash at the end, not the script's)*
 
