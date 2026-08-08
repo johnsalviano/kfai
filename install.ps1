@@ -228,6 +228,101 @@ function Test-NineRouterInstalled {
   return @{ Ok=$false; ViaNpm=$false; ViaSrc=$false; PortUp=$portUp }
 }
 
+# --- verifica se o opencode esta instalado e sua versao (instalada vs mais recente) ---
+function Test-OpencodeInstalled {
+  $cmd = (Get-Command opencode -ErrorAction SilentlyContinue).Source
+  if(-not $cmd){ return @{ Ok=$false; Version=''; Latest=''; Outdated=$false } }
+  $ver = ''
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try { $ver = (& opencode --version 2>$null | Select-Object -Last 1).Trim() } catch {}
+  $ErrorActionPreference = $prevEap
+  return @{ Ok=$true; Version=$ver; Latest=''; Outdated=$false }
+}
+
+# --- versao mais recente do opencode no npm ---
+function Get-OpencodeLatestVersion {
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $latest = (& npm view opencode-ai version 2>$null | Select-Object -Last 1).Trim()
+    $ErrorActionPreference = $prevEap
+    if($latest){ return $latest }
+  } catch { $ErrorActionPreference = $prevEap }
+  return ''
+}
+
+# --- compara versoes "x.y.z" para saber se a instalada e mais nova/antiga ---
+function Test-VersionOutdated {
+  param([string]$Installed, [string]$Latest)
+  if(-not $Installed -or -not $Latest){ return $false }
+  $a = $Installed.TrimStart('v') -split '\.' | ForEach-Object { try { [int]$_ } catch { 0 } }
+  $b = $Latest.TrimStart('v')  -split '\.' | ForEach-Object { try { [int]$_ } catch { 0 } }
+  for($i=0; $i -lt [math]::Max($a.Count,$b.Count); $i++){
+    $x = if($i -lt $a.Count){ $a[$i] } else { 0 }
+    $y = if($i -lt $b.Count){ $b[$i] } else { 0 }
+    if($x -lt $y){ return $true }
+    if($x -gt $y){ return $false }
+  }
+  return $false
+}
+
+# --- verifica se o AionUi esta instalado e sua versao ---
+function Test-AionUiInstalled {
+  $exe = "C:\Users\USUARIO\AppData\Local\Programs\AionUi\AionUi.exe"
+  if(-not (Test-Path $exe)){
+    # procura em outros locais comuns
+    $alt = Get-ChildItem "$env:LOCALAPPDATA\Programs\AionUi\AionUi.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if($alt){ $exe = $alt.FullName } else { return @{ Ok=$false; Exe=''; Version='' } }
+  }
+  $ver = ''
+  try { $ver = (Get-Item $exe).VersionInfo.FileVersion } catch {}
+  return @{ Ok=$true; Exe=$exe; Version=$ver }
+}
+
+# --- relatorio de apps e dependencias (instalado? versao? atualizado?) ---
+function Show-AppsReport {
+  Write-Step "Verificacao de apps e dependencias"
+  $nodeOk = Test-NodeJs
+  $nodeVer = ''
+  if($nodeOk){ $nodeVer = (& node --version 2>$null).Trim() }
+  Write-Host "Node.js : $(if($nodeOk){ "OK ($nodeVer)" } else { 'FALTANDO' })"
+
+  $ollama = Test-OllamaInstalled
+  Write-Host "Ollama  : $(if($ollama.Cmd){ "OK ($($ollama.Cmd))" } else { 'FALTANDO' })"
+  Write-Host "          servidor: $(if($ollama.ServerUp){ 'rodando (11434)' } else { 'parado' })"
+
+  $nine = Test-NineRouterInstalled
+  if($nine.Ok){
+    $how = if($nine.ViaNpm){ 'npm global' } elseif($nine.ViaSrc){ '9router-src' }
+    Write-Host "9Router : OK ($how)"
+    Write-Host "          rodando: $(if($nine.PortUp){ 'sim (20128)' } else { 'nao' })"
+  } else {
+    Write-Host "9Router : FALTANDO"
+  }
+
+  $oc = Test-OpencodeInstalled
+  if($oc.Ok){
+    $ocLatest = Get-OpencodeLatestVersion
+    $ocOutdated = Test-VersionOutdated -Installed $oc.Version -Latest $ocLatest
+    $status = if($ocOutdated){ "DESATUALIZADO (tem $($oc.Version), novo e $ocLatest)" } else { "atualizado ($($oc.Version))" }
+    Write-Host "Opencode: OK - $status"
+    $script:OcOutdated = $ocOutdated
+  } else {
+    Write-Host "Opencode: FALTANDO"
+    $script:OcOutdated = $false
+  }
+
+  $aui = Test-AionUiInstalled
+  if($aui.Ok){
+    Write-Host "AionUi  : OK (versao $($aui.Version))"
+    Write-Host "          atualizacao: pelo proprio app (menu de ajuda/sobre)"
+  } else {
+    Write-Host "AionUi  : FALTANDO (instalador em https://aionui.com ou loja)"
+  }
+  Write-Host ""
+}
+
 Write-Host ""
 if($useLocal){
   Write-Step "IA local - passo 1: Ollama"
@@ -282,6 +377,28 @@ if($nine.Ok){
   } else {
     Write-Host "Nao consegui instalar o 9Router automaticamente." -ForegroundColor Red
     Write-Host "Instale manualmente: npm install -g 9router" -ForegroundColor Yellow
+  }
+}
+
+Show-AppsReport
+
+# se o opencode estiver desatualizado, oferece atualizar na hora
+if($script:OcOutdated){
+  $ocVer = (Test-OpencodeInstalled).Version
+  $ocLatest = Get-OpencodeLatestVersion
+  Write-Host "Opencode desatualizado ($ocVer -> $ocLatest)." -ForegroundColor Yellow
+  $resp = ''
+  try { $resp = Read-Host "Atualizar agora com 'opencode upgrade'? (s/N)" } catch { $resp = '' }
+  if($resp -match '^(s|sim|y|yes)$'){
+    opencode upgrade 2>&1 | Out-Null
+    if(Test-VersionOutdated -Installed (Test-OpencodeInstalled).Version -Latest $ocLatest){
+      Write-Host "Opencode nao atualizou (talvez a instalacao via npm nao siga o binario)." -ForegroundColor Yellow
+      Write-Host "Tente: npm install -g opencode-ai@latest" -ForegroundColor Yellow
+    } else {
+      Write-Host "Opencode atualizado para $((Test-OpencodeInstalled).Version)." -ForegroundColor Green
+    }
+  } else {
+    Write-Host "Ok, fica para depois. Rode 'opencode upgrade' quando quiser." -ForegroundColor DarkGray
   }
 }
 
