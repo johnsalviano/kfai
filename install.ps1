@@ -80,7 +80,112 @@ function ChooseLocalModel($hw){
   return 'qwen2.5:7b'
 }
 
+function Test-IsAdmin {
+  $p = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+  return $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+# Node.js e pre-requisito do 9Router. Retorna true se node+npm funcionam.
+function Test-NodeJs {
+  $node = (Get-Command node -ErrorAction SilentlyContinue).Source
+  $npm  = (Get-Command npm  -ErrorAction SilentlyContinue).Source
+  if(-not $node -or -not $npm){ return $false }
+  return $true
+}
+
+# Versao LTS atual do Node (API oficial). Fallback em caso de offline.
+function Get-NodeLtsVersion {
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $json = Invoke-RestMethod -Uri "https://nodejs.org/dist/index.json" -TimeoutSec 30
+    $ErrorActionPreference = $prevEap
+    $lts = @($json | Where-Object { $_.lts }) | Select-Object -First 1
+    if($lts -and $lts.version){ return $lts.version }
+  } catch { $ErrorActionPreference = $prevEap }
+  return 'v22.16.0'  # fallback se a API nao responder
+}
+
+# Instala Node.js na pasta do USUARIO (sem admin). Fonte oficial nodejs.org.
+function Install-NodeJsPerUser {
+  param([string]$Version)
+  $destDir = Join-Path $env:LOCALAPPDATA "Programs\nodejs"
+  $zipPath = Join-Path $env:TEMP "node-$Version-win-x64.zip"
+  $extract = Join-Path $env:TEMP "node-$Version-win-x64"
+  $url = "https://nodejs.org/dist/$Version/node-$Version-win-x64.zip"
+
+  Write-Host "Baixando Node.js $Version (arquivo oficial, ~30 MB)..."
+  try {
+    Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing -TimeoutSec 300
+  } catch {
+    Write-Error "Falha ao baixar Node.js de $url. Verifique sua internet."
+    return $false
+  }
+
+  Write-Host "Extraindo para a pasta do usuario..."
+  if(Test-Path $extract){ Remove-Item $extract -Recurse -Force }
+  Expand-Archive -LiteralPath $zipPath -DestinationPath $env:TEMP -Force
+
+  New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+  Copy-Item -Path (Join-Path $extract "*") -Destination $destDir -Recurse -Force
+  Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+  Remove-Item $extract -Recurse -Force -ErrorAction SilentlyContinue
+
+  # Adiciona ao PATH do usuario (registro HKCU, sem admin) e da sessao atual.
+  $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+  if($userPath -notlike "*$destDir*"){
+    [Environment]::SetEnvironmentVariable("Path", "$destDir;$userPath", "User")
+  }
+  $env:Path = "$destDir;$env:Path"
+  return $true
+}
+
+# Instala Node.js tentando primeiro o modo normal (administrador).
+# Se o PC for de empresa/gerenciado e nao tiver admin (ou a instalacao normal
+# for bloqueada), cai para a pasta do usuario local (sem precisar de permissao).
+# Avisa o usuario SO nesse caso especifico.
+function Ensure-NodeJs {
+  if(Test-NodeJs){ Write-Host "Node.js OK (node + npm encontrados)."; return $true }
+  Write-Step "Node.js nao encontrado - necessario antes de tudo"
+  Write-Host "O 9Router (roteador de IA em nuvem) exige Node.js. Vamos resolver isso."
+
+  if(Test-IsAdmin){
+    # Com admin: tenta instalacao automatica (winget). Se falhar, per-usuario.
+    Write-Host "Voce e administrador. Tentando instalar o Node.js LTS (winget)..."
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & winget install --id OpenJS.NodeJS.LTS -e --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null
+    $wingetOk = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = $prevEap
+    if($wingetOk){
+      Start-Sleep -Seconds 3
+      if(Test-NodeJs){ Write-Host "Node.js instalado com sucesso." -ForegroundColor Green; return $true }
+      Write-Host "Instalado, mas node/npm ainda nao estao no PATH desta sessao." -ForegroundColor Yellow
+    }
+    Write-Host "Instalacao normal nao concluiu. Cai para a pasta do usuario local..." -ForegroundColor Yellow
+  } else {
+    # Sem admin: pode ser PC de empresa que bloqueia instalacao de programas.
+    Write-Host "Voce NAO tem permissao de administrador nesta maquina (comum em PCs gerenciados por empresa)." -ForegroundColor Yellow
+    Write-Host "Instalacao normal seria barrada. Instalando Node.js na PASTA DO USUARIO local," -ForegroundColor Yellow
+    Write-Host "que NAO precisa de administrador e fica fora do controle do sistema da empresa." -ForegroundColor Yellow
+  }
+
+  $version = Get-NodeLtsVersion
+  if(Install-NodeJsPerUser -Version $version){
+    Start-Sleep -Seconds 2
+    if(Test-NodeJs){
+      Write-Host "Node.js $version instalado na pasta do usuario. Node e npm funcionando." -ForegroundColor Green
+      return $true
+    }
+    Write-Error "Node.js instalado, mas node/npm ainda nao foram reconhecidos. Abra um terminal novo e rode este script de novo."
+    return $false
+  }
+  return $false
+}
+
 if(-not (Test-OfficialOrigin)){ exit 1 }
+
+if(-not (Ensure-NodeJs)){ Write-Host "Impossivel continuar sem Node.js. Abra um terminal novo apos instalar e tente de novo." -ForegroundColor Red; exit 1 }
 
 Write-Step "KFAI - Kit de Ferramentas de Agente de IA"
 $hw = Get-HardwareInfo
