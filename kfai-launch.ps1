@@ -20,15 +20,20 @@ if($With9Router){ $StartArgs += "-With9Router" }
 
 # --- apps conhecidos: nome -> (tipo, caminho, nome do processo) ---
 $known = @{
-  "aionui"  = @{ Type="gui";  Exe="C:\Users\USUARIO\AppData\Local\Programs\AionUi\AionUi.exe";   Proc="AionUi" }
+  "aionui"  = @{ Type="gui";  Exe="$env:LOCALAPPDATA\Programs\AionUi\AionUi.exe";   Proc="AionUi" }
   "opencode"= @{ Type="cli";  Exe="opencode";                                                  Proc="opencode" }
-  "hermes"  = @{ Type="cli";  Exe="C:\Users\USUARIO\AppData\Local\hermes\hermes-agent\venv\Scripts\hermes.exe"; Proc="hermes" }
+  "hermes"  = @{ Type="cli";  Exe="$env:LOCALAPPDATA\hermes\hermes-agent\venv\Scripts\hermes.exe"; Proc="hermes" }
 }
 
 # --- resolve o alvo ---
 $info = $null
 if($known.ContainsKey($App.ToLower())){
   $info = $known[$App.ToLower()]
+  if($info.Type -eq "gui" -and -not (Test-Path -LiteralPath $info.Exe)){
+    # caminho padrao nao existe: procura em outros locais comuns
+    $alt = Get-ChildItem "$env:LOCALAPPDATA\Programs\$($info.Proc)\*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if($alt){ $info.Exe = $alt.FullName } else { Write-Error "Nao encontrei o executavel de '$App'. Passe o caminho completo."; exit 1 }
+  }
 } elseif(Test-Path -LiteralPath $App){
   $info = @{ Type="gui"; Exe=$App; Proc=[IO.Path]::GetFileNameWithoutExtension($App) }
 } else {

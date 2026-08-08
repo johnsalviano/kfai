@@ -298,7 +298,7 @@ function Test-VersionOutdated {
 
 # --- verifica se o AionUi esta instalado e sua versao ---
 function Test-AionUiInstalled {
-  $exe = "C:\Users\USUARIO\AppData\Local\Programs\AionUi\AionUi.exe"
+  $exe = "$env:LOCALAPPDATA\Programs\AionUi\AionUi.exe"
   if(-not (Test-Path $exe)){
     # procura em outros locais comuns
     $alt = Get-ChildItem "$env:LOCALAPPDATA\Programs\AionUi\AionUi.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
