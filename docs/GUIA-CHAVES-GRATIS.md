@@ -57,7 +57,37 @@ chave e cola no 9Router (ou no arquivo de configuração) no lugar do
   3. Cole no 9Router (provider `cloudflare-ai`)
 - Grátis: 10.000 neurônios/dia (cota que você usa sem pagar).
 
-## 5) Ollama (local — sem chave)
+## 5) API.airforce
+
+- O que é: provedor agregador com modelos gratuitos e acessível.
+- Roteiro:
+  1. Acesse https://api.airforce
+  2. Crie uma conta grátis
+  3. Sua chave primária já aparece no Dashboard (`sk-air-...`)
+  4. Cole no 9Router (provider `api-airforce`)
+- Grátis: cota gratuita para uso pessoal.
+
+## 6) Poolside
+
+- O que é: provedor com modelos de IA de código aberto.
+- Roteiro:
+  1. Acesse https://platform.poolside.ai
+  2. Entre com sua conta
+  3. Aba **API Keys** → **New key**
+  4. Cole no 9Router (provider `poolside`)
+- Grátis: plano gratuito com cota para uso pessoal.
+
+## 7) BytePlus ModelArk (Volcengine)
+
+- O que é: plataforma de modelos da ByteDance (Doubao etc.).
+- Roteiro:
+  1. Acesse https://console.volcengine.com/iam
+  2. Crie a conta
+  3. Vá em **IAM** (Identity and Access Management) e gere um **Access Key**
+  4. Cole no 9Router (provider `byteplus`)
+- Grátis: cota inicial gratuita de uso.
+
+## 8) Ollama (local — sem chave)
 
 - Não precisa de chave nenhuma. Só instale o [Ollama](https://ollama.com) e o
   KFAI baixa o modelo certo para seu PC automaticamente (via `install.ps1`).
@@ -73,15 +103,19 @@ chave e cola no 9Router (ou no arquivo de configuração) no lugar do
 | Google Gemini | https://aistudio.google.com | free tier |
 | NVIDIA NIM | https://build.nvidia.com | gratuito |
 | Cloudflare | https://dash.cloudflare.com | free tier (cota diária) |
+| API.airforce | https://api.airforce | gratuito |
+| Poolside | https://platform.poolside.ai | gratuito |
+| BytePlus ModelArk | https://console.volcengine.com/iam | cota inicial gratuita |
 | Ollama | (sem chave) | grátis |
+
+> Quer um atalho? Rode `.\kfai-config-chaves.ps1` e ele mostra na tela quais
+> chaves ainda faltam com o link certo de cada uma.
 
 ## Onde colocar a sua chave
 
-- No **9Router**: menu de connection/provider → `apikey`.
-- No **Opencode**: arquivo `config/opencode/<combo>.json`, campo `apiKey` da
-  seção `9router`, troque `{env:KFAI_NINEROUTER_KEY}` pela nave de ambiente
-  `KFAI_NINEROUTER_KEY`, definida no seu sistema com a sua chave.
+- **No 9Router**: painel em `http://localhost:20128/dashboard` → conexões →
+  escolha o provider gratuito → cole a chave. O 9Router é o **único lugar** que
+  guarda chaves de nuvem hoje; o KFAI só aponta para ele.
 
-> Nunca coloque a chave em arquivo que você vá mandar para alguém. Defina como
-> **variável de ambiente** e use `{env:...}` (é o jeito seguro, que o KFAI já
-> preparou nos arquivos de exemplo).
+> Nunca coloque a chave em arquivo que você vá mandar para alguém. O 9Router
+> guarda as chaves localmente, no seu PC, e o KFAI nunca as usa nem envia.

@@ -64,12 +64,20 @@ perfis pagos (Anthropic e OpenAI).
 
 ## Passo 4 — Gerar suas chaves gratuitas
 
-Siga o [Guia de Chaves Gratuitas](GUIA-CHAVES-GRATIS.md) para gerar as chaves de
-OpenRouter, Gemini, NVIDIA e Cloudflare (todas grátis). **Cole as chaves no
-9Router** (menu de providers/conexões do app). O 9Router fica rodando em segundo
-plano e o router KFAI encaminha os combos de nuvem para ele — ou seja, com as
-chaves dentro do 9Router, os combos **Full Cloud** e **Cloud + Local** passam a
-funcionar sem precisar mexer em variáveis de ambiente.
+Rode o assistente de chaves para ver na tela **quais chaves faltam** e o **link
+de cada uma** (ele abre os sites, você gera a chave e cola no 9Router):
+
+```powershell
+.\kfai-config-chaves.ps1
+```
+
+Também pode seguir o [Guia de Chaves Gratuitas](GUIA-CHAVES-GRATIS.md) para
+gerar as chaves de OpenRouter, Gemini, NVIDIA, Cloudflare, API.airforce,
+Poolside e BytePlus (todas grátis). **Cole as chaves no 9Router** (painel em
+`http://localhost:20128/dashboard` → conexões). O 9Router fica rodando em
+segundo plano e o router KFAI encaminha os combos de nuvem para ele — ou seja,
+com as chaves dentro do 9Router, os combos **Full Cloud** e **Cloud + Local**
+passam a funcionar sem precisar mexer em variáveis de ambiente.
 
 > **Por que assim?** O 9Router guarda as chaves dele em um banco local seguro.
 > O router KFAI não copia suas chaves: ele só pede ao 9Router para responder,

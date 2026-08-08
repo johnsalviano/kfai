@@ -550,10 +550,37 @@ Write-Host "Vou adicionar os combos do KFAI (provider kfai) no opencode e, se po
 Apply-OpencodeCombos
 Apply-AionUiCombos
 
+Write-Step "Chaves de IA gratuitas (9Router)"
+$cfgChaves = Join-Path $Root "kfai-config-chaves.ps1"
+if(Test-Path -LiteralPath $cfgChaves){
+  # passo 1: checa o estado sem abrir nada nem perguntar
+  # exit 0 = tudo OK | 1 = nao leu o 9Router | 2 = faltam chaves
+  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $cfgChaves -Test
+  $exitKey = $LASTEXITCODE
+  if($exitKey -eq 1){
+    Write-Host "Nao deu para ler o 9Router agora. Depois rode: .\kfai-config-chaves.ps1" -ForegroundColor Yellow
+  } elseif($exitKey -eq 2){
+    Write-Host ""
+    $resp = ''
+    try { $resp = Read-Host "Quer que eu te guie na configuracao das chaves que faltam? (s/N)" } catch { $resp = '' }
+    if($resp -match '^(s|sim|y|yes)$'){
+      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $cfgChaves
+    } else {
+      Write-Host "Ok. Links das chaves em docs/GUIA-CHAVES-GRATIS.md" -ForegroundColor DarkGray
+      Write-Host "Ou rode depois: .\kfai-config-chaves.ps1" -ForegroundColor DarkGray
+    }
+  } else {
+    Write-Host "Todas as chaves ja configuradas no 9Router." -ForegroundColor Green
+  }
+} else {
+  Write-Host "Assistente de chaves nao encontrado (kfai-config-chaves.ps1)." -ForegroundColor Yellow
+}
+
 Write-Step "Guia de proximos passos"
 Write-Host @"
 1. Abra o 9Router e ative as conexoes gratuitas de sua escolha.
-2. Adicione suas chaves gratuitas (links em docs/GUIA-CHAVES-GRATIS.md).
+2. Adicione suas chaves gratuitas: rode .\kfai-config-chaves.ps1
+   (ele abre os sites das chaves que faltam; links em docs/GUIA-CHAVES-GRATIS.md).
 3. Escolha o combo ja instalado no opencode (mudar o modelo):
    - kfai/full-cloud      -> so IAs gratuitas da nuvem
    - kfai/cloud-plus-local-> nuvem primeiro, seu PC de reserva
