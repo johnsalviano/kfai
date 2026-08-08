@@ -80,6 +80,10 @@ Recursos que o roteador próprio tem de fábrica:
   instantaneamente sem reprocessar (`KFAI_CACHE_SEC` 300s, até `KFAI_CACHE_MAX` 200).
 - **Log JSONL**: cada request registrado em `logs/router.log` (rota, uplink, modo,
   cache, bytes, tempo). Variáveis: `KFAI_LOG_FILE`, `KFAI_ROUTER_PORT`.
+- **Proteção contra abuso local**: o roteador recusa requests com `Origin` de sites
+  externos (evita que uma página maliciosa que você visite use as suas chaves via
+  navegador) e pode exigir um token — defina `KFAI_ROUTER_TOKEN` para que só quem
+  conhece o token use o roteador (proteção extra contra malware local).
 
 ## IA local com contexto que funciona (não quebra o agente)
 
@@ -167,11 +171,20 @@ valores reais ficam apenas na sua máquina, nunca neste repositório.
 O instalador se autoprotege contra cópias adulteradas:
 
 - só executa se vier do repositório oficial (`github.com/johnsalviano/kfai`);
+- **avisa e para** se o remote não for o oficial **ou se não houver remote**
+  (caso de ZIP/cópia repassada por terceiros — sempre confira o hash abaixo);
 - no final, mostra o **SHA-256 do próprio script** para você conferir contra o
   valor publicado abaixo (mantido atualizado a cada versão).
 
+O roteador próprio também se protege contra abuso:
+
+- recusa requests com `Origin` de sites externos (uma página maliciosa que você
+  visite **não** consegue usar as suas chaves de IA pelo navegador);
+- opcionalmente exige `KFAI_ROUTER_TOKEN` para bloquear qualquer processo local
+  que não conheça o token.
+
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `F620AF1EBC4EBAEBE06A8AB2C93F0DDC3834415B49261740DB6F315550EDC85D`<br>
+> `6AC577134794BE73CC6AFA62E57F4E498236C9D4DE9920674026651AFF5B9F6F`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 

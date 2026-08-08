@@ -1,4 +1,4 @@
-﻿import json, os, time, re, hashlib, urllib.request, urllib.error
+import json, os, time, re, hashlib, urllib.request, urllib.error
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # =========================================================================
@@ -23,7 +23,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 #   KFAI_LOG_FILE        arquivo de log JSONL; vazio desliga (default logs/router.log)
 #   KFAI_NUM_CTX         contexto (num_ctx) injetado para uplinks locais (Ollama).
 #                        Default 32768: evita o truncamento silencioso em 4096
-#                        que quebra agentes com tool calling. 0 desliga.
+#                        quebra agentes com tool calling. 0 desliga.
+#   KFAI_ROUTER_TOKEN    token opcional (Bearer). Se definido, apenas requests
+#                        com esse token sao aceitos. Protege contra abuso por
+#                        sites maliciosos e processos locais. Default: vazio
+#                        (aceita qualquer request vindo de localhost).
 # =========================================================================
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -39,6 +43,7 @@ CACHE_SEC = int(os.environ.get("KFAI_CACHE_SEC", "300"))
 CACHE_MAX = int(os.environ.get("KFAI_CACHE_MAX", "200"))
 LOG_FILE = os.environ.get("KFAI_LOG_FILE", os.path.join(BASE, "logs", "router.log"))
 NUM_CTX = int(os.environ.get("KFAI_NUM_CTX", "32768"))
+ROUTER_TOKEN = os.environ.get("KFAI_ROUTER_TOKEN", "").strip()
 
 # --- estado em memoria ---
 ROUTES = {}
@@ -81,7 +86,7 @@ def load_conf():
     routes = {}
     if not os.path.exists(CONF):
         return routes
-    with open(CONF, encoding="utf-8") as f:
+    with open(CONF, encoding="utf-8-sig") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
@@ -326,6 +331,21 @@ class Handler(BaseHTTPRequestHandler):
         if self.path != "/v1/chat/completions":
             self.send_error(404)
             return
+        # --- seguranca local: nada de abuso por sites maliciosos / processos locais ---
+        # 1) Origin: requests vindos de paginas web so sao aceitos se forem do proprio
+        #    localhost. Qualquer outro Origin (site na internet) e bloqueado com 403.
+        #    Isso impede que um site malicioso use suas chaves via fetch do navegador.
+        origin = self.headers.get("Origin", "")
+        if origin and origin not in ("http://localhost", "http://127.0.0.1"):
+            self.send_error(403, "Origin nao permitido")
+            return
+        # 2) Token opcional: se KFAI_ROUTER_TOKEN estiver definido, exige
+        #    Authorization: Bearer <token> (protege contra malware local).
+        if ROUTER_TOKEN:
+            auth = self.headers.get("Authorization", "")
+            if auth.strip() != "Bearer " + ROUTER_TOKEN:
+                self.send_error(401, "Token ausente ou invalido")
+                return
         t0 = time.time()
         try:
             length = int(self.headers.get("Content-Length", 0))

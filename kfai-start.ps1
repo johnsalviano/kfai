@@ -39,14 +39,17 @@ $OllamaRunName = "KFAI Ollama"
 #   - caminho no PATH / instalacao padrao / winget
 function Find-OllamaCommand{
   $candidates = @()
-  $p = (Get-Command ollama -ErrorAction SilentlyContinue).Source
-  if($p){ $candidates += $p }
+  # Prioridade: caminhos de instalacao conhecidos (nao confia em exe no PATH,
+  # que pode ser um falso ollama.exe plantado por malware para ser executado aqui).
   foreach($base in @("$env:LOCALAPPDATA\Programs\Ollama", "$env:ProgramFiles\Ollama", "$env:ProgramFiles\Ollama App")){
     foreach($name in @("ollama.exe", "ollama app.exe")){
       $c = Join-Path $base $name
       if(Test-Path $c){ $candidates += $c }
     }
   }
+  # So depois tenta o PATH (instalacao por winget/choco/etc).
+  $p = (Get-Command ollama -ErrorAction SilentlyContinue).Source
+  if($p){ $candidates += $p }
   if($candidates.Count -eq 0){ return $null }
   # Preferencia: ollama.exe (serve puro) sobre "ollama app.exe" (bandeja).
   $serve = $candidates | Where-Object { $_ -notmatch ' app\.exe$' } | Select-Object -First 1

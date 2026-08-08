@@ -21,7 +21,16 @@ function Test-OfficialOrigin {
   $origin = (& git -C $Root remote get-url origin 2>$null)
   $ErrorActionPreference = $prevEap
   $origin = if($origin){ $origin.Trim() } else { '' }
-  if($origin -and $origin -ne $CanonicalRepoUrl){
+  if(-not $origin){
+    # Sem remote: veio de ZIP/extraido ou copia manual. Nao da para confirmar a origem.
+    Write-Step "ALERTA: nao consegui confirmar a origem deste script"
+    Write-Host "Nao ha repositorio git (remote) nesta pasta. Copias extraidas de ZIP" -ForegroundColor Yellow
+    Write-Host "ou repassadas por terceiros PODEM ser adulteradas." -ForegroundColor Yellow
+    Write-Host "Confira o SHA-256 no final contra o publicado em $CanonicalRepoUrl" -ForegroundColor Yellow
+    Write-Host "ou rode o instalador a partir do repositorio oficial." -ForegroundColor Yellow
+    return $false
+  }
+  if($origin -ne $CanonicalRepoUrl){
     Write-Step "ALERTA: origem deste script nao e a oficial"
     Write-Host "Origin : $origin" -ForegroundColor Red
     Write-Host "Oficial: $CanonicalRepoUrl" -ForegroundColor Yellow
