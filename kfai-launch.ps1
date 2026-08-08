@@ -46,21 +46,31 @@ if($known.ContainsKey($App.ToLower())){
   }
 }
 
-# --- 1) liga servicos (se ainda nao estiverem) ---
-if($With9Router){ Write-Host "[kfai] Ligando router + ollama + 9Router..." } else { Write-Host "[kfai] Ligando router + ollama..." }
-& $Start @StartArgs
-
-# --- 2) abre o agente e espera fechar ---
+# --- 1) abre o agente logo (nao fica esperando servicos subirem) ---
 if($info.Type -eq "cli"){
-  # roda no console atual (openmode TUI / hermes)
+  # CLI: liga servicos ANTES porque o console ja vai ser usado pelo app.
+  if($With9Router){ Write-Host "[kfai] Ligando router + ollama + 9Router..." } else { Write-Host "[kfai] Ligando router + ollama..." }
+  & $Start @StartArgs
+  # roda no console atual (opencode TUI / hermes)
   & $info.Exe
 } else {
-  # App grafico (AionUi). Redireciona saida para logs: desacopla o app do console,
-  # entao fechar esta janela NAO derruba o app (que segue em segundo plano).
+  # App grafico (AionUi). Abre a janela NA HORA e sobe os servicos em paralelo,
+  # em segundo plano: sem tela preta, sem esperar ~11s do start.
   $logDir = Join-Path $Root "logs"
   New-Item -ItemType Directory -Path $logDir -Force | Out-Null
   $outLog = Join-Path $logDir "app.stdout.log"
   $errLog = Join-Path $logDir "app.stderr.log"
+  $startOut = Join-Path $logDir "start.stdout.log"
+  $startErr = Join-Path $logDir "start.stderr.log"
+
+  # 1a) dispara o start em background (processo separado, escondido)
+  Write-Host "[kfai] Subindo servicos em segundo plano..."
+  $ps = (Get-Command powershell -ErrorAction SilentlyContinue).Source
+  $startArgs = @("-NoProfile","-WindowStyle","Hidden","-ExecutionPolicy","Bypass","-File","$Start")
+  if($With9Router){ $startArgs += "-With9Router" }
+  Start-Process -FilePath $ps -ArgumentList $startArgs -WindowStyle Hidden -RedirectStandardOutput $startOut -RedirectStandardError $startErr | Out-Null
+
+  # 1b) abre o app imediatamente (nao espera o background)
   $p = Start-Process -FilePath $info.Exe -PassThru -WindowStyle Hidden -RedirectStandardOutput $outLog -RedirectStandardError $errLog
   $p.WaitForExit()
 }
