@@ -1,18 +1,26 @@
 # KFAI — Kit de Ferramentas de Agente de IA
 
-**Agentes de IA gratuitos para quem não desiste.**
+![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-blue)
+![Plataforma](https://img.shields.io/badge/Plataforma-Windows%2010%2F11-lightgrey)
+![Linguagem](https://img.shields.io/badge/Linguagem-PowerShell%20%2B%20Python-purple)
+![IA](https://img.shields.io/badge/IA-Ollama%20%2B%209Router%20%2B%20Opencode-green)
+![Status](https://img.shields.io/badge/Status-Aberto%20para%20todos-brightgreen)
+
+> **Agentes de IA gratuitos para quem não desiste.**
 
 O KFAI reúne, configura e explica como usar ferramentas de IA **gratuitas**
 (Ollama, 9Router, Opencode, AionUi) para realizar tarefas do dia a dia — e ainda
 te ajuda a otimizar seu próprio computador para aproveitá-las melhor.
 
-- 100% gratuito (ferramentas de código aberto)
-- Roda em PC fraco: se sua máquina não aguentar IA local, você usa a nuvem
-- Sem chaves de ninguém: você gera as suas, gratuitamente
+- ✅ **100% gratuito** — só ferramentas de código aberto
+- 🖥️ **Roda em PC fraco** — se sua máquina não aguentar IA local, você usa a nuvem
+- 🔐 **Sem chaves de ninguém** — você gera as suas, de graça, e elas ficam na sua máquina
 
-## Como instalar
+---
 
-1. Baixe e instale [Ollama](https://ollama.com/download/windows) (opcional, só se quiser IA local).
+## 🚀 Como instalar
+
+1. Baixe e instale [Ollama](https://ollama.com/download/windows) *(opcional, só se quiser IA local)*.
 2. Instale o [9Router](https://9router.com) e o [Opencode](https://opencode.ai).
 3. Rode o instalador:
 
@@ -20,10 +28,13 @@ te ajuda a otimizar seu próprio computador para aproveitá-las melhor.
 .\install.ps1
 ```
 
-Ele detecta o seu hardware (RAM, CPU, GPU), escolhe o modelo local certo e mostra
-o caminho passo a passo.
+O instalador **detecta o seu hardware** (RAM, CPU, GPU), escolhe o modelo local
+certo para a sua máquina e mostra o caminho passo a passo — sem pedir
+administrador e sem baixar nada duas vezes.
 
-## Combos disponíveis
+---
+
+## 🧩 Combos disponíveis
 
 | Combo | O que é | Quando usar |
 |---|---|---|
@@ -147,16 +158,22 @@ abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 - [Guia de chaves gratuitas](docs/GUIA-CHAVES-GRATIS.md) — como gerar sua API key grátis de cada provedor
 - [Créditos](docs/CREDITOS.md) — quem fez cada ferramenta
 
-## Segurança
+## 🔐 Segurança
 
-O KFAI não inclui, lê nem compartilha chaves, tokens ou dados pessoais de
-ninguém. Toda credencial nasce como `SUA_CHAVE_AQUI` para você preencher.
+O KFAI **não inclui, lê nem compartilha** chaves, tokens ou dados pessoais de
+ninguém. Toda credencial nasce como `SUA_CHAVE_AQUI` para você preencher — e os
+valores reais ficam apenas na sua máquina, nunca neste repositório.
 
 O instalador se autoprotege contra cópias adulteradas:
 
 - só executa se vier do repositório oficial (`github.com/johnsalviano/kfai`);
-- no final, mostra o SHA-256 do próprio script para você conferir contra o
-  valor publicado na página oficial do repositório.
+- no final, mostra o **SHA-256 do próprio script** para você conferir contra o
+  valor publicado abaixo (mantido atualizado a cada versão).
+
+> **Hash do `install.ps1` atual (confira antes de rodar):**<br>
+> `F620AF1EBC4EBAEBE06A8AB2C93F0DDC3834415B49261740DB6F315550EDC85D`<br>
+> *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
+> o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 ## Licença
 
