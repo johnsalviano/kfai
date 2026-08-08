@@ -5,6 +5,7 @@
 ![Linguagem](https://img.shields.io/badge/Linguagem-PowerShell%20%2B%20Python-purple)
 ![IA](https://img.shields.io/badge/IA-Ollama%20%2B%209Router%20%2B%20Opencode-green)
 ![Status](https://img.shields.io/badge/Status-Aberto%20para%20todos-brightgreen)
+[![Release](https://img.shields.io/github/v/release/johnsalviano/kfai)](https://github.com/johnsalviano/kfai/releases)
 
 > **Agentes de IA gratuitos para quem não desiste.**
 
