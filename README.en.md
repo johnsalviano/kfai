@@ -191,6 +191,10 @@ If you'd rather not donate, that's fine too! You already help a lot by:
 - 🐛 reporting bugs in [issues](https://github.com/johnsalviano/kfai/issues);
 - 📣 sharing the project with someone who might benefit from it.
 
+> 🙏 **Want your name on the wall?** Donors who authorize it get listed in the
+> [supporters list](docs/APOIADORES.md) *(in Portuguese)* — check there how to
+> get your name registered (with consent and without exposing amounts).
+
 ### 📜 Donation rules (scam protection)
 
 For everyone's safety, please read before donating:

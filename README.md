@@ -189,6 +189,10 @@ Se preferir não doar, tudo bem também! Você já ajuda muito ao:
 - 🐛 reportar bugs em [issues](https://github.com/johnsalviano/kfai/issues);
 - 📣 divulgar o projeto para alguém que possa aproveitar.
 
+> 🙏 **Quer seu nome no mural?** Quem doa e autoriza entra na
+> [lista de apoiadores](docs/APOIADORES.md) — veja lá como ter o nome
+> registrado (com consentimento e sem expor valores).
+
 ### 📜 Regras da doação (proteção contra golpes)
 
 Para a segurança de todos, leia antes de doar:
