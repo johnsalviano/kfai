@@ -6,8 +6,10 @@
 ![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey)
 ![Language](https://img.shields.io/badge/Language-PowerShell%20%2B%20Python-purple)
 ![AI](https://img.shields.io/badge/AI-Ollama%20%2B%209Router%20%2B%20Opencode-green)
-![Status](https://img.shields.io/badge/Status-Open%20to%20everyone-brightgreen)
+[![Status](https://img.shields.io/badge/Status-Open%20to%20everyone-brightgreen)](https://github.com/johnsalviano/kfai)
 [![Release](https://img.shields.io/github/v/release/johnsalviano/kfai)](https://github.com/johnsalviano/kfai/releases)
+[![Stars](https://img.shields.io/github/stars/johnsalviano/kfai?style=social&label=Stars)](https://github.com/johnsalviano/kfai)
+[![Forks](https://img.shields.io/github/forks/johnsalviano/kfai?style=social&label=Forks)](https://github.com/johnsalviano/kfai/fork)
 
 > **Free AI agents for people who don't give up.**
 
@@ -173,7 +175,41 @@ revert).
 - [What is KFAI](docs/O-QUE-E-KFAI.md) *(in Portuguese)*
 - [Setup guide](docs/GUIA-CONFIGURACAO.md) *(in Portuguese)*
 - [Free API keys guide](docs/GUIA-CHAVES-GRATIS.md) *(in Portuguese)* — how to get a free API key from each provider
+- [Models by hardware](docs/MODELOS-POR-HARDWARE.md) *(in Portuguese)* — which local model to download on your PC
 - [Credits](docs/CREDITOS.md) *(in Portuguese)* — who made each tool
+
+## ❓ FAQ / Troubleshooting
+
+**PowerShell blocks `install.ps1` ("cannot be loaded")?**
+Restricted execution policy. Quick fix: download `KFAI-Instalador.exe` (double-click, no policy needed) **or** run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` and reopen PowerShell.
+
+**Getting 401/403 (unauthorized) errors from the router?**
+That's a config problem, not a limit — the router **intentionally does not**
+fallback on 400/401/403/404. Check your key in `router.conf` (did you replace
+`SUA_CHAVE_AQUI`?), the provider and the model in the opencode config.
+
+**Getting 429 (rate limit) and responses stall?**
+429 is the normal fallback case: the router waits `KFAI_COOLDOWN_SEC` (60s) and
+tries the next uplink in the list. If **all** are on 429, wait or switch combos
+(e.g. `cloud-plus-local` to fall back to local Ollama).
+
+**My PC is weak, can I use it?**
+Yes — use the **Full Cloud** combo (cloud free tiers only, no local AI). The
+installer detects hardware and the launcher only tries Ollama if the machine
+can handle it.
+
+**The local agent "forgets" mid-task / tool calls fail?**
+Short context. KFAI already sets `num_ctx 32768` (`-32k` model). See the
+"Local AI with context that actually works" section above — if your VRAM allows,
+create a `-64k` one.
+
+**How do I keep everything always on?** `.\kfai-start.ps1 -Register` (revert: `-Unregister`).
+
+**Nothing works and I don't know where to start?** Run `.\kfai-start.ps1 -Status`
+— it shows the ports, found paths and whether your PC supports local AI.
+
+**Another question?** Open an [issue](https://github.com/johnsalviano/kfai/issues)
+— we'll help and the FAQ grows with you.
 
 ## ❤️ Support the project
 
@@ -251,3 +287,8 @@ The own router also protects against abuse:
 
 See [docs/CREDITOS.md](docs/CREDITOS.md) for tool attribution. The kit itself
 (documentation, skills, scripts, configuration) is distributed under MIT.
+
+---
+
+**Want to help?** See [CONTRIBUTING.md](CONTRIBUTING.md) — there are ways to
+contribute even without coding.

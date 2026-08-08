@@ -8,6 +8,8 @@
 ![IA](https://img.shields.io/badge/IA-Ollama%20%2B%209Router%20%2B%20Opencode-green)
 ![Status](https://img.shields.io/badge/Status-Aberto%20para%20todos-brightgreen)
 [![Release](https://img.shields.io/github/v/release/johnsalviano/kfai)](https://github.com/johnsalviano/kfai/releases)
+[![Estrelas](https://img.shields.io/github/stars/johnsalviano/kfai?style=social&label=Estrelas)](https://github.com/johnsalviano/kfai)
+[![Forks](https://img.shields.io/github/forks/johnsalviano/kfai?style=social&label=Forks)](https://github.com/johnsalviano/kfai/fork)
 
 > **Agentes de IA gratuitos para quem não desiste.**
 
@@ -166,12 +168,45 @@ agente SEM launcher e mesmo assim ter os serviços, ligue manualmente com
 **Modo "sempre ligado" (opcional):** se preferir que tudo suba no login sem
 abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 
-## Documentação
+## 📚 Documentação
 
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
 - [Guia de configuração](docs/GUIA-CONFIGURACAO.md)
 - [Guia de chaves gratuitas](docs/GUIA-CHAVES-GRATIS.md) — como gerar sua API key grátis de cada provedor
+- [Modelos por hardware](docs/MODELOS-POR-HARDWARE.md) — qual modelo local baixar no seu PC
 - [Créditos](docs/CREDITOS.md) — quem fez cada ferramenta
+
+## ❓ FAQ / Dúvidas frequentes
+
+**O PowerShell bloqueia o `install.ps1` ("não pode ser carregado")?**
+Política de execução restrita. Solução rápida: baixe o `KFAI-Instalador.exe`
+(dá dois cliques, sem depender da política) **ou** rode `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e abra o PowerShell de novo.
+
+**Recebo erro 401/403 (não autorizado) ao usar o roteador?**
+Isso é problema de configuração, não de limite — o roteador **não** faz fallback
+para 400/401/403/404 de propósito. Confira sua chave no `router.conf` (a
+`SUA_CHAVE_AQUI` foi preenchida?), o provedor e o modelo no config do opencode.
+
+**Recebo 429 (rate limit) e a resposta trava?**
+O 429 é o caso normal de fallback: o roteador espera o `KFAI_COOLDOWN_SEC`
+(60s) e tenta o próximo uplink da lista. Se **todos** estiverem em 429, aguarde
+ou troque de combo (ex.: `cloud-plus-local` para cair no Ollama local).
+
+**Meu PC é fraco, dá para usar?**
+Sim — use o combo **Full Cloud** (só nuvem gratuita, sem IA local). O instalador
+detecta o hardware e o launcher só tenta subir o Ollama se a máquina aguentar.
+
+**O agente local "esquece" o meio da tarefa / tool call falha?**
+Contexto curto. O KFAI já configura `num_ctx 32768` (modelo `-32k`). Veja a seção
+"Ia local com contexto que funciona" acima — se sua VRAM aguentar, crie um `-64k`.
+
+**Como deixo tudo sempre ligado?** `.\kfai-start.ps1 -Register` (reverter: `-Unregister`).
+
+**Nada funciona e não sei por onde começar?** Rode `.\kfai-start.ps1 -Status`
+— mostra as portas, caminhos encontrados e se o PC é compatível com IA local.
+
+**Tenho outra dúvida?** Abra uma [issue](https://github.com/johnsalviano/kfai/issues)
+— ajudamos e o FAQ cresce com você.
 
 ## ❤️ Apoie o projeto
 
@@ -248,3 +283,8 @@ O roteador próprio também se protege contra abuso:
 
 Veja [docs/CREDITOS.md](docs/CREDITOS.md) para atribuição das ferramentas. O kit
 em si (documentação, skills, scripts, configuração) é distribuído sob MIT.
+
+---
+
+**Quer ajudar?** Veja o [CONTRIBUTING.md](CONTRIBUTING.md) — tem como contribuir
+sem saber programar.
