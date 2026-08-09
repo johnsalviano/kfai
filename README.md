@@ -11,8 +11,6 @@
 [![Estrelas](https://img.shields.io/github/stars/johnsalviano/kfai?style=social&label=Estrelas)](https://github.com/johnsalviano/kfai)
 [![Forks](https://img.shields.io/github/forks/johnsalviano/kfai?style=social&label=Forks)](https://github.com/johnsalviano/kfai/fork)
 
-> **Agentes de IA gratuitos para quem não desiste.**
-
 O KFAI reúne, configura e explica como usar ferramentas de IA **gratuitas**
 (Ollama, 9Router, Opencode, AionUi) para realizar tarefas do dia a dia — e ainda
 te ajuda a otimizar seu próprio computador para aproveitá-las melhor.
@@ -274,12 +272,12 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `8431C2114D83E8C3CC4CDC05F2CE1FCD8793AEBEFF4837D0367ECDBE4BEE55D3`<br>
+> `9BABBFB8C8ED7A93F586DEBDF089BCFCE6546AC51150CB3D5E6A8142A1B222D8`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `30B755ACB1DFC55E5FCD6DBF7C976D5EC3DF053FAEC6C8578634FC847282DD54`<br>
+> `789B65015B6175D4F73DACED6A4C2DD8F619A8C4819CA3ADF87307B70AAF6248`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
 

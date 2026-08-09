@@ -125,6 +125,80 @@ function Test-IsAdmin {
   return $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+# --- acha um instalador incluso no pacote (pasta instaladores\) ---
+# O pacote pode vir com os apps empacotados para nao depender de downloads
+# nem de o usuario rodar instaladores na mao. Retorna o caminho ou $null.
+function Get-BundledInstaller {
+  param([string]$Pattern)
+  $dir = Join-Path $Root "instaladores"
+  if(-not (Test-Path -LiteralPath $dir)){ return $null }
+  $m = Get-ChildItem -LiteralPath $dir -File | Where-Object { $_.Name -like $Pattern } | Select-Object -First 1
+  if($m){ return $m.FullName }
+  return $null
+}
+
+# --- roda um instalador incluso em modo silencioso ---
+# MSI usa msiexec /qn; exe NSIS usa /S. Nao exige interacao do usuario.
+function Install-BundledInstaller {
+  param(
+    [string]$DisplayName,
+    [string]$Pattern,
+    [string[]]$SilentArgs
+  )
+  $file = Get-BundledInstaller -Pattern $Pattern
+  if(-not $file){ return @{ Ok=$false; Bundled=$false } }
+  Write-Host "Instalando $DisplayName em silencio (instalador incluso no pacote)..."
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    if($file -like '*.msi'){
+      Start-Process msiexec -ArgumentList "/i","`"$file`"","/qn","/norestart" -Wait -ErrorAction SilentlyContinue
+    } else {
+      $p = Start-Process -FilePath $file -ArgumentList $SilentArgs -Wait -PassThru -ErrorAction SilentlyContinue
+    }
+  } catch { }
+  $ErrorActionPreference = $prevEap
+  return @{ Ok=$true; Bundled=$true }
+}
+
+# --- pega a versao "latest" de um repo no GitHub (API oficial) ---
+function Get-GitHubLatestTag {
+  param([string]$Repo)
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest" -Headers @{ 'User-Agent'='KFAI' } -TimeoutSec 30
+    $ErrorActionPreference = $prevEap
+    if($rel -and $rel.tag_name){ return $rel.tag_name.TrimStart('v') }
+  } catch { $ErrorActionPreference = $prevEap }
+  return ''
+}
+
+# --- baixa um instalador exe do proprio site oficial e roda em silencio ---
+# Usa sempre a versao mais recente oficial. NSIS aceita /S.
+function Install-FromOfficialUrl {
+  param(
+    [string]$DisplayName,
+    [string]$Url,
+    [string]$LocalName
+  )
+  $local = Join-Path $env:TEMP $LocalName
+  Write-Host "Baixando $DisplayName (versao mais recente oficial, pode demorar)..."
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    Invoke-WebRequest -Uri $Url -OutFile $local -UseBasicParsing -TimeoutSec 900
+    if(Test-Path -LiteralPath $local){
+      Write-Host "Instalando $DisplayName em silencio..."
+      Start-Process -FilePath $local -ArgumentList '/S' -Wait -ErrorAction SilentlyContinue
+    }
+  } catch {
+    Write-Host "Falha ao baixar $DisplayName de $Url." -ForegroundColor Yellow
+  }
+  Remove-Item -LiteralPath $local -Force -ErrorAction SilentlyContinue
+  $ErrorActionPreference = $prevEap
+}
+
 # Node.js e pre-requisito do 9Router. Retorna true se node+npm funcionam.
 function Test-NodeJs {
   $node = (Get-Command node -ErrorAction SilentlyContinue).Source
@@ -189,6 +263,22 @@ function Ensure-NodeJs {
   Write-Step "Node.js nao encontrado - necessario antes de tudo"
   Write-Host "O 9Router (roteador de IA em nuvem) exige Node.js. Vamos resolver isso."
 
+  # Prefere o MSI que vem junto no pacote (instaladores\) antes de baixar.
+  $bundledMsi = Get-BundledInstaller -Pattern 'node-*.msi'
+  if($bundledMsi){
+    Write-Host "Instalador do Node.js incluso no pacote encontrado. Instalando em silencio..."
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    Start-Process msiexec -ArgumentList "/i","`"$bundledMsi`"","/qn","/norestart" -Wait -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 3
+    $ErrorActionPreference = $prevEap
+    if(Test-NodeJs){
+      Write-Host "Node.js instalado com sucesso (MSI do pacote)." -ForegroundColor Green
+      return $true
+    }
+    Write-Host "MSI executado, mas node/npm ainda nao reconhecidos. Tentando o caminho normal..." -ForegroundColor Yellow
+  }
+
   if(Test-IsAdmin){
     # Com admin: tenta instalacao automatica (winget). Se falhar, per-usuario.
     Write-Host "Voce e administrador. Tentando instalar o Node.js LTS (winget)..."
@@ -240,6 +330,27 @@ function Test-OllamaInstalled {
   $serverUp = $false
   try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", 11434); $serverUp = $true } catch {}
   return @{ Cmd = $cmd; ServerUp = $serverUp }
+}
+
+# --- garante o Ollama instalado. Baixa o instalador oficial (latest) e
+# roda em silencio. A URL fixa aponta sempre para a versao mais recente. ---
+function Ensure-Ollama {
+  $oll = Test-OllamaInstalled
+  if($oll.Cmd){
+    Write-Host "Ollama instalado: $($oll.Cmd)"
+    return $true
+  }
+  Write-Host "Ollama nao encontrado. Baixando instalador oficial..." -ForegroundColor Yellow
+  Install-FromOfficialUrl -DisplayName 'Ollama' -Url 'https://ollama.com/download/OllamaSetup.exe' -LocalName 'OllamaSetup.exe'
+  Start-Sleep -Seconds 3
+  $oll2 = Test-OllamaInstalled
+  if($oll2.Cmd){
+    Write-Host "Ollama instalado com sucesso (ultima versao oficial)." -ForegroundColor Green
+    return $true
+  }
+  Write-Host "Ollama instalado, mas nao localizado nesta sessao." -ForegroundColor Yellow
+  Write-Host "Abra um terminal novo e rode: ollama --version" -ForegroundColor Yellow
+  return $true
 }
 
 # --- verifica se um modelo ja esta baixado no Ollama (sem duplicar download) ---
@@ -309,6 +420,24 @@ function Test-OpencodeInstalled {
   return @{ Ok=$true; Version=$ver; Latest=''; Outdated=$false }
 }
 
+# --- garante o app grafico OpenCode Desktop instalado ---
+# Baixa a versao mais recente oficial do GitHub e instala em silencio.
+function Ensure-OpencodeDesktop {
+  if((Test-OpencodeInstalled).Ok){
+    Write-Host "OpenCode CLI ja instalado; app grafico opcional." -ForegroundColor DarkGray
+    return $true
+  }
+  $tag = Get-GitHubLatestTag -Repo 'anomalyco/opencode'
+  if($tag){
+    $url = "https://github.com/anomalyco/opencode/releases/download/v$tag/opencode-desktop-win-x64.exe"
+    Install-FromOfficialUrl -DisplayName "OpenCode Desktop ($tag)" -Url $url -LocalName "opencode-desktop-win-x64.exe"
+    return $true
+  }
+  Write-Host "Nao consegui descobrir a versao mais recente do OpenCode." -ForegroundColor Yellow
+  Write-Host "Instale do site oficial: https://opencode.ai" -ForegroundColor Yellow
+  return $false
+}
+
 # --- versao mais recente do opencode no npm ---
 function Get-OpencodeLatestVersion {
   $prevEap = $ErrorActionPreference
@@ -347,6 +476,70 @@ function Test-AionUiInstalled {
   $ver = ''
   try { $ver = (Get-Item $exe).VersionInfo.FileVersion } catch {}
   return @{ Ok=$true; Exe=$exe; Version=$ver }
+}
+
+# --- garante o AionUi instalado ---
+# Descobre a versao mais recente oficial (GitHub tag) e monta o link estavel
+# de download (static.aionui.com/releases/<ver>/AionUi-<ver>-win-x64.exe).
+function Ensure-AionUi {
+  $aui = Test-AionUiInstalled
+  if($aui.Ok){ return $true }
+  $tag = Get-GitHubLatestTag -Repo 'iOfficeAI/AionUi'
+  if($tag){
+    $url = "https://static.aionui.com/releases/$tag/AionUi-$tag-win-x64.exe"
+    Install-FromOfficialUrl -DisplayName "AionUi ($tag)" -Url $url -LocalName "AionUi-$tag-win-x64.exe"
+    Start-Sleep -Seconds 3
+    if((Test-AionUiInstalled).Ok){
+      Write-Host "AionUi instalado." -ForegroundColor Green
+      return $true
+    }
+    Write-Host "AionUi instalado, mas o app ainda nao foi localizado nesta sessao." -ForegroundColor Yellow
+    Write-Host "Ele aparece no menu Iniciar mesmo assim." -ForegroundColor Yellow
+    return $true
+  }
+  Write-Host "Nao consegui descobrir a versao mais recente do AionUi." -ForegroundColor Yellow
+  Write-Host "Instale do site oficial: https://aionui.com" -ForegroundColor Yellow
+  return $false
+}
+
+# --- garante as CLI globais do opencode e do 9Router via npm ---
+# Node.js ja veio antes. Usa npm install -g (pacote oficial no registry).
+function Ensure-NpmDeps {
+  $oc = Test-OpencodeInstalled
+  if($oc.Ok){
+    Write-Host "OpenCode CLI OK (versao $($oc.Version))."
+  } else {
+    Write-Host "OpenCode CLI nao encontrado. Instalando via npm global..."
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    npm install -g opencode-ai 2>&1 | Out-Null
+    $npmOk = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = $prevEap
+    if($npmOk -and (Test-OpencodeInstalled).Ok){
+      Write-Host "OpenCode CLI instalado via npm." -ForegroundColor Green
+    } else {
+      Write-Host "Nao consegui instalar o opencode-ai via npm." -ForegroundColor Yellow
+      Write-Host "Tente depois: npm install -g opencode-ai" -ForegroundColor Yellow
+    }
+  }
+
+  $nine = Test-NineRouterInstalled
+  if($nine.Ok){
+    Write-Host "9Router OK ($(if($nine.ViaNpm){'npm global'}else{'9router-src'}))."
+  } else {
+    Write-Host "9Router nao encontrado. Instalando via npm global..."
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    npm install -g 9router 2>&1 | Out-Null
+    $npmOk = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = $prevEap
+    if($npmOk -and (Test-NineRouterInstalled).Ok){
+      Write-Host "9Router instalado via npm." -ForegroundColor Green
+    } else {
+      Write-Host "Nao consegui instalar o 9router via npm." -ForegroundColor Yellow
+      Write-Host "Tente depois: npm install -g 9router" -ForegroundColor Yellow
+    }
+  }
 }
 
 # --- local do config global do opencode do USUARIO (mesmo lugar em .ps1 e .exe) ---
@@ -462,14 +655,10 @@ function Show-AppsReport {
 Write-Host ""
 if($useLocal){
   Write-Step "IA local - passo 1: Ollama"
-  $ollama = Test-OllamaInstalled
-  if(-not $ollama.Cmd){
-    Write-Host "Ollama NAO instalado. Abrindo guia de instalacao..." -ForegroundColor Yellow
-    Start-Process "https://ollama.com/download/windows"
-    Write-Host "Instale o Ollama, rode este script de novo." -ForegroundColor Yellow
+  if(-not (Ensure-Ollama)){
+    Write-Host "Impossivel continuar sem o Ollama. Rode este script de novo apos instalar." -ForegroundColor Red
     exit 1
   }
-  Write-Host "Ollama instalado: $($ollama.Cmd)"
 
   Write-Step "IA local - passo 2: modelo $model"
   if(Test-OllamaModel -Name $model){
@@ -498,30 +687,14 @@ if($useLocal){
   }
 }
 
-Write-Step "Passo: 9Router (roteador de IA em nuvem)"
-$nine = Test-NineRouterInstalled
-if($nine.Ok){
-  $how = if($nine.ViaNpm){ "CLI npm global" } elseif($nine.ViaSrc){ "9router-src (build local)" }
-  Write-Host "9Router JA instalado ($how)."
-  if($nine.PortUp){
-    Write-Host "E ja esta rodando na porta 20128." -ForegroundColor Green
-  } else {
-    Write-Host "Instalado mas nao esta rodando. Inicie com kfai-start.ps1 -With9Router." -ForegroundColor Yellow
-  }
-} else {
-  Write-Host "9Router NAO instalado. Instalando via npm (pacote oficial)..." -ForegroundColor Yellow
-  $prevEap = $ErrorActionPreference
-  $ErrorActionPreference = 'Continue'
-  npm install -g 9router 2>&1 | Out-Null
-  $npmOk = ($LASTEXITCODE -eq 0)
-  $ErrorActionPreference = $prevEap
-  if($npmOk -and (Test-NineRouterInstalled).Ok){
-    Write-Host "9Router instalado com sucesso (CLI npm global)." -ForegroundColor Green
-  } else {
-    Write-Host "Nao consegui instalar o 9Router automaticamente." -ForegroundColor Red
-    Write-Host "Instale manualmente: npm install -g 9router" -ForegroundColor Yellow
-  }
-}
+Write-Step "Passo: dependencias npm (CLI do opencode + 9Router)"
+Ensure-NpmDeps
+
+Write-Step "Passo: OpenCode Desktop (app grafico)"
+Ensure-OpencodeDesktop
+
+Write-Step "Passo: AionUi (interface)"
+Ensure-AionUi
 
 Show-AppsReport
 
@@ -566,7 +739,7 @@ if(Test-Path -LiteralPath $cfgChaves){
     if($resp -match '^(s|sim|y|yes)$'){
       & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $cfgChaves
     } else {
-      Write-Host "Ok. Links das chaves em docs/GUIA-CHAVES-GRATIS.md" -ForegroundColor DarkGray
+      Write-Host "Ok. Guia completo em: $(Join-Path $Root 'docs\GUIA-CHAVES-GRATIS.md')" -ForegroundColor DarkGray
       Write-Host "Ou rode depois: .\kfai-config-chaves.ps1" -ForegroundColor DarkGray
     }
   } else {
@@ -577,10 +750,12 @@ if(Test-Path -LiteralPath $cfgChaves){
 }
 
 Write-Step "Guia de proximos passos"
+$guiaChaves = Join-Path $Root "docs\GUIA-CHAVES-GRATIS.md"
 Write-Host @"
 1. Abra o 9Router e ative as conexoes gratuitas de sua escolha.
 2. Adicione suas chaves gratuitas: rode .\kfai-config-chaves.ps1
-   (ele abre os sites das chaves que faltam; links em docs/GUIA-CHAVES-GRATIS.md).
+   (ele abre os sites das chaves que faltam; guia completo em:
+    $guiaChaves)
 3. Escolha o combo ja instalado no opencode (mudar o modelo):
    - kfai/full-cloud      -> so IAs gratuitas da nuvem
    - kfai/cloud-plus-local-> nuvem primeiro, seu PC de reserva

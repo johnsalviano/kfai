@@ -11,8 +11,6 @@
 [![Stars](https://img.shields.io/github/stars/johnsalviano/kfai?style=social&label=Stars)](https://github.com/johnsalviano/kfai)
 [![Forks](https://img.shields.io/github/forks/johnsalviano/kfai?style=social&label=Forks)](https://github.com/johnsalviano/kfai/fork)
 
-> **Free AI agents for people who don't give up.**
-
 KFAI gathers, sets up and explains how to use **free** AI tools (Ollama,
 9Router, Opencode, AionUi) to handle everyday tasks — and also helps you
 tune up your own computer to get the most out of them.
@@ -279,12 +277,12 @@ The own router also protects against abuse:
   doesn't know the token.
 
 > **Current `install.ps1` hash (check before running):**<br>
-> `8431C2114D83E8C3CC4CDC05F2CE1FCD8793AEBEFF4837D0367ECDBE4BEE55D3`<br>
+> `9BABBFB8C8ED7A93F586DEBDF089BCFCE6546AC51150CB3D5E6A8142A1B222D8`<br>
 > *(the script itself prints the same value at the end of the install — if it
 > differs, the file may have been tampered with and **must not** be run)*
 
 > **Current `KFAI-Instalador.exe` hash (check before running):**<br>
-> `30B755ACB1DFC55E5FCD6DBF7C976D5EC3DF053FAEC6C8578634FC847282DD54`<br>
+> `789B65015B6175D4F73DACED6A4C2DD8F619A8C4819CA3ADF87307B70AAF6248`<br>
 > *(if you downloaded the executable, check **this** value — the executable
 > prints the `.exe` hash at the end, not the script's)*
 
