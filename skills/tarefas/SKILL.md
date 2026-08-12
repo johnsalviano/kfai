@@ -37,4 +37,4 @@ tirar proveito dele para tarefas reais, do jeito simples.
 ## Regras
 - Nao inventar que o agente faz algo que nao faz (ex.: sem internet, nao busca
   "ao vivo" - so com chave e config). Ser honesto sobre limite.
-- A produto e sempre do usuario; a IA apoia e revisa.
+- A decisão é sempre do usuário; a IA apoia e revisa.

@@ -17,7 +17,7 @@ Ajude a pessoa a usar agentes de IA **gratuitos** para realizar tarefas. Foco é
 ### 2. Nuvem gratuita (9Router + chaves grátis)
 - [9Router](https://9router.com): combina várias IAs gratuitas, com troca
   automática quando uma acaba o limite.
-- Proveedores com chave grátis: **OpenRouter** (`:free`), **Google Gemini**
+- Provedores com chave grátis: **OpenRouter** (`:free`), **Google Gemini**
   (AI Studio), **NVIDIA NIM**, **Cloudflare**. Ver `docs/GUIA-CHAVES-GRATIS.md`.
 
 ### 3. Agentes/interface

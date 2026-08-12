@@ -26,7 +26,7 @@ open source que já existem. Abaixo, cada uma com seu papel, versão atual
 | **O que faz** | Baixa e executa modelos open source (qwen3, llama3.2, etc.) localmente. Expõe uma API compatível com OpenAI em `http://localhost:11434/v1`. |
 | **Versão** | 0.32.9 (ago/2026). Instalador baixa sempre a mais recente de https://ollama.com/download/OllamaSetup.exe. |
 | **Modelo padrão do KFAI** | `qwen3:4b` (2.5 GB, 256K contexto, suporta ferramentas) para PC com 6GB+ VRAM. Para PC com 8-16GB RAM (CPU), `qwen3:4b` também. |
-| **Variáveis configured pelo KFAI** | `OLLAMA_KEEP_ALIVE=30m` (modelo fica 30 min na RAM, evita cold start), `OLLAMA_NUM_PARALLEL=2` (requisições paralelas), `OLLAMA_KV_CACHE_TYPE=q8_0` (corta ~50% da memória do cache de contexto). fonte: https://docs.ollama.com/faq |
+| **Variáveis configuradas pelo KFAI** | `OLLAMA_KEEP_ALIVE=30m` (modelo fica 30 min na RAM, evita cold start), `OLLAMA_NUM_PARALLEL=2` (requisições paralelas), `OLLAMA_KV_CACHE_TYPE=q8_0` (corta ~50% da memória do cache de contexto). Fonte: https://docs.ollama.com/faq |
 | **Fonte oficial** | https://ollama.com/download · GitHub: https://github.com/ollama/ollama · Docs: https://docs.ollama.com |
 
 ---
@@ -35,7 +35,7 @@ open source que já existem. Abaixo, cada uma com seu papel, versão atual
 
 | | |
 |---|---|
-| **Para quê** | Gateway de nuvem: guarda suas chaves de IA gratuitas e expõ um único endpoint. O router KFAI encaminha para ele; ele sabe qual provedor usar. |
+| **Para quê** | Gateway de nuvem: guarda suas chaves de IA gratuitas e expõe um único endpoint. O router KFAI encaminha para ele; ele sabe qual provedor usar. |
 | **O que faz** | Roda localmente (porta 20128). Cadastra chaves dos provedores (OpenRouter, Gemini, NVIDIA, Cloudflare, etc.) num banco SQLite local. Expõe API compatível com OpenAI. Dashboard em `http://localhost:20128/dashboard`. |
 | **Versão** | 0.5.50 (npm, ago/2026). Instalado via `npm install -g 9router`. |
 | **Chaves** | Você gera nos sites oficiais e cola no dashboard. O KFAI nunca toca nas suas chaves — nem copia, nem loga, nem commita. |
@@ -55,7 +55,7 @@ open source que já existem. Abaixo, cada uma com seu papel, versão atual
 | **Config** | O KFAI grava um provider `kfai` no `~/.config/opencode/opencode.json` com três combos: `full-cloud`, `cloud-plus-local`, `full-local`. |
 | **Fonte oficial** | https://opencode.ai · GitHub: https://github.com/anomalyco/opencode · Docs: https://opencode.ai/docs |
 
-> Opencode exige **contexto de 64k+** em modelos locais. O KFAI cria um modelo derivado com `num_ctx=65536` automaticamente. fonte: https://docs.ollama.com/integrations/opencode
+> Opencode exige **contexto de 64k+** em modelos locais. O KFAI cria um modelo derivado com `num_ctx=65536` automaticamente. Fonte: https://docs.ollama.com/integrations/opencode
 
 ---
 

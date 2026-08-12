@@ -162,7 +162,10 @@ function Test-PcSuportaLocal{
 }
 
 function Test-Port([int]$port){
-  try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", $port); return $true } catch { return $false }
+  try {
+    $c = New-Object Net.Sockets.TcpClient
+    try { $c.Connect("127.0.0.1", $port); return $true } finally { $c.Dispose() }
+  } catch { return $false }
 }
 
 # Ollama "funciona" se responder na porta E tiver pelo menos 1 modelo baixado.

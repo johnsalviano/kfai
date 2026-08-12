@@ -36,7 +36,10 @@ $Providers = @(
 )
 
 function Test-Port([int]$port){
-  try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", $port); return $true } catch { return $false }
+  try {
+    $c = New-Object Net.Sockets.TcpClient
+    try { $c.Connect("127.0.0.1", $port); return $true } finally { $c.Dispose() }
+  } catch { return $false }
 }
 
 # --- 1) Acha o banco do 9Router + o better-sqlite3 (ambos vem com o 9Router) ---

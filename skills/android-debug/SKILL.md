@@ -29,8 +29,8 @@ usamos; se nao tem, nao instalamos.
 - Nao desativar apps criticos do Android (telefone, SMS, configuracoes, Google
   Services). Explicar o risco de desativar bloat.
 - Nunca apagar dados pessoais do usuario sem permissao clara.
-- Farao do usuario executa; voce guia. Nada de desbloqueio bootloader/root
-  sugerido a leve.
+- A ação é sempre do usuário; você guia. Nada de desbloqueio de bootloader/root
+  sugerido à toa.
 
 ## Scripts
 - `scripts/diagnostico.ps1` — relatorio (so leitura) de dispositivos, apps e uso.

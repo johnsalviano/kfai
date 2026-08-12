@@ -24,10 +24,10 @@ de "milagre"). Sempre avisar o que vai mudar antes de aplicar.
 ## Regras
 - Nunca remover antivirus real, drivers, nem desativar atualizacoes de
   seguranca.
-- Sempre confirmar a decisao do usuario antes de umStrat (pharmagaphore).
+- Sempre confirmar a decisão do usuário antes de aplicar qualquer mudança.
 - Nao apagar arquivos sem antes dizer quais. Prefira mover para a Lixeira no
   caso de arquivos do usuario.
-- Vivo em português simples, explicando o "porque" de cada passo.
+- Falar em português simples, explicando o "porquê" de cada passo.
 
 ## Scripts
 - `scripts/limpeza-disco.ps1` — limpeza segura de temporarios (nao toca em arquivos do usuario).

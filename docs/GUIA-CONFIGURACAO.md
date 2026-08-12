@@ -42,7 +42,7 @@ no opencode:
 |---|---|
 | só internet, IA da nuvem | `kfai/full-cloud` |
 | nuvem + seu PC de reserva | `kfai/cloud-plus-local` |
-| tudo offline (200%) | `kfai/full-local` |
+| tudo offline (100%) | `kfai/full-local` |
 
 Se preferir configurar à mão, também existem presets completos em
 `config/opencode/` (`full-cloud.json`, `cloud-plus-local.json`,
@@ -98,9 +98,9 @@ Cada skill tem um `SKILL.md` (o "manual") e scripts para executar em baixo.
 
 ## Dicas
 
-- Prefira **Cloud + Local** na maioria dos casos: usa a nuvem de grava e só usa
+- Prefira **Cloud + Local** na maioria dos casos: usa a nuvem de graça e só usa
   seu PC se a nuvem estiver sem cota.
-- Se seu PC for bem básico (menos de 3GB de RAM), o instalador não força IA
+- Se seu PC for bem básico (menos de 3 GB de RAM), o instalador não força IA
   local — use **Full Cloud**.
 - Suas chaves ficam **dentro do 9Router** (banco local seguro). Não compartilhe
   e não coloque em arquivo que você vá mandar para alguém.

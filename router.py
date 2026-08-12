@@ -30,6 +30,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 #                        com esse token sao aceitos. Protege contra abuso por
 #                        sites maliciosos e processos locais. Default: vazio
 #                        (aceita qualquer request vindo de localhost).
+#   KFAI_MAX_BODY_BYTES  limite de tamanho do corpo do request (default 16MB).
 # =========================================================================
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -46,6 +47,9 @@ CACHE_MAX = int(os.environ.get("KFAI_CACHE_MAX", "200"))
 LOG_FILE = os.environ.get("KFAI_LOG_FILE", os.path.join(BASE, "logs", "router.log"))
 NUM_CTX = int(os.environ.get("KFAI_NUM_CTX", "65536"))
 ROUTER_TOKEN = os.environ.get("KFAI_ROUTER_TOKEN", "").strip()
+# Limite de tamanho do corpo do request (bytes). Impede que um processo local
+# malicioso ou bugado esgote a memoria do router com um payload gigante.
+MAX_BODY_BYTES = int(os.environ.get("KFAI_MAX_BODY_BYTES", str(16 * 1024 * 1024)))
 
 # --- estado em memoria ---
 ROUTES = {}
@@ -302,7 +306,9 @@ def call_upl(route, body):
             up["base"].rstrip("/") + "/chat/completions", data=json.dumps(b).encode(), method="POST",
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + (up["key"] or "ollama"),
+                # Chave do uplink. Remove quebras de linha para impedir
+                # injecao de cabecalho caso a chave tenha CR/LF.
+                "Authorization": "Bearer " + (up["key"] or "ollama").replace("\r", "").replace("\n", ""),
             },
         )
         try:
@@ -363,6 +369,13 @@ class Handler(BaseHTTPRequestHandler):
         t0 = time.time()
         try:
             length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            self.send_error(400, "Content-Length invalido")
+            return
+        if length > MAX_BODY_BYTES:
+            self.send_error(413, "Corpo grande demais")
+            return
+        try:
             body = json.loads(self.rfile.read(length) if length else b"{}")
         except Exception:
             self.send_error(400, "Corpo JSON invalido")

@@ -16,7 +16,7 @@ foreach($d in $disk){ Write-Host "Disco $($d.DeviceID): livre $((GB $d.FreeSpace
 
 # Classificacao p/ IA local
 if($ram -le 3gb){ Write-Host "`nResultado: PC FRACO - rode Full Cloud (nao usa IA local)" }
-elseif($ram -lt 8gb){ Write-Host "`nResultado: IA local leve -> qwen2.5:1.5b (ou llama3.2:1b)" }
-elseif($ram -lt 16gb){ Write-Host "`nResultado: IA local media -> qwen2.5:3b (ou llama3.2:3b)" }
-elseif($gpus.Count -gt 0 -and ($gpus[0].AdapterRAM -ge 4gb)){ Write-Host "`nResultado: IA local boa -> qwen2.5:7b (ou llama3.2:8b)" }
-else{ Write-Host "`nResultado: IA local boa -> qwen2.5:7b (ou llama3.2:8b)" }
+elseif($ram -lt 8gb){ Write-Host "`nResultado: IA local leve -> qwen3:0.6b (ou llama3.2:1b)" }
+elseif($ram -lt 16gb){ Write-Host "`nResultado: IA local media -> qwen3:4b (ou llama3.2:3b)" }
+elseif($gpus.Count -gt 0 -and ($gpus[0].AdapterRAM -ge 4gb)){ Write-Host "`nResultado: IA local boa -> qwen3:8b (ou llama3.2:8b)" }
+else{ Write-Host "`nResultado: IA local boa -> qwen3:8b (ou llama3.2:8b)" }

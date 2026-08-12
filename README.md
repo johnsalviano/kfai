@@ -2,14 +2,16 @@
 
 **🇧🇷 Português · [🇺🇸 English](README.en.md)**
 
-![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-blue)
+[![Licença](https://img.shields.io/github/license/johnsalviano/kfai)](LICENSE)
+[![Versão](https://img.shields.io/github/v/release/johnsalviano/kfai)](https://github.com/johnsalviano/kfai/releases)
+[![Último commit](https://img.shields.io/github/last-commit/johnsalviano/kfai)](https://github.com/johnsalviano/kfai)
+[![Estrelas](https://img.shields.io/github/stars/johnsalviano/kfai?style=social&label=Estrelas)](https://github.com/johnsalviano/kfai)
+[![Forks](https://img.shields.io/github/forks/johnsalviano/kfai?style=social&label=Forks)](https://github.com/johnsalviano/kfai/fork)
+
 ![Plataforma](https://img.shields.io/badge/Plataforma-Windows%2010%2F11-lightgrey)
 ![Linguagem](https://img.shields.io/badge/Linguagem-PowerShell%20%2B%20Python-purple)
 ![IA](https://img.shields.io/badge/IA-Ollama%20%2B%209Router%20%2B%20Opencode-green)
-![Status](https://img.shields.io/badge/Status-Aberto%20para%20todos-brightgreen)
-[![Release](https://img.shields.io/github/v/release/johnsalviano/kfai)](https://github.com/johnsalviano/kfai/releases)
-[![Estrelas](https://img.shields.io/github/stars/johnsalviano/kfai?style=social&label=Estrelas)](https://github.com/johnsalviano/kfai)
-[![Forks](https://img.shields.io/github/forks/johnsalviano/kfai?style=social&label=Forks)](https://github.com/johnsalviano/kfai/fork)
+![Status](https://img.shields.io/badge/Status-Ativo-brightgreen)
 
 O KFAI reúne, configura e explica como usar ferramentas de IA **gratuitas**
 (Ollama, 9Router, Opencode, AionUi) para realizar tarefas do dia a dia — e ainda
@@ -18,6 +20,19 @@ te ajuda a otimizar seu próprio computador para aproveitá-las melhor.
 - ✅ **100% gratuito** — só ferramentas de código aberto
 - 🖥️ **Roda em PC fraco** — se sua máquina não aguentar IA local, você usa a nuvem
 - 🔐 **Sem chaves de ninguém** — você gera as suas, de graça, e elas ficam na sua máquina
+
+## 📖 Índice
+
+- [Como instalar](#-como-instalar)
+- [Combos disponíveis](#-combos-disponíveis)
+- [Como o KFAI funciona](#-como-o-kfai-funciona)
+- [IA local com contexto que funciona](#-ia-local-com-contexto-que-funciona)
+- [Ligar só quando usar](#-ligar-só-quando-usar-sem-processo-sempre-rodando)
+- [Documentação](#-documentação)
+- [FAQ](#-faq--dúvidas-frequentes)
+- [Apoie o projeto](#-apoie-o-projeto)
+- [Segurança](#-segurança)
+- [Material para aprender mais](#-material-para-aprender-mais)
 
 ---
 
@@ -99,24 +114,50 @@ Recursos que o roteador próprio tem de fábrica:
   navegador) e pode exigir um token — defina `KFAI_ROUTER_TOKEN` para que só quem
   conhece o token use o roteador (proteção extra contra malware local).
 
+## 🧠 Como o KFAI funciona
+
+Uma única rota com **vários provedores em ordem de prioridade** (uplinks): o
+router KFAI tenta o primeiro; se ele falhar, a chamada segue para o próximo.
+
+```
+Você (Opencode CLI / OpenCode Desktop / AionUi)
+        │  pede um combo (ex.: kfai/cloud-plus-local)
+        ▼
+Router KFAI (porta 20129 — router.py)
+        │
+        ├── 1º uplink: 9Router (porta 20128) ←── suas chaves gratuitas ficam aqui
+        │        ├─ OpenRouter  ·  Gemini  ·  NVIDIA NIM  ·  Cloudflare …
+        │        └─ falhou? (429/5xx/qualquer erro do 9Router) → desce
+        │
+        └── 2º uplink: Ollama local (porta 11434) ←── IA 100% offline
+                 └─ qwen3:4b (ou o modelo que o instalador escolheu p/ seu PC)
+```
+
+- **`kfai/full-cloud`** → só o 9Router (nuvem gratuita).
+- **`kfai/cloud-plus-local`** → nuvem primeiro; se falhar, cai para o Ollama local.
+- **`kfai/full-local`** → só o Ollama (funciona até sem internet).
+
+Cada combo é uma rota do `router.conf`; o modelo que o agente pede decide a rota.
+Mais detalhes técnicos em [docs/FERRAMENTAS.md](docs/FERRAMENTAS.md).
+
 ## IA local com contexto que funciona (não quebra o agente)
 
 O Ollama usa contexto **4.096 tokens por padrão** e **trunca silenciosamente**
 o que passar disso — isso faz o agente local "esquecer" o meio da tarefa e as
-**tool calls falharem**. O KFAI resolve isso em dois pontos:
+**tool calls falharem**. O KFAI resolve isso em três pontos:
 
 1. **`kfai-start.ps1`** define `OLLAMA_KEEP_ALIVE=30m` (o modelo fica na RAM,
    sem cold start de 3–10s a cada request) e `OLLAMA_NUM_PARALLEL=2`.
 2. **Router próprio**: quando um uplink é o Ollama local, o router injeta
-   `options.num_ctx` no request (`KFAI_NUM_CTX`, padrão **32768**). Config de
-   falha/erro só para 429/5xx/timeout.
-3. **Modelo derivado `-32k`**: o instalador cria um modelo com `num_ctx 32768`
-   gravado nele (ex.: `qwen2.5-coder-32k`). Use esse nome no config do opencode
+   `options.num_ctx` no request (`KFAI_NUM_CTX`, padrão **65536**).
+3. **Modelo derivado `-64k`**: o instalador cria um modelo com `num_ctx 65536`
+   gravado nele (ex.: `qwen3-64k`). Use esse nome no config do opencode
    (`config/opencode/full-local.json`, campo `KFAI_LOCAL_MODEL`).
 
-> Recomendação oficial do Ollama para agentes com tool calling: contexto **≥64k**.
-> Se seu PC aguentar (VRAM livre), pode criar `-64k` com o mesmo método:
-> `FROM <modelo>` + `PARAMETER num_ctx 65536` num Modelfile, depois
+> Contexto de **64k+** é a recomendação oficial do Ollama para agentes com tool
+> calling (https://docs.ollama.com/integrations/opencode). O instalador já cria
+> o modelo `-64k` automaticamente; para outro tamanho, monte um `Modelfile`
+> (`FROM <modelo>` + `PARAMETER num_ctx <N>`) e rode
 > `ollama create <modelo>-64k -f Modelfile`.
 
 O instalador também aproveita o comando **`ollama launch opencode`** (Ollama 0.15+):
@@ -131,7 +172,7 @@ você abre o agente** e desliga quando você o fecha:
 .\kfai-launch.ps1 -App aionui      # abre o AionUi
 .\kfai-launch.ps1 -App opencode    # abre o opencode no terminal
 .\kfai-launch.ps1 -App hermes      # abre o Hermes
-.\kfai-launch.ps1 -App "C:\caminho\app.exe"   # qualquer executavel
+.\kfai-launch.ps1 -App "C:\caminho\app.exe"   # qualquer executável
 ```
 
 **Usa o 9Router (porta 20128)?** Adicione `-With9Router` para preferir a IA
@@ -199,8 +240,8 @@ Sim — use o combo **Full Cloud** (só nuvem gratuita, sem IA local). O instala
 detecta o hardware e o launcher só tenta subir o Ollama se a máquina aguentar.
 
 **O agente local "esquece" o meio da tarefa / tool call falha?**
-Contexto curto. O KFAI já configura `num_ctx 32768` (modelo `-32k`). Veja a seção
-"Ia local com contexto que funciona" acima — se sua VRAM aguentar, crie um `-64k`.
+Contexto curto. O KFAI já configura `num_ctx 65536` (modelo `-64k`). Veja a seção
+"IA local com contexto que funciona" acima.
 
 **Como deixo tudo sempre ligado?** `.\kfai-start.ps1 -Register` (reverter: `-Unregister`).
 
@@ -272,12 +313,12 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `BAF3BDDA8FC7B24326909D25DC447D6CADC839D4F8BA631525CF5698FFA799EA`<br>
+> `466065D0CD68C91944A5D4D7D0EBE89472654CE03513A72F1A7B25E43AF6ABBA`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `6385DC02CBD97B58237FFA309F7136C06402722F532A2D8101078C031FACB14E`<br>
+> `DC8BBC8A9C8967FBCF86E47D23DDBFD93117AD0F4F7134FE9117E93DF3863027`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
 

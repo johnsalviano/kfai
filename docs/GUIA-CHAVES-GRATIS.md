@@ -30,7 +30,7 @@ chave e cola no 9Router (ou no arquivo de configuração) no lugar do
 
 ## 2) Google Gemini
 
-- O que é: o modelo multimodai do Google (texto + imagem + áudio).
+- O que é: o modelo multimodal do Google (texto + imagem + áudio).
 - Tem chave **gratuita** (AI Studio / Gemini API), com cota mensal.
 - Roteiro:
   1. Acesse https://aistudio.google.com

@@ -17,13 +17,13 @@ seguras; mudancas de DNS sao opcionais e explicadas.
    (Google 8.8.8.8, Cloudflare 1.1.1.1, e o do provedor). Mudar o DNS e
    **opcional** e so com o acordo do usuario. Explicar: DNS rapido pode
    acelerar o "abrir pagina".
-4. **Eicos simples**:
+4. **Dicas simples**:
    - testar cabo vs WiFi (cabo mais estavel);
    - aproximar o roteador / evitar barreiras;
    - usar banda de 5GHz quando possivel;
    - reiniciar modem roteador 30s (desligar, esperar, religar) resolve muitos casos.
 5. **Contexto do jogo** (ex.: Ragnarok/discord): manter ping baixo e sem
-   "jitter". Mostrar cabos e DNS no que ajuda.
+   "jitter". Mostrar cabos e DNS ajuda.
 
 ## Regras
 - Nao mexer em configuracao de roteador sem instrucao explicita e com cuidado.

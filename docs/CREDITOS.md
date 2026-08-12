@@ -16,7 +16,7 @@ pessoal, chave, token ou API dos desenvolvedores do kit.
 | **Ollama** | Roda modelos de IA localmente | Ollama | MIT |
 | **9Router** | Roteia várias IAs gratuitas (nuvem), com fallback automático | decolua | MIT |
 | **Opencode** | Agente de IA no terminal (CLI) | Anthropic / comunidade | MIT / Apache-2.0 |
-| **AionUi** | Interface gráfica para os agentes de IA | AionUi | licensa própria do produto |
+| **AionUi** | Interface gráfica para os agentes de IA | AionUi | licença própria do produto |
 
 ## Modelos de IA citados (exemplos, só IDs de modelo)
 
@@ -30,7 +30,7 @@ da fonte oficial no equipamento de cada pessoa.
 
 - **Curadoria, documentação, skills, scripts e o combo de configuração**: de
   autoria do preparador do kit.
-- Reunitedo e mantido como um projeto open-source para ajudar quem não tem
+- Reunido e mantido como um projeto open-source para ajudar quem não tem
   condições de pagar modelos de IA pagos.
 
 ## Marcas e avisos

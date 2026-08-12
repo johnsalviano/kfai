@@ -12,7 +12,7 @@ ligar. **Sempre explicar e orientar antes de mudar qualquer coisa.**
 ## Regras de seguranca (IMPORTANTE)
 - Nunca mudar voltagem de CPU (overclock) por conta propria sem total
   confianca - isso pode danificar.
-- Nunca sugerir "atualizar BIOS" a leve; somente se houver ganho real (ex.:
+- Nunca sugerir "atualizar BIOS" à toa; somente se houver ganho real (ex.:
   suporte a nova RAM) e explicando como voltar (backup da BIOS atual).
 - Tudo que a pessoa for fazer: ela executa, voce guia. Nada de script que altere BIOS.
 

@@ -27,7 +27,7 @@ $CanonicalRepoUrl = 'https://github.com/johnsalviano/kfai'
 function Get-KitVersion {
   $v = Join-Path $Root "VERSION"
   if(Test-Path -LiteralPath $v){ return (Get-Content -LiteralPath $v -Raw).Trim() }
-  return '0.1.0'
+  return '0.2.0'
 }
 
 function Write-Step([string]$m){ Write-Host "`n== $m ==" -ForegroundColor Cyan }
@@ -336,7 +336,10 @@ $useLocal = ($model -ne $null -and -not $SkipOllama)
 function Test-OllamaInstalled {
   $cmd = (Get-Command ollama -ErrorAction SilentlyContinue).Source
   $serverUp = $false
-  try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", 11434); $serverUp = $true } catch {}
+  try {
+    $c = New-Object Net.Sockets.TcpClient
+    try { $c.Connect("127.0.0.1", 11434); $serverUp = $true } finally { $c.Dispose() }
+  } catch {}
   return @{ Cmd = $cmd; ServerUp = $serverUp }
 }
 
@@ -412,7 +415,10 @@ function Test-NineRouterInstalled {
   $viaNpm = Test-Path $cliNpm
   $viaSrc = Test-Path $src
   $portUp = $false
-  try { (New-Object Net.Sockets.TcpClient).Connect("127.0.0.1", 20128); $portUp = $true } catch {}
+  try {
+    $c = New-Object Net.Sockets.TcpClient
+    try { $c.Connect("127.0.0.1", 20128); $portUp = $true } finally { $c.Dispose() }
+  } catch {}
   if($viaNpm -or $viaSrc){ return @{ Ok=$true; ViaNpm=$viaNpm; ViaSrc=$viaSrc; PortUp=$portUp } }
   return @{ Ok=$false; ViaNpm=$false; ViaSrc=$false; PortUp=$portUp }
 }
@@ -691,7 +697,7 @@ if($useLocal){
     }
   }
 
-  # contexto 32k para o agente local (o default 4096 quebra tool calling)
+  # contexto 64k para o agente local (o default 4096 quebra tool calling)
   if(Test-OllamaModel -Name $model){
     $script:NumCtxModel = Ensure-NumCtxModel -BaseModel $model
   } else {
@@ -779,7 +785,7 @@ Write-Host @"
    - kfai/cloud-plus-local-> nuvem primeiro, seu PC de reserva
    - kfai/full-local      -> somente seu PC (Ollama)
    Tambem pode trocar o arquivo inteiro usando os presets em config\opencode\.
-$(if($script:NumCtxModel){ "   Modelo local recomendado (contexto 32k): $($script:NumCtxModel)`n" })
+$(if($script:NumCtxModel){ "   Modelo local recomendado (contexto 64k): $($script:NumCtxModel)`n" })
    Pronto! Use as skills da pasta skills\ para otimizar seu PC.
 "@ -ForegroundColor Cyan
 Show-IntegrityHash

@@ -16,10 +16,10 @@ Também decide se o PC da pessoa consegue rodar IA local (e qual modelo).
 2. Leia a saída (RAM total, CPU, GPU + VRAM, disco livre/tipo).
 3. Classifique o computador:
    - **Fraco**: RAM <= 3GB → não rodar IA local; usar Full Cloud.
-   - **Básico**: 4-7GB → qwen2.5:1.5b / llama3.2:1b.
-   - **Médio**: 8-15GB → qwen2.5:3b / llama3.2:3b.
-   - **Bom**: 16GB+ e GPU >= 4GB VRAM → qwen2.5:7b / llama3.2:8b.
-   - **Forte**: 32GB+ → qwen2.5:14b+.
+   - **Básico**: 4-7GB → qwen3:0.6b / llama3.2:1b.
+   - **Médio**: 8-15GB → qwen3:4b / llama3.2:3b.
+   - **Bom**: 16GB+ e GPU >= 4GB VRAM → qwen3:8b / llama3.2:8b.
+   - **Forte**: 32GB+ → qwen3:14b+.
 4. Dialogue com a pessoa:
    - Se o objetivo é usar agentes de IA, diga se o PC aguenta local e indique o combo.
    - Aponte possíveis gargalos (ex.: disco rígido HDD lento) e skills de melhoria.
