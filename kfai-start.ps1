@@ -178,8 +178,11 @@ function Start-Ollama{
   if(-not $script:OllamaCmd){ Write-Error "Ollama nao encontrado nesta maquina."; return $false }
   # Mantem o modelo na RAM 30min (evita cold start de 3-10s a cada request) e permite
   # requisições paralelas. Usuario pode sobrescrever com env vars proprias.
+  # KV cache q8_0: docs oficiais do Ollama (FAQ) dizem que corta ~50% da memoria
+  # do cache de contexto -- importante agora que usamos contexto 64k+.
   if(-not $env:OLLAMA_KEEP_ALIVE){ $env:OLLAMA_KEEP_ALIVE = "30m" }
   if(-not $env:OLLAMA_NUM_PARALLEL){ $env:OLLAMA_NUM_PARALLEL = "2" }
+  if(-not $env:OLLAMA_KV_CACHE_TYPE){ $env:OLLAMA_KV_CACHE_TYPE = "q8_0" }
   if(-not (Test-Port 11434)){
     if($script:OllamaCmd -match ' app\.exe$'){
       Write-Host "Iniciando Ollama (GUI de bandeja - unica opcao instalada)..."

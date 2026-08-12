@@ -22,8 +22,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 #   KFAI_CACHE_MAX       max de entradas no cache (default 200)
 #   KFAI_LOG_FILE        arquivo de log JSONL; vazio desliga (default logs/router.log)
 #   KFAI_NUM_CTX         contexto (num_ctx) injetado para uplinks locais (Ollama).
-#                        Default 32768: evita o truncamento silencioso em 4096
-#                        quebra agentes com tool calling. 0 desliga.
+#                        Default 65536: os docs oficiais do opencode exigem 64k+
+#                        (https://docs.ollama.com/integrations/opencode); o padrao
+#                        4096 do Ollama trunca silenciosamente e quebra agentes
+#                        com tool calling. 0 desliga.
 #   KFAI_ROUTER_TOKEN    token opcional (Bearer). Se definido, apenas requests
 #                        com esse token sao aceitos. Protege contra abuso por
 #                        sites maliciosos e processos locais. Default: vazio
@@ -42,7 +44,7 @@ COOLDOWN_SEC = int(os.environ.get("KFAI_COOLDOWN_SEC", "60"))
 CACHE_SEC = int(os.environ.get("KFAI_CACHE_SEC", "300"))
 CACHE_MAX = int(os.environ.get("KFAI_CACHE_MAX", "200"))
 LOG_FILE = os.environ.get("KFAI_LOG_FILE", os.path.join(BASE, "logs", "router.log"))
-NUM_CTX = int(os.environ.get("KFAI_NUM_CTX", "32768"))
+NUM_CTX = int(os.environ.get("KFAI_NUM_CTX", "65536"))
 ROUTER_TOKEN = os.environ.get("KFAI_ROUTER_TOKEN", "").strip()
 
 # --- estado em memoria ---
@@ -292,7 +294,7 @@ def call_upl(route, body):
         b["model"] = up["model"]
         if NUM_CTX > 0 and "11434" in up["base"]:
             # Ollama local usa num_ctx 4096 por padrao e trunca silenciosamente,
-            # quebrando agentes com tool calling. Injetamos contexto maior.
+            # quebrando agentes com tool calling. Injetamos contexto maior (64k+).
             opts = dict(b.get("options") or {})
             opts["num_ctx"] = NUM_CTX
             b["options"] = opts
@@ -307,7 +309,11 @@ def call_upl(route, body):
             resp = urllib.request.urlopen(req, timeout=300)
             return resp, up, mode
         except urllib.error.HTTPError as e:
-            if not is_retryable_status(e.code):
+            # 9Router (20128) e o servidor PRINCIPAL: qualquer erro dele (4xx do
+            # gateway, cota, modelo indisponivel) deve cair para o proximo uplink
+            # (ex.: Ollama local). So erros de config de provedores DIRETOS
+            # propagam sem fallback.
+            if not is_retryable_status(e.code) and "20128" not in up["base"]:
                 raise NotRetryable(e.code, f"erro nao recuperavel ({e.code}) em {up['base']}")
             last = e
             used = up

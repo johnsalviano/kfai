@@ -6,7 +6,7 @@
       "name": "KFAI Router",
       "options": {
         "baseURL": "http://localhost:20129/v1",
-        "apiKey": "{env:KFAI_ROUTER_KEY}"
+        "apiKey": "kfai"
       },
       "models": {
         "full-local": {

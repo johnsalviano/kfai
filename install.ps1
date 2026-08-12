@@ -23,6 +23,13 @@ if(-not $Root){ $Root = Get-Location }
 
 $CanonicalRepoUrl = 'https://github.com/johnsalviano/kfai'
 
+# Versao do kit: vem do arquivo VERSION na raiz do pacote.
+function Get-KitVersion {
+  $v = Join-Path $Root "VERSION"
+  if(Test-Path -LiteralPath $v){ return (Get-Content -LiteralPath $v -Raw).Trim() }
+  return '0.1.0'
+}
+
 function Write-Step([string]$m){ Write-Host "`n== $m ==" -ForegroundColor Cyan }
 
 function Test-OfficialOrigin {
@@ -111,13 +118,14 @@ function Get-HardwareInfo {
 
 function ChooseLocalModel($hw){
   if($hw.Ram -le 3){ return $null }
-  # 7B Q4 cabe em ~4.7GB de VRAM; 6GB deixa folga confortavel
-  if($hw.Vram -ge 6){ return 'qwen2.5:7b' }
-  if($hw.Ram -lt 8){ return 'qwen2.5:1.5b' }
-  if($hw.Ram -lt 16){ return 'qwen2.5:3b' }
-  if($hw.Vram -ge 4){ return 'qwen2.5:7b' }
-  if($hw.Ram -ge 32){ return 'qwen2.5:14b' }
-  return 'qwen2.5:7b'
+  # qwen3 tem tools + contexto longo nativo (4b = 2.5GB, 256K ctx). Ver
+  # https://ollama.com/library/qwen3 c/ tag tools.
+  if($hw.Vram -ge 6){ return 'qwen3:4b' }
+  if($hw.Ram -lt 8){ return 'qwen3:0.6b' }
+  if($hw.Ram -lt 16){ return 'qwen3:4b' }
+  if($hw.Vram -ge 4){ return 'qwen3:4b' }
+  if($hw.Ram -ge 32){ return 'qwen3:14b' }
+  return 'qwen3:4b'
 }
 
 function Test-IsAdmin {
@@ -294,10 +302,10 @@ function Ensure-NodeJs {
     }
     Write-Host "Instalacao normal nao concluiu. Cai para a pasta do usuario local..." -ForegroundColor Yellow
   } else {
-    # Sem admin: pode ser PC de empresa que bloqueia instalacao de programas.
-    Write-Host "Voce NAO tem permissao de administrador nesta maquina (comum em PCs gerenciados por empresa)." -ForegroundColor Yellow
-    Write-Host "Instalacao normal seria barrada. Instalando Node.js na PASTA DO USUARIO local," -ForegroundColor Yellow
-    Write-Host "que NAO precisa de administrador e fica fora do controle do sistema da empresa." -ForegroundColor Yellow
+    # Sem admin: instala na pasta do usuario local, sem depender de permissao.
+    Write-Host "Sem permissao de administrador nesta sessao. Tudo bem:" -ForegroundColor Yellow
+    Write-Host "vou instalar o Node.js na pasta do USUARIO (nao precisa de" -ForegroundColor Yellow
+    Write-Host "administrador nem de senha)." -ForegroundColor Yellow
   }
 
   $version = Get-NodeLtsVersion
@@ -317,7 +325,7 @@ if(-not (Test-OfficialOrigin)){ exit 1 }
 
 if(-not (Ensure-NodeJs)){ Write-Host "Impossivel continuar sem Node.js. Abra um terminal novo apos instalar e tente de novo." -ForegroundColor Red; exit 1 }
 
-Write-Step "KFAI - Kit de Ferramentas de Agente de IA"
+Write-Step "KFAI - Kit de Ferramentas de Agente de IA (v$(Get-KitVersion))"
 $hw = Get-HardwareInfo
 Write-Host "RAM: $($hw.Ram) GB | CPU: $($hw.Cpu) | GPU VRAM: $($hw.Vram) GB ($($hw.Gpu)) [fonte: $($hw.VramSource)]"
 
@@ -367,22 +375,23 @@ function Test-OllamaModel {
   } catch { return $false }
 }
 
-# --- cria o modelo derivado -32k (num_ctx 32768 baked) para agentes locais ---
+# --- cria o modelo derivado -64k (num_ctx 65536 baked) para agentes locais ---
 # O Ollama usa contexto 4096 por padrao e trunca silenciosamente, quebrando
-# tool calling. Modelos com "tools" precisam de contexto grande.
+# tool calling. Modelos com "tools" precisam de contexto grande. Os docs
+# oficiais do opencode exigem 64k+: https://docs.ollama.com/integrations/opencode
 function Ensure-NumCtxModel {
   param([string]$BaseModel)
   if(-not $BaseModel){ return "" }
   $base = ($BaseModel -replace ':.*$', '')
-  $derived = "$base-32k"
+  $derived = "$base-64k"
   if(Test-OllamaModel -Name $derived){
-    Write-Host "Modelo $derived ja existe (contexto 32k)." -ForegroundColor DarkGray
+    Write-Host "Modelo $derived ja existe (contexto 64k)." -ForegroundColor DarkGray
     return $derived
   }
-  Write-Host "Criando $derived (contexto 32k para agentes)..." -ForegroundColor Cyan
+  Write-Host "Criando $derived (contexto 64k para agentes)..." -ForegroundColor Cyan
   $mf = Join-Path $env:TEMP "Modelfile-kfai"
   try {
-    Set-Content -Path $mf -Value "FROM $BaseModel`nPARAMETER num_ctx 32768" -Encoding utf8
+    Set-Content -Path $mf -Value "FROM $BaseModel`nPARAMETER num_ctx 65536" -Encoding utf8
     $null = ollama create $derived -f $mf 2>&1
     if(Test-OllamaModel -Name $derived){
       Write-Host "$derived criado. Agora o agente local nao quebra por contexto 4096." -ForegroundColor Green
@@ -579,7 +588,7 @@ function Apply-OpencodeCombos {
     name  = "KFAI Router"
     options = @{
       baseURL = "http://localhost:20129/v1"
-      apiKey  = "{env:KFAI_ROUTER_KEY}"
+      apiKey  = "kfai"
     }
     models = @{
       "full-cloud" = @{ name = "KFAI - Full Cloud (nuvem gratuita)"; limit = @{ context = 200000; output = 65536 } }
@@ -588,6 +597,15 @@ function Apply-OpencodeCombos {
     }
   }
   $cfg.provider | Add-Member -NotePropertyName kfai -NotePropertyValue $kfai -Force
+
+  # 9Router e o servidor PRINCIPAL: o combo padrao passa a ser cloud-plus-local
+  # (nuvem primeiro via 9Router; so cai para o Ollama local se o 9Router falhar).
+  # Se o usuario ja escolheu outro modelo, respeita a escolha dele.
+  $serverSideChoice = @{ "9router/ps/poolside/laguna-s-2.1" = "kfai/cloud-plus-local" }
+  if($null -eq $cfg.model -or $serverSideChoice.ContainsKey([string]$cfg.model)){
+    $cfg | Add-Member -NotePropertyName model -NotePropertyValue "kfai/cloud-plus-local" -Force
+    $cfg.model = "kfai/cloud-plus-local"
+  }
 
   $cfg | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $path -Encoding utf8
   Write-Host "Combos do KFAI adicionados ao opencode (provider kfai: full-cloud, cloud-plus-local, full-local)." -ForegroundColor Green

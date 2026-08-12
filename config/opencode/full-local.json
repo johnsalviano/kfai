@@ -10,9 +10,9 @@
       },
       "models": {
         "KFAI_LOCAL_MODEL": {
-          "name": "KFAI Local (num_ctx 32k)",
+          "name": "KFAI Local (num_ctx 64k)",
           "tools": true,
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": { "context": 65536, "output": 8192 }
         }
       }
     }

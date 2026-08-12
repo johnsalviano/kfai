@@ -272,14 +272,37 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `9BABBFB8C8ED7A93F586DEBDF089BCFCE6546AC51150CB3D5E6A8142A1B222D8`<br>
+> `BAF3BDDA8FC7B24326909D25DC447D6CADC839D4F8BA631525CF5698FFA799EA`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `789B65015B6175D4F73DACED6A4C2DD8F619A8C4819CA3ADF87307B70AAF6248`<br>
+> `6385DC02CBD97B58237FFA309F7136C06402722F532A2D8101078C031FACB14E`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
+
+## 📺 Material para aprender mais
+
+Documentação oficial das ferramentas (sempre confira nelas antes de qualquer
+tutorial de terceiros — evita phishing):
+
+| Ferramenta | Documentação oficial |
+|---|---|
+| Ollama (IA local) | https://docs.ollama.com · integração com opencode: https://docs.ollama.com/integrations/opencode |
+| Opencode (agente no terminal) | https://opencode.ai/docs |
+| AionUi (app gráfico) | https://github.com/iOfficeAI/AionUi/wiki |
+| 9Router (gateway de nuvem) | https://github.com/decolua/9router |
+
+Vídeos citados nos próprios READMEs oficiais (fonte verificável, baixo risco):
+
+- Julian Goldie SEO — *"Hermes + Aion UI is Insane (FREE!)"*: https://www.youtube.com/watch?v=vWxE6VO9TKo
+- WorldofAI — review do AionUi: https://www.youtube.com/watch?v=yUU5E-U5B3M
+- CodeVerse Soban — *"Claude CLI Free Setup with 9Router"*: https://www.youtube.com/@CodeVerseSoban
+
+> ⚠️ **Phishing:** gere chaves de IA **sempre** nos sites oficiais dos provedores
+> e cole-as você mesmo no painel do 9Router (`http://localhost:20128/dashboard`).
+> Nenhum site "agregador de API grátis" ou tutorial que peça suas chaves é
+> confiável.
 
 ## Licença
 

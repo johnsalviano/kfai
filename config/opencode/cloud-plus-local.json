@@ -39,9 +39,9 @@
         "apiKey": "ollama"
       },
       "models": {
-        "qwen2.5-coder:latest": {
-          "name": "Local: qwen2.5-coder (GPU)",
-          "limit": { "context": 32768, "output": 8192 }
+        "qwen3:4b": {
+          "name": "Local: qwen3:4b (tools, 256K ctx)",
+          "limit": { "context": 65536, "output": 8192 }
         }
       }
     }

@@ -43,15 +43,15 @@ full-cloud|todas-free|http://localhost:20128/v1||full
 # Nuvem primeiro (via 9Router); quando falhar/limite (429), cai para o Ollama
 # local. Use o modelo local que o install.ps1 escolheu para a sua maquina.
 cloud-plus-local|todas-free|http://localhost:20128/v1||full
-cloud-plus-local|qwen2.5-coder:latest|http://localhost:11434/v1||full
+cloud-plus-local|qwen3:4b|http://localhost:11434/v1||full
 cloud-plus-local|llama3.2:3b|http://localhost:11434/v1||full
-# cloud-plus-local|qwen2.5:7b|http://localhost:11434/v1||full   # PC com GPU 6GB+
+# cloud-plus-local|qwen3:8b|http://localhost:11434/v1||full   # PC com GPU 8GB+
 #
 # ============================= 3) FULL LOCAL ==============================
 # Somente Ollama local. Escolha o modelo do seu PC (install.ps1 decide).
-full-local|qwen2.5-coder:latest|http://localhost:11434/v1||full
+full-local|qwen3:4b|http://localhost:11434/v1||full
 full-local|llama3.2:3b|http://localhost:11434/v1||full
-# full-local|qwen2.5:7b|http://localhost:11434/v1||full           # PC com GPU 6GB+
+# full-local|qwen3:8b|http://localhost:11434/v1||full           # PC com GPU 8GB+
 # full-local|qwen2.5:3b|http://localhost:11434/v1||full           # PC com 8-16GB RAM
 # full-local|qwen2.5:1.5b|http://localhost:11434/v1||full         # PC muito fraco
 #
@@ -67,3 +67,4 @@ full-local|llama3.2:3b|http://localhost:11434/v1||full
 #   KFAI_CACHE_SEC=300          cache exato p/ respostas nao-stream; 0 desliga
 #   KFAI_CACHE_MAX=200          max de entradas no cache em memoria
 #   KFAI_LOG_FILE=logs/router.log  log JSONL; vazio desliga
+#   KFAI_NUM_CTX=65536          contexto dos uplinks Ollama locais (docs opencode: 64k+)

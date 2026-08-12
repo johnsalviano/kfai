@@ -1,6 +1,6 @@
 # KFAI — Passo a passo (instalar e usar)
 
-Guia simples começando do zero. Tudo grátis.
+Kit **v0.2.0** · Guia simples começando do zero. Tudo grátis.
 
 ## Parte 1 — Instalar
 
@@ -14,6 +14,10 @@ Guia simples começando do zero. Tudo grátis.
 
 > Quer ver tudo que será executado antes? Rode o script no PowerShell em vez do
 > `.exe`: `.\install.ps1` (abaixo). O resultado é o mesmo.
+
+> Atalho oficial: `ollama launch opencode` já configura o opencode com o Ollama
+> local sozinho, sem mexer na sua config. Veja os docs em
+> https://docs.ollama.com/integrations/opencode.
 
 ## Parte 2 — Adicionar suas chaves gratuitas
 
