@@ -33,6 +33,13 @@ $Providers = @(
   @{ Provider = 'api-airforce';   Nome = 'API.airforce';      Link = 'https://api.airforce' ;        Como = 'Crie uma conta gratis; sua chave primaria ja aparece no Dashboard (comeca com sk-air-).' }
   @{ Provider = 'poolside';       Nome = 'Poolside';          Link = 'https://platform.poolside.ai' ;Como = 'Entre com sua conta, va na aba "API Keys" e clique em "New key".' }
   @{ Provider = 'byteplus';       Nome = 'BytePlus ModelArk'; Link = 'https://console.volcengine.com/iam' ; Como = 'Crie a conta, va em IAM (Identity and Access Management) e gere um Access Key.' }
+  @{ Provider = 'groq';           Nome = 'Groq';              Link = 'https://console.groq.com' ;    Como = 'Crie a conta (sem cartao), va em "API Keys" e crie uma chave (comeca com gsk-).' }
+  @{ Provider = 'cerebras';       Nome = 'Cerebras';          Link = 'https://cloud.cerebras.ai' ;   Como = 'Crie a conta, va em "API Keys" e gere uma chave.' }
+  @{ Provider = 'mistral';        Nome = 'Mistral';           Link = 'https://console.mistral.ai' ;  Como = 'Crie a conta (verificacao por telefone + opt-in), va em "API Keys" e crie uma chave.' }
+  @{ Provider = 'mistral-codestral'; Nome = 'Mistral Codestral'; Link = 'https://console.mistral.ai/codestral' ; Como = 'Use a mesma conta do Mistral e gere uma chave para a API do Codestral.' }
+  @{ Provider = 'cohere';         Nome = 'Cohere';            Link = 'https://dashboard.cohere.com' ;Como = 'Crie a conta, va em "API Keys" e crie uma chave.' }
+  @{ Provider = 'huggingface';    Nome = 'HuggingFace';       Link = 'https://huggingface.co/settings/tokens' ; Como = 'Crie a conta, va em "Access Tokens" e crie um token (comeca com hf_).' }
+  @{ Provider = 'vercel-ai-gateway'; Nome = 'Vercel AI Gateway'; Link = 'https://vercel.com' ;        Como = 'Crie a conta, va em "AI Gateway" e gere a chave do gateway.' }
 )
 
 function Test-Port([int]$port){

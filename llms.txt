@@ -1,0 +1,34 @@
+# KFAI — Kit de Ferramentas de Agente de IA
+
+> Kit gratuito e open source para Windows que reúne ferramentas de IA gratuitas
+> (Ollama local + nuvem grátis: Gemini, OpenRouter, Groq, Cerebras, Mistral,
+> NVIDIA NIM, Cloudflare) com roteador de fallback automático, detecção de
+> hardware, contexto de 64k para agentes e verificação de integridade dos
+> downloads. Configura e explica OpenCode e AionUi.
+
+## Documentação
+
+- [README (pt-BR)](README.md): visão geral, instalação, combos e FAQ
+- [README (English)](README.en.md): overview, install, combos and FAQ
+- [Guia de Configuração](docs/GUIA-CONFIGURACAO.md): passo a passo do instalador e do uso
+- [Guia de Chaves Gratuitas](docs/GUIA-CHAVES-GRATIS.md): onde gerar cada chave de API gratuita (OpenRouter, Gemini, Groq, Cerebras, Mistral, NVIDIA, Cloudflare, etc.)
+- [Ferramentas do Kit](docs/FERRAMENTAS.md): o que cada script do KFAI faz
+- [Modelos por Hardware](docs/MODELOS-POR-HARDWARE.md): qual modelo local usar em cada PC
+- [O que é o KFAI](docs/O-QUE-E-KFAI.md): introdução para quem está chegando
+- [Origem do Projeto](docs/ORIGEM.md): histórico e decisões técnicas
+- [Créditos](docs/CREDITOS.md): agradecimentos e referências
+- [Instruções de uso](INSTRUCOES.md): o que esperar da instalação
+
+## Ferramentas principais
+
+- `install.ps1` / `KFAI-Instalador.exe`: instalador com detecção de hardware e verificação de hash
+- `router.py`: roteador de IA com fallback automático entre nuvem gratuita e IA local (porta 20129)
+- `kfai-start.ps1`: inicia o roteador + 9Router + Ollama
+- `kfai-config-chaves.ps1`: assistente que mostra quais chaves gratuitas faltam e onde gerá-las
+- `kfai-launch.ps1`: abre o opencode já configurado com os combos do KFAI
+- `config/opencode/*.json`: presets de configuração (full-cloud, cloud-plus-local, full-local)
+
+## Outros
+
+- [Guia de chaves gratuitas — resumo dos provedores](docs/GUIA-CHAVES-GRATIS.md)
+- [Material para aprender mais (documentação oficial das ferramentas)](README.md#-material-para-aprender-mais)

@@ -1,4 +1,9 @@
-import json, os, time, re, hashlib, urllib.request, urllib.error
+import hashlib
+import json
+import os
+import time
+import urllib.error
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 # =========================================================================
@@ -75,9 +80,7 @@ def is_retryable_status(code):
     400/403/404 sao erros de configuracao: propagam sem fallback."""
     if code >= 500:
         return True
-    if code in (429, 401):
-        return True
-    return False
+    return code in (429, 401)
 
 
 def uplink_id(up):
@@ -138,7 +141,7 @@ def summarize_old(messages):
             out = json.loads(r.read())
         text = out["choices"][0]["message"]["content"].strip()
         return "[resumo KFAI] " + text
-    except Exception:
+    except Exception:  # noqa: BLE001 - offline/erro de resumo: cai para a poda simples
         return None
 
 
@@ -212,9 +215,7 @@ def is_complex_request(body):
     text = " ".join(str(m.get("content", "")) for m in msgs).lower()
     strong = ["debug", "refactor", "arquitetura", "architecture", "explica como",
               "projeto um", "design", "seguranca", "vulnerabil", "otimiza"]
-    if any(k in text for k in strong):
-        return True
-    return False
+    return bool(any(k in text for k in strong))
 
 
 def decide_mode(up_mode, body):
@@ -269,7 +270,7 @@ def log_event(event):
         os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write(json.dumps(event, ensure_ascii=False) + "\n")
-    except Exception:
+    except Exception:  # noqa: BLE001,S110 - logging nunca pode derrubar o roteador
         pass
 
 
@@ -279,7 +280,6 @@ def log_event(event):
 
 def call_upl(route, body):
     last = None
-    used = None
     for up in route:
         if now_cooldown(up):
             continue
@@ -322,12 +322,10 @@ def call_upl(route, body):
             if not is_retryable_status(e.code) and "20128" not in up["base"]:
                 raise NotRetryable(e.code, f"erro nao recuperavel ({e.code}) em {up['base']}")
             last = e
-            used = up
             mark_cooldown(up)
             continue
         except (urllib.error.URLError, TimeoutError, OSError):
             last = type("Err", (), {"code": 0})()
-            used = up
             mark_cooldown(up)
             continue
     raise Retryable(last.code if last else 502, body.get("mode", body.get("model", "")))
@@ -377,7 +375,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             body = json.loads(self.rfile.read(length) if length else b"{}")
-        except Exception:
+        except Exception:  # noqa: BLE001 - entrada externa: so queremos um 400
             self.send_error(400, "Corpo JSON invalido")
             return
         route = ROUTES.get(body.get("model", ""))
