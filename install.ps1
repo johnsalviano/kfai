@@ -182,13 +182,63 @@ function Get-GitHubLatestTag {
   return ''
 }
 
+# --- SHA-256 oficial de um asset de release do GitHub (API publica) ---
+# O GitHub publica o digest (sha256) de cada asset na API de releases.
+# Retorna '' quando nao ha checksum publicado (ex.: releases sem assets).
+function Get-GitHubAssetSha256 {
+  param([string]$Repo, [string]$AssetName)
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest" -Headers @{ 'User-Agent'='KFAI' } -TimeoutSec 30
+    $ErrorActionPreference = $prevEap
+    if(-not $rel -or -not $rel.assets){ return '' }
+    foreach($a in $rel.assets){
+      if($a.name -eq $AssetName -and $a.digest){ return ([string]$a.digest).Trim() }
+    }
+  } catch { $ErrorActionPreference = $prevEap }
+  return ''
+}
+
+# --- confere a integridade de um arquivo baixado (SHA-256) ---
+# Aceita o digest do GitHub ("sha256:...") ou hash puro. Se nenhum esperado
+# for informado (fonte oficial nao publica checksum), passa sem bloquear.
+function Assert-FileSha256 {
+  param(
+    [string]$Path,
+    [string]$ExpectedSha256,
+    [string]$DisplayName
+  )
+  if([string]::IsNullOrWhiteSpace($ExpectedSha256)){ return $true }
+  $clean = $ExpectedSha256.Trim().ToLowerInvariant()
+  if($clean -like 'sha256:*'){ $clean = $clean.Substring(7) }
+  if($clean -notmatch '^[0-9a-f]{64}$'){
+    Write-Host "AVISO: hash esperado de $DisplayName em formato invalido; verificacao pulada." -ForegroundColor Yellow
+    return $true
+  }
+  try {
+    $h = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+    if($h -eq $clean){ return $true }
+    Write-Host "FALHA de integridade: $DisplayName NAO confere com o SHA-256 oficial." -ForegroundColor Red
+    Write-Host "  Esperado: $clean" -ForegroundColor Red
+    Write-Host "  Baixado:  $h" -ForegroundColor Red
+    return $false
+  } catch {
+    Write-Host "AVISO: nao consegui calcular o SHA-256 de $DisplayName." -ForegroundColor Yellow
+    return $true
+  }
+}
+
 # --- baixa um instalador exe do proprio site oficial e roda em silencio ---
 # Usa sempre a versao mais recente oficial. NSIS aceita /S.
+# Se -ExpectedSha256 for informado (checksum publicado pela fonte oficial),
+# o arquivo baixado e conferido antes de executar.
 function Install-FromOfficialUrl {
   param(
     [string]$DisplayName,
     [string]$Url,
-    [string]$LocalName
+    [string]$LocalName,
+    [string]$ExpectedSha256
   )
   $local = Join-Path $env:TEMP $LocalName
   Write-Host "Baixando $DisplayName (versao mais recente oficial, pode demorar)..."
@@ -197,8 +247,12 @@ function Install-FromOfficialUrl {
   try {
     Invoke-WebRequest -Uri $Url -OutFile $local -UseBasicParsing -TimeoutSec 900
     if(Test-Path -LiteralPath $local){
-      Write-Host "Instalando $DisplayName em silencio..."
-      Start-Process -FilePath $local -ArgumentList '/S' -Wait -ErrorAction SilentlyContinue
+      if(Assert-FileSha256 -Path $local -ExpectedSha256 $ExpectedSha256 -DisplayName $DisplayName){
+        Write-Host "Instalando $DisplayName em silencio..."
+        Start-Process -FilePath $local -ArgumentList '/S' -Wait -ErrorAction SilentlyContinue
+      } else {
+        Write-Host "Instalacao de $DisplayName ABORTADA (hash nao confere)." -ForegroundColor Red
+      }
     }
   } catch {
     Write-Host "Falha ao baixar $DisplayName de $Url." -ForegroundColor Yellow
@@ -235,10 +289,24 @@ function Install-NodeJsPerUser {
   $zipPath = Join-Path $env:TEMP "node-$Version-win-x64.zip"
   $extract = Join-Path $env:TEMP "node-$Version-win-x64"
   $url = "https://nodejs.org/dist/$Version/node-$Version-win-x64.zip"
+  $sumsUrl = "https://nodejs.org/dist/$Version/SHASUMS256.txt"
 
   Write-Host "Baixando Node.js $Version (arquivo oficial, ~30 MB)..."
   try {
+    # A fonte oficial publica os hashes SHA-256 de todos os arquivos.
+    # Baixamos a lista e conferimos o zip antes de extrair (integridade).
+    $expected = ""
+    try {
+      $sums = (Invoke-WebRequest -Uri $sumsUrl -UseBasicParsing -TimeoutSec 30).Content
+      $line = ($sums -split "`n" | Where-Object { $_ -like "*node-$Version-win-x64.zip*" } | Select-Object -First 1)
+      if($line){ $expected = (($line -split '\s+')[0]).Trim() }
+    } catch { }
     Invoke-WebRequest -Uri $url -OutFile $zipPath -UseBasicParsing -TimeoutSec 300
+    if(-not (Assert-FileSha256 -Path $zipPath -ExpectedSha256 $expected -DisplayName "Node.js $Version")){
+      Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+      Write-Error "Falha de integridade no download do Node.js. Baixe manualmente de https://nodejs.org e rode este script de novo."
+      return $false
+    }
   } catch {
     Write-Error "Falha ao baixar Node.js de $url. Verifique sua internet."
     return $false
@@ -445,7 +513,9 @@ function Ensure-OpencodeDesktop {
   $tag = Get-GitHubLatestTag -Repo 'anomalyco/opencode'
   if($tag){
     $url = "https://github.com/anomalyco/opencode/releases/download/v$tag/opencode-desktop-win-x64.exe"
-    Install-FromOfficialUrl -DisplayName "OpenCode Desktop ($tag)" -Url $url -LocalName "opencode-desktop-win-x64.exe"
+    # Checksum oficial publicado pelo proprio GitHub na API de releases.
+    $sha = Get-GitHubAssetSha256 -Repo 'anomalyco/opencode' -AssetName 'opencode-desktop-win-x64.exe'
+    Install-FromOfficialUrl -DisplayName "OpenCode Desktop ($tag)" -Url $url -LocalName "opencode-desktop-win-x64.exe" -ExpectedSha256 $sha
     return $true
   }
   Write-Host "Nao consegui descobrir a versao mais recente do OpenCode." -ForegroundColor Yellow
@@ -502,6 +572,8 @@ function Ensure-AionUi {
   $tag = Get-GitHubLatestTag -Repo 'iOfficeAI/AionUi'
   if($tag){
     $url = "https://static.aionui.com/releases/$tag/AionUi-$tag-win-x64.exe"
+    # O AionUi nao publica checksum oficial dos binarios (nem no GitHub nem
+    # no static.aionui.com). Fica a mitigacao de HTTPS + dominio oficial.
     Install-FromOfficialUrl -DisplayName "AionUi ($tag)" -Url $url -LocalName "AionUi-$tag-win-x64.exe"
     Start-Sleep -Seconds 3
     if((Test-AionUiInstalled).Ok){

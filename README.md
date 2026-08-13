@@ -303,7 +303,10 @@ O instalador se autoprotege contra cópias adulteradas:
   **avisa e pede confirmação** antes de continuar — você confirma que baixou do
   repositório oficial e confere o hash abaixo;
 - no final, mostra o **SHA-256 do próprio instalador** para você conferir contra o
-  valor publicado abaixo (mantido atualizado a cada versão).
+  valor publicado abaixo (mantido atualizado a cada versão);
+- **verifica a integridade de cada download**: o Node.js é conferido contra o
+  `SHASUMS256.txt` oficial da nodejs.org e o OpenCode Desktop contra o digest
+  publicado pelo próprio GitHub; se o hash não conferir, a instalação é abortada.
 
 O roteador próprio também se protege contra abuso:
 
@@ -313,12 +316,12 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `466065D0CD68C91944A5D4D7D0EBE89472654CE03513A72F1A7B25E43AF6ABBA`<br>
+> `138BDA47546FE389E98887A5B44885EA70B62ABE4C3C495BDD647BF00B1BDCEA`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `DC8BBC8A9C8967FBCF86E47D23DDBFD93117AD0F4F7134FE9117E93DF3863027`<br>
+> `3C0142A100547FFF4A80DD910B00385C9B3BD0304E10A7E0E8958F4D01FD7A2C`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
 
