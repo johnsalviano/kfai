@@ -1,223 +1,211 @@
 # Guia de Chaves Gratuitas — KFAI
 
-Para usar os combos **Full Cloud** e **Cloud + Local**, você precisa de chaves
-de API **gratuitas** de provedores. Este guia mostra o caminho para gerar cada
-uma. Você pode começar **sem nenhuma chave** (o 9Router já oferece alguns
-modelos gratuitos) e ir adicionando conforme precisar.
+O KFAI usa o **9Router** (roteador local de IA em nuvem, porta 20128) como
+"tomada" para a IA: você configura uma ou mais chaves **gratuitas** e o KFAI
+escolhe o melhor modelo disponível para cada perfil.
 
-> **Importante**: cada chave é **sua** e pessoal. Não compartilhe. O KFAI nunca
-> usa nem guarda chaves de ninguém.
+Este guia mostra **todos os provedores gratuitos** que o 9Router entende, o
+link para gerar a chave de cada um e o jeito mais fácil de configurar.
 
-## Como funciona
-
-Cada provedor dá um tanto de uso grátis por conta. Você se cadastra, gera a
-chave e cola no 9Router (ou no arquivo de configuração) no lugar do
-`SUA_CHAVE_AQUI`.
-
----
-
-## 1) OpenRouter (mais fácil para começar)
-
-- O que é: agrega **centenas de modelos** de vários criadores em um só lugar.
-- Tem modelos grátis (marcados com `:free`) e um saldo inicial gratuito.
-- Roteiro:
-  1. Acesse https://openrouter.ai
-  2. Crie conta (Google ou e-mail)
-  3. Vá em "Keys" / "API Keys"
-  4. Gere uma chave (`sk-or-...`)
-  5. Cole no 9Router (provider `openrouter`) ou em `config/opencode/*.json`
-- Grátis: modelos `:free` sem custo; saldo pequeno de crédito inicial.
-
-## 2) Google Gemini
-
-- O que é: o modelo multimodal do Google (texto + imagem + áudio).
-- Tem chave **gratuita** (AI Studio / Gemini API), com cota mensal.
-- Roteiro:
-  1. Acesse https://aistudio.google.com
-  2. Faça login com conta Google
-  3. **Get API key** → cria a chave (`AIza...`)
-  4. Cole no 9Router (provider `gemini`)
-- Grátis: plano **free tier** (algumas requisições por dia), suficiente para uso pessoal.
-
-## 3) NVIDIA NIM (modelos NVIDIA de graça)
-
-- O que é: modelos (Nemotron, DeepSeek, GLM, MiniMax) rodando no NVIDIA, grátis.
-- Roteiro:
-  1. Acesse https://build.nvidia.com (NVIDIA NIM / NGC)
-  2. Cadastre-se → **API Key** (NVIDIA NIM)
-  3. Cole no 9Router (provider `nvidia`)
-- Grátis: uso limitado por mês, bom para testes e tarefas leves.
-
-## 4) Cloudflare (Worker AI)
-
-- O que é: Cloudflare oferece modelos de IA gratuitos com cota diária generosa.
-- Roteiro:
-  1. Acesse https://dash.cloudflare.com → Workers & Pages → AI
-  2. Crie a conta → gere API Key/Token
-  3. Cole no 9Router (provider `cloudflare-ai`)
-- Grátis: 10.000 neurônios/dia (cota que você usa sem pagar).
-
-## 5) API.airforce
-
-- O que é: provedor agregador com modelos gratuitos e acessível.
-- Roteiro:
-  1. Acesse https://api.airforce
-  2. Crie uma conta grátis
-  3. Sua chave primária já aparece no Dashboard (`sk-air-...`)
-  4. Cole no 9Router (provider `api-airforce`)
-- Grátis: cota gratuita para uso pessoal.
-
-## 6) Poolside
-
-- O que é: provedor com modelos de IA de código aberto.
-- Roteiro:
-  1. Acesse https://platform.poolside.ai
-  2. Entre com sua conta
-  3. Aba **API Keys** → **New key**
-  4. Cole no 9Router (provider `poolside`)
-- Grátis: plano gratuito com cota para uso pessoal.
-
-## 7) BytePlus ModelArk (Volcengine)
-
-- O que é: plataforma de modelos da ByteDance (Doubao etc.).
-- Roteiro:
-  1. Acesse https://console.volcengine.com/iam
-  2. Crie a conta
-  3. Vá em **IAM** (Identity and Access Management) e gere um **Access Key**
-  4. Cole no 9Router (provider `byteplus`)
-- Grátis: cota inicial gratuita de uso.
-
-## 8) Groq (velocidade máxima)
-
-- O que é: inferência **muito rápida** com modelos abertos (Llama 3.3 70B,
-  Llama 4 Scout, Kimi K2, gpt-oss-120b) e suporte a áudio (Whisper).
-- Um dos **uplinks principais recomendados** para o combo `full-cloud` em PC fraco.
-- Roteiro:
-  1. Acesse https://console.groq.com
-  2. Crie a conta (Google ou e-mail) — sem cartão
-  3. Aba **API Keys** → **Create API Key** (`gsk_...`)
-  4. Cole no 9Router (provider `groq`)
-- Grátis: até **14.400 req/dia** (limite diário muito generoso).
-
-## 9) Cerebras (folga diária grande)
-
-- O que é: inferência em chip especializado, também com limites diários altos.
-- Modelos: gpt-oss-120b, Qwen 3 235B, Llama 3.3 70B.
-- Roteiro:
-  1. Acesse https://cloud.cerebras.ai
-  2. Crie a conta → **API Keys** → **Generate key**
-  3. Cole no 9Router (provider `cerebras`)
-- Grátis: até **14.400 req/dia** / 1M tokens por dia.
-- Dica: no OpenRouter os modelos são `:free` com limite pequeno; direto na
-  Cerebras a folga é bem maior.
-
-## 10) Mistral La Plateforme (maior volume de tokens grátis)
-
-- O que é: o maior volume gratuito — **1 bilhão de tokens/mês** no plano
-  Experiment (Mistral Large, Nemo, Small).
-- Roteiro:
-  1. Acesse https://console.mistral.ai
-  2. Crie a conta → verificação por **telefone** (obrigatória)
-  3. Aceite o opt-in de uso dos dados para treinamento
-  4. **API Keys** → **Create new key**
-  5. Cole no 9Router (provider `mistral`)
-- Grátis: plano Experiment (1B tokens/mês). Exige telefone + opt-in.
-
-## 11) Mistral Codestral (foco em código)
-
-- O que é: modelos de geração de código do Mistral.
-- Roteiro:
-  1. Acesse https://console.mistral.ai/codestral
-  2. Crie a conta (ou use a mesma da seção 10)
-  3. Gere uma chave para a API do Codestral
-  4. Cole no 9Router (provider `mistral-codestral`)
-- Grátis: **2.000 req/dia**.
-
-## 12) Cohere (bom para RAG/corporativo)
-
-- O que é: modelos Command A / Command R+, conhecidos por contexto longo e
-  recuperação de informações (RAG).
-- Roteiro:
-  1. Acesse https://dashboard.cohere.com
-  2. Crie a conta → **API Keys** → **Create key**
-  3. Cole no 9Router (provider `cohere`)
-- Grátis: 1.000 req/mês, 20 req/min.
-
-## 13) HuggingFace Inference Providers (milhares de modelos open source)
-
-- O que é: um endpoint único para os modelos da comunidade (serverless, até 10GB).
-- Roteiro:
-  1. Acesse https://huggingface.co/settings/tokens
-  2. Crie a conta → **Access Tokens** → **Create new token** (`hf_...`)
-  3. Cole no 9Router (provider `huggingface`)
-- Grátis: modelos serverless gratuitos + ~$0,10/mês de créditos.
-
-## 14) Vercel AI Gateway (um gateway para vários provedores)
-
-- O que é: roteia para vários provedores de IA num gateway só (útil como
-  camada extra de fallback).
-- Roteiro:
-  1. Acesse https://vercel.com → **AI Gateway**
-  2. Crie a conta → gere a chave do gateway
-  3. Cole no 9Router (provider `vercel-ai-gateway`)
-- Grátis: plano free (~$5/mês de uso no plano pago; free tem cota).
-
-## 15) Ollama (local — sem chave)
-
-- Não precisa de chave nenhuma. Só instale o [Ollama](https://ollama.com) e o
-  KFAI baixa o modelo certo para seu PC automaticamente (via `install.ps1`).
-- Use nos combos **Cloud + Local** (fallback) ou **Full Local** (100% offline).
+> **Regra deste guia:** só provedores que **não cobram nada** (limites
+> gratuitos diários/mensais ou totalmente grátis). Nada de créditos de trial
+> ou contas que exijam cartão.
+>
+> **Segurança:** cada chave é sua e pessoal. O 9Router guarda as chaves
+> localmente, no seu PC. O KFAI nunca as usa, nunca as envia e nunca as grava
+> em arquivo.
 
 ---
 
-## Com créditos de trial (opção no `kfai-config-chaves`)
+## Como usar o KFAI para configurar (o caminho rápido)
 
-Provedores que dão créditos de teste. Úteis como **fallback adicional** ou para
-experimentar um modelo específico. Exigem cadastro e, em alguns, verificação.
+Rode o assistente. Ele mostra o que já está configurado e o que falta:
 
-| Provedor | Crédito | Observações |
+```
+.\kfai-config-chaves.ps1            # mostra o estado
+.\kfai-config-chaves.ps1 -Adicionar # cola a chave e salva direto no 9Router
+```
+
+O fluxo **-Adicionar** faz tudo sozinho:
+
+1. Mostra os provedores gratuitos e marca quais já têm chave (`[OK]`);
+2. Você escolhe um pelo número e cola a chave (ela fica mascarada na tela);
+3. O script salva a chave **direto no 9Router** (API local), sem abrir painel;
+4. Ele **testa** a conexão e avisa se a chave está certa;
+5. Pergunta se quer adicionar os modelos ao combo **`todas-free`** (usado
+   pelos perfis `full-cloud` e `cloud-plus-local`).
+
+A chave digitada vai direto do seu teclado para o 9Router — o KFAI só faz a
+ponte, não guarda nem imprime nada.
+
+> Alternativa manual: gerar a chave no site e colar no painel do 9Router
+> (`http://localhost:20128/dashboard`).
+
+---
+
+## Tipos de provedores gratuitos
+
+| Tipo | O que é | Como configura |
 |---|---|---|
-| Alibaba Cloud Model Studio | 1M tokens/modelo | família Qwen |
-| SambaNova Cloud | ~$5 / 3 meses | DeepSeek, Llama, Qwen |
-| Scaleway Generative APIs | 1M tokens | — |
-| Hyperbolic | ~$1 | modelos open (DeepSeek, Qwen, Llama) |
-| Fireworks / Nebius / Novita / Inference.net | $1–25 | créditos iniciais |
-| AI21 / Upstage | ~$10 / 3 meses | — |
-| NLP Cloud | ~$15 | exige telefone |
+| **Com chave de API** | O site dá uma chave (`sk-or-…`, `AIza…`, `gsk_…`) | Fluxo `-Adicionar` (cola a chave) |
+| **Por login (OAuth)** | Entra com sua conta Google/X/outra | No painel do 9Router, clique em "Conectar" |
+| **Sem chave** | Grátis, não pede nada | Só ative/instale (alguns rodam no seu PC) |
 
-> **Não recomendado**: GitHub Models (descontinuado em jul/2026) e Vertex AI
-> (grátis em preview, mas exige cartão de pagamento).
+---
+
+## 1) Provedores com chave de API (grátis)
+
+Para estes, use `.\kfai-config-chaves.ps1 -Adicionar`.
+
+### OpenRouter — o mais fácil para começar
+- Agrega **centenas de modelos** num lugar só, inclusive modelos `:free`.
+- **Como:** https://openrouter.ai/keys → crie a conta → **Keys** → gere (`sk-or-…`).
+- **Custo:** grátis (modelos `:free` + crédito inicial pequeno).
+
+### Google Gemini — multimodal (texto, imagem, áudio)
+- **Como:** https://aistudio.google.com/apikey → login Google → **Get API key** (`AIza…`).
+- **Custo:** free tier (cota mensal), suficiente para uso pessoal.
+
+### NVIDIA NIM — modelos de código/raciocínio de graça
+- **Como:** https://build.nvidia.com → cadastre-se → **Get API Key** (`nvapi-…`).
+- **Custo:** gratuito (uso limitado por mês).
+
+### Cloudflare AI (Workers AI) — cota diária generosa
+- **Como:** https://dash.cloudflare.com → Workers & Pages → AI → gere um **API Token**.
+- **Custo:** free tier (10.000 neurônios/dia).
+
+### Groq — velocidade máxima
+- Modelos abertos (Llama, Kimi, gpt-oss) rodando muito rápido.
+- **Como:** https://console.groq.com/keys → conta sem cartão → **Create API Key** (`gsk_…`).
+- **Custo:** até **14.400 requisições/dia**.
+
+### Cerebras — folga diária grande
+- **Como:** https://cloud.cerebras.ai → **API Keys** → **Generate key**.
+- **Custo:** até **14.400 req/dia** / 1M tokens por dia.
+
+### Mistral — o maior volume de tokens grátis
+- **Como:** https://console.mistral.ai/api-keys → conta (verificação por
+  **telefone** + opt-in) → **Create new key**.
+- **Custo:** plano Experiment, **1 bilhão de tokens/mês**.
+
+### Cohere — foco em recuperação de informação (RAG)
+- **Como:** https://dashboard.cohere.com/api-keys → **Create key**.
+- **Custo:** 1.000 req/mês.
+
+### HuggingFace Inference — milhares de modelos open source
+- **Como:** https://huggingface.co/settings/tokens → **Access Tokens** → criar (`hf_…`).
+- **Custo:** modelos serverless gratuitos.
+
+### API.airforce — agregador com chave pronta no painel
+- **Como:** https://api.airforce → conta grátis → a chave primária já aparece no
+  Dashboard (`sk-air-…`).
+- **Custo:** cota gratuita para uso pessoal.
+
+### Poolside — modelos abertos
+- **Como:** https://poolside.ai → conta → **API Keys** → **New key**.
+- **Custo:** plano gratuito.
+
+### BytePlus ModelArk (ByteDance) — família Doubao
+- **Como:** https://www.byteplus.com → conta → **IAM** → gerar um **Access Key**.
+- **Custo:** cota inicial gratuita.
+
+### Bazaarlink — agregador free tier
+- **Como:** https://bazaarlink.ai → conta → gerar chave no painel.
+- **Custo:** free tier.
+
+### Kilo Gateway — free tier
+- **Como:** https://kilo-gateway.com → conta → gerar chave.
+- **Custo:** free tier.
+
+### Vercel AI Gateway — um gateway para vários provedores
+- **Como:** https://vercel.com → **AI Gateway** → gerar a chave.
+- **Custo:** free tier (cota).
+
+### Ollama Cloud — modelo via nuvem da Ollama
+- **Como:** https://ollama.com → conta → gerar chave no painel.
+- **Custo:** free tier.
+
+---
+
+## 2) Provedores por login (OAuth) — grátis, sem chave
+
+Estes não usam chave de API: você **conecta sua conta** no painel do 9Router
+(`http://localhost:20128/dashboard` → o provedor → "Conectar"). São os mais
+simples — se você já tem a conta, é um clique.
+
+| Provedor | Site | O que conecta |
+|---|---|---|
+| **Gemini CLI** | https://aistudio.google.com | Sua conta Google |
+| **Kiro AI** | https://kiro.ai | Sua conta Kiro |
+| **Kimchi** | https://kimchi.ai | Sua conta Kimchi |
+| **MiMo Code Free** | https://xiaomi.com | Sem login (ativo no 9Router) |
+| **OpenCode Free** | https://opencode.ai | Sem login (ativo no 9Router) |
+
+> Dica: `gemini-cli` e `kiro` dão uso gratuito bem generoso e são ótimos
+> primeiros provedores para testar sem gerar chave nenhuma.
+
+---
+
+## 3) Sem chave / rodam no seu PC
+
+Nada para digitar. Instale/ative e use.
+
+| Provedor | O que é | Como ativa |
+|---|---|---|
+| **Ollama (local)** | IA que roda no seu PC (100% offline) | Instale https://ollama.com — o KFAI baixa o modelo certo (usado nos perfis `cloud-plus-local` e `full-local`) |
+| **SearXNG** | Busca na web privada | Self-hosted: https://github.com/searxng/searxng |
+| **Edge TTS** | Voz (texto→fala) | Ative no 9Router (gratuito) |
+| **Coqui TTS** | Voz self-hosted | https://github.com/coqui-ai/TTS |
+| **Tortoise TTS** | Voz self-hosted | https://github.com/neonbjb/tortoise-tts |
+| **Local Device** | Modelos locais em geral | https://github.com/9router/local-ai-docs |
+
+---
+
+## O que já está configurado neste PC
+
+Este PC já tem as chaves destes provedores salvas no 9Router (verificado agora):
+
+`OpenRouter`, `Gemini`, `NVIDIA NIM`, `Cloudflare AI`, `Poolside`,
+`BytePlus`, `API.airforce` e `Ollama`.
+
+Os perfis do KFAI usam o combo **`todas-free`** (que já agrega 17 modelos
+gratuitos) e, para IA local, o Ollama (`qwen2.5-coder`, `llama3.2:3b`).
 
 ---
 
 ## Resumo rápido
 
-| Provedor | Link da chave | Custo |
-|---|---|---|
-| OpenRouter | https://openrouter.ai/keys | grátis (`:free` + crédito inicial) |
-| Google Gemini | https://aistudio.google.com | free tier |
-| NVIDIA NIM | https://build.nvidia.com | gratuito |
-| Cloudflare | https://dash.cloudflare.com | free tier (cota diária) |
-| API.airforce | https://api.airforce | gratuito |
-| Poolside | https://platform.poolside.ai | gratuito |
-| BytePlus ModelArk | https://console.volcengine.com/iam | cota inicial gratuita |
-| Groq | https://console.groq.com | grátis (14.400 req/dia) |
-| Cerebras | https://cloud.cerebras.ai | grátis (14.400 req/dia) |
-| Mistral | https://console.mistral.ai | 1B tokens/mês (Experiment) |
-| Mistral Codestral | https://console.mistral.ai/codestral | 2.000 req/dia |
-| Cohere | https://dashboard.cohere.com | 1.000 req/mês |
-| HuggingFace | https://huggingface.co/settings/tokens | modelos serverless grátis |
-| Vercel AI Gateway | https://vercel.com | free tier |
-| Ollama | (sem chave) | grátis |
+| Provedor | Link | Tipo | Custo |
+|---|---|---|---|
+| OpenRouter | https://openrouter.ai/keys | chave | grátis (`:free`) |
+| Google Gemini | https://aistudio.google.com/apikey | chave | free tier |
+| NVIDIA NIM | https://build.nvidia.com | chave | gratuito |
+| Cloudflare AI | https://dash.cloudflare.com | chave | free tier |
+| Groq | https://console.groq.com/keys | chave | 14.400 req/dia |
+| Cerebras | https://cloud.cerebras.ai | chave | 14.400 req/dia |
+| Mistral | https://console.mistral.ai/api-keys | chave | 1B tokens/mês |
+| Cohere | https://dashboard.cohere.com/api-keys | chave | 1.000 req/mês |
+| HuggingFace | https://huggingface.co/settings/tokens | chave | serverless grátis |
+| API.airforce | https://api.airforce | chave | gratuito |
+| Poolside | https://poolside.ai | chave | gratuito |
+| BytePlus | https://www.byteplus.com | chave | cota inicial |
+| Bazaarlink | https://bazaarlink.ai | chave | free tier |
+| Kilo Gateway | https://kilo-gateway.com | chave | free tier |
+| Vercel AI Gateway | https://vercel.com | chave | free tier |
+| Ollama Cloud | https://ollama.com | chave | free tier |
+| Gemini CLI | https://aistudio.google.com | login | grátis |
+| Kiro AI | https://kiro.ai | login | grátis |
+| Kimchi | https://kimchi.ai | login | grátis |
+| MiMo Code Free | https://xiaomi.com | sem chave | grátis |
+| OpenCode Free | https://opencode.ai | sem chave | grátis |
+| Ollama (local) | https://ollama.com | sem chave | grátis |
 
-> Quer um atalho? Rode `.\kfai-config-chaves.ps1` e ele mostra na tela quais
-> chaves ainda faltam com o link certo de cada uma.
+---
 
-## Onde colocar a sua chave
+## Onde ficam as chaves
 
-- **No 9Router**: painel em `http://localhost:20128/dashboard` → conexões →
-  escolha o provider gratuito → cole a chave. O 9Router é o **único lugar** que
-  guarda chaves de nuvem hoje; o KFAI só aponta para ele.
-
-> Nunca coloque a chave em arquivo que você vá mandar para alguém. O 9Router
-> guarda as chaves localmente, no seu PC, e o KFAI nunca as usa nem envia.
+- **No 9Router** (`http://localhost:20128/dashboard`): único lugar que guarda
+  as chaves de nuvem hoje. O KFAI só aponta para ele.
+- Nunca coloque a chave em arquivo que você vá mandar para alguém.
+- Se uma chave vazar ou parecer comprometida, **regere** no site do provedor e
+  adicione de novo com `.\kfai-config-chaves.ps1 -Adicionar`.

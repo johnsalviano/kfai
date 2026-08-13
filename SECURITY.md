@@ -39,7 +39,7 @@ Encontrou uma falha de segurança? **Não abra uma issue pública.**
 | `9Router` (porta 20128) | chaves ficam no banco local do app |
 | `Ollama` (porta 11434) | serviço local |
 | `install.ps1` | verifica origem (remote oficial), verifica hash próprio e dos downloads |
-| `kfai-config-chaves.ps1` | leitura somente-leitura do banco do 9Router, sem expor segredos |
+| `kfai-config-chaves.ps1` | sem `-Adicionar`: leitura somente-leitura do banco do 9Router, sem expor segredos; com `-Adicionar`: envia a chave digitada apenas para a API local do 9Router (`localhost:20128`), nunca grava em arquivo |
 
 ## Suporte
 

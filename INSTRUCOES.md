@@ -31,7 +31,13 @@ Os combos de nuvem (Full Cloud) precisam de pelo menos uma chave gratuita.
    ```
 
 3. Ele mostra **quais chaves faltam** e abre o site de cada fornecedor. Gere a
-   chave de graça e **cole no 9Router** (painel em
+   chave de graça e rode o fluxo automático para salvá-la:
+
+   ```powershell
+   .\kfai-config-chaves.ps1 -Adicionar
+   ```
+
+   (alternativa manual: colar a chave no 9Router, painel em
    `http://localhost:20128/dashboard` → conexões).
 4. Volte ao assistente e confirme; ele só sai quando estiver tudo certo.
 

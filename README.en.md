@@ -218,7 +218,7 @@ revert).
 - [What is KFAI](docs/O-QUE-E-KFAI.md) *(in Portuguese)*
 - [Setup guide](docs/GUIA-CONFIGURACAO.md) *(in Portuguese)*
 - [Free API keys guide](docs/GUIA-CHAVES-GRATIS.md) *(in Portuguese)* — how to get a free API key from each provider
-- `kfai-config-chaves.ps1` — helper that shows which keys are missing and opens each provider's site
+- `kfai-config-chaves.ps1` — helper that shows which keys are missing, opens each provider's site and, with `-Adicionar`, saves the key straight into the 9Router
 - [Models by hardware](docs/MODELOS-POR-HARDWARE.md) *(in Portuguese)* — which local model to download on your PC
 - [Credits](docs/CREDITOS.md) *(in Portuguese)* — who made each tool
 

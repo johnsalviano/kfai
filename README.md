@@ -215,7 +215,7 @@ abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
 - [Guia de configuração](docs/GUIA-CONFIGURACAO.md)
 - [Guia de chaves gratuitas](docs/GUIA-CHAVES-GRATIS.md) — como gerar sua API key grátis de cada provedor
-- `kfai-config-chaves.ps1` — assistente que mostra quais chaves faltam e abre o site de cada provedor
+- `kfai-config-chaves.ps1` — assistente que mostra quais chaves faltam, abre o site de cada provedor e, com `-Adicionar`, salva a chave direto no 9Router
 - [Modelos por hardware](docs/MODELOS-POR-HARDWARE.md) — qual modelo local baixar no seu PC
 - [Créditos](docs/CREDITOS.md) — quem fez cada ferramenta
 
