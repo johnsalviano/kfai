@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 
   <!--
@@ -43,6 +43,7 @@
     <Property Id="KF_INSTALL_AIONUI"    Value="1" Secure="yes" />
     <Property Id="KF_INSTALL_AUTOSTART" Value="1" Secure="yes" />
     <Property Id="KF_INSTALL_SHORTCUTS" Value="1" Secure="yes" />
+    <Property Id="WIXUI_DONTVALIDATEPATH" Value="1" />
 
     <ui:WixUI Id="WixUI_KFAI" InstallDirectory="INSTALLFOLDER" />
 
@@ -54,24 +55,24 @@
     -->
 
     <CustomAction Id="SetKfaiInstallData"
-                  Property="KfaiInstallData"
+                  Property="RunKfaiInstaller"
                   Value="[INSTALLFOLDER]01-install.ps1;[KF_INSTALL_OLLAMA];[KF_INSTALL_OPENCODE];[KF_INSTALL_AIONUI];[KF_INSTALL_AUTOSTART]"
                   Execute="immediate" />
 
     <CustomAction Id="RunKfaiInstaller"
-                  Property="KfaiInstallData"
+                  Directory="SystemFolder"
                   ExeCommand="powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Normal -Command &quot;&amp; { param($d); $p,$opts = $d -split ';',2; &amp; $p -MsiOptions $opts } '[CustomActionData]'&quot;"
                   Execute="deferred"
                   Impersonate="yes"
                   Return="check" />
 
     <CustomAction Id="SetKfaiUninstallData"
-                  Property="KfaiUninstallData"
+                  Property="RunKfaiUninstaller"
                   Value="[INSTALLFOLDER]09-kfai-desinstalar.ps1"
                   Execute="immediate" />
 
     <CustomAction Id="RunKfaiUninstaller"
-                  Property="KfaiUninstallData"
+                  Directory="SystemFolder"
                   ExeCommand="powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command &quot;&amp; '[CustomActionData]' -SoKfai&quot;"
                   Execute="deferred"
                   Impersonate="yes"

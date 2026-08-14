@@ -410,7 +410,10 @@ function Ensure-NodeJs {
   return $false
 }
 
-if(-not (Test-OfficialOrigin)){ exit 1 }
+# Origem verificada (git remote) so quando rodado como script avulso.
+# No MSI oficial (KFAI-Instalador.msi) a origem ja e garantida pelo pacote,
+# e na pasta instalada nao ha repositorio git — pular para nao travar.
+if(-not $MsiOptions -and -not (Test-OfficialOrigin)){ exit 1 }
 
 if(-not (Ensure-NodeJs)){ Write-Host "Impossivel continuar sem Node.js. Abra um terminal novo apos instalar e tente de novo." -ForegroundColor Red; exit 1 }
 
