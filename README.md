@@ -38,16 +38,20 @@ te ajuda a otimizar seu próprio computador para aproveitá-las melhor.
 
 ## 🚀 Como instalar
 
-Você pode rodar o instalador de **duas formas** — escolha a que preferir:
+Você pode rodar o instalador de **três formas** — escolha a que preferir:
 
 | Prefere | Faça |
 |---|---|
 | Script (transparente, dá para ler tudo) | `.\01-install.ps1` no PowerShell |
 | Executável (não depende da Execution Policy) | baixe o `KFAI-Instalador.exe` na página de [releases](https://github.com/johnsalviano/kfai/releases) e dê dois cliques |
+| Instalador MSI (wizard gráfico em português, com opções na tela) | baixe o `KFAI-Instalador.msi` na página de [releases](https://github.com/johnsalviano/kfai/releases) e dê dois cliques |
 
-> O executável é apenas o instalador compilado — o kit em si continua sendo
+> Os executáveis são apenas o instalador compilado — o kit em si continua sendo
 > scripts abertos (você pode ler tudo antes de usar). O `.exe` existe para quem
-> tem o PowerShell com políticas de execução que bloqueiam scripts.
+> tem o PowerShell com políticas de execução que bloqueiam scripts; o `.msi`
+> adiciona um wizard gráfico que permite marcar/desmarcar o que instalar
+> (Ollama, Opencode, AionUi, iniciar com o Windows e atalhos) e desinstalar
+> pelo Painel de Controle.
 
 Antes, instale as dependências:
 
@@ -64,8 +68,8 @@ administrador e sem baixar nada duas vezes.
 
 | Combo | O que é | Quando usar |
 |---|---|---|
-| **Full Cloud** | só IAs gratuitas na nuvem (Gemini, OpenRouter :free, NVIDIA NIM…) | PC fraco, quer usar a IA da nuvem |
-| **Cloud + Local** | nuvem primeiro; se o limite acabar, usa IA local | equilíbrio, quase sempre |
+| **Full Cloud** | IAs gratuitas na nuvem (Gemini, OpenRouter :free, NVIDIA NIM…) | Quase sempre; atende bem PCs sem suporte a IA local |
+| **Cloud + Local** | nuvem primeiro; se o limite acabar, usa IA local | **Padrão** — melhor equilíbrio, atende os dois mundos |
 | **Full Local** | 100% offline (Ollama) | sem internet ou por privacidade; só se seu PC aguentar |
 
 O instalador do KFAI já deixa os combos prontos: adiciona o **provider `kfai`**
@@ -74,15 +78,12 @@ AionUi, o `04-kfai-aionui-combos.ps1` adiciona o mesmo no app e remove perfis pa
 
 Também há arquivos prontos para configurar à mão na pasta `config/opencode/`:
 
-| Prefere | Arquivos |
+| Uso | Arquivos |
 |---|---|
-| Roteador próprio (sem 9Router ligado) | `router-full-cloud.json`, `router-cloud-plus-local.json`, `router-full-local.json` |
-| 9Router | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
+| **Padrão (via 9Router)** — chaves no dashboard do 9Router | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
+| **Avançado (direto no router KFAI)** — provedores diretos no `router.conf` | `router-full-cloud.json`, `router-cloud-plus-local.json`, `router-full-local.json` |
 
-**Roteador próprio:** rode `python router.py`, preencha `router.conf` (copie o
-`.example`), escolha por rota `full` (texto intacto), `eco` (resume histórico
-antigo para economizar tokens) ou `auto` (o roteador decide por heurística: tema
-complexo → `full`, pergunta simples → `eco`). O 9Router fica só para quem preferir ele.
+**Router KFAI (porta 20129):** é o gateway padrão. Ele encaminha para o **9Router (porta 20128)** como nuvem e para o **Ollama (porta 11434)** como reserva local. Os combos padrão usam o 9Router; as configs `router-*.json` são para quem quer configurar provedores diretos no `router.conf` (sem 9Router).
 
 Os **3 combos padrão** já vêm prontos no `router.conf.example`. Cada linha é um
 "uplink" (provedor); linhas com a mesma rota formam a lista de fallback:
@@ -210,6 +211,31 @@ agente SEM launcher e mesmo assim ter os serviços, ligue manualmente com
 **Modo "sempre ligado" (opcional):** se preferir que tudo suba no login sem
 abrir agente, rode `.\05-kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 
+## 🔄 Atualizar e desinstalar
+
+O instalador **nunca cria uma segunda cópia**: se um programa já está instalado,
+ele é reutilizado. E sempre que houver versão nova, ele pergunta (ou atualiza
+sozinho com `-Atualizar`):
+
+```powershell
+.\01-install.ps1            # pergunta antes de atualizar o que tiver versão nova
+.\01-install.ps1 -Atualizar # atualiza direto, sem perguntar (Ollama, opencode, 9Router, AionUi)
+.\01-install.ps1 -Limpo     # apaga a config antiga do KFAI e configura do zero (resolve bug)
+```
+
+`-Limpo` resolve config quebrada **sem apagar suas chaves (9Router) nem os modelos
+baixados (Ollama)**.
+
+Quer remover tudo? Rode o desinstalador guiado:
+
+```powershell
+.\09-kfai-desinstalar.ps1           # pergunta o que remover (configs + apps)
+.\09-kfai-desinstalar.ps1 -SoKfai   # remove só as configs do KFAI, mantém os apps
+.\09-kfai-desinstalar.ps1 -Tudo     # remove configs e desinstala os apps, sem perguntar
+.\09-kfai-desinstalar.ps1 -Limpo    # desinstalação LIMPA: apaga também backups antigos,
+                                    # temporários, 9router-src, modelos do Ollama e dados do AionUi
+```
+
 ## 📚 Documentação
 
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
@@ -317,12 +343,12 @@ O roteador próprio também se protege contra abuso:
   que não conheça o token.
 
 > **Hash do `01-install.ps1` atual (confira antes de rodar):**<br>
-> `A5D93D321264ECC10695618F986625D3ACF704020B308CF4B664C9E0B8C3513B`<br>
+> `0433609BC0A95CA871DE30328FC92CFC21E27DEEC10106D847B5D0FE3E53CAC9`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 
 > **Hash do `KFAI-Instalador.exe` atual (confira antes de rodar):**<br>
-> `3C0142A100547FFF4A80DD910B00385C9B3BD0304E10A7E0E8958F4D01FD7A2C`<br>
+> `0A3A3B716204AC00D61597F8E031B7A4A5C303D92901A747CE9DF6923B6B3F66`<br>
 > *(se você baixou o executável, confira **este** valor — o executável imprime o
 > hash do `.exe` no final, não o do script)*
 

@@ -47,3 +47,7 @@ logs/
 *.lnk
 # Executavel compilado (artefato de build - vai so para a pagina de releases)
 KFAI-Instalador.exe
+KFAI-Instalador.msi
+# Build do MSI (WiX): payload copiado e Payload.wxs sao gerados pelo script
+build/msi/staging/
+build/msi/Payload.wxs

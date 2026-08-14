@@ -13,6 +13,8 @@ Notas para agentes de IA que trabalham neste repositório.
 ## Estrutura
 Executáveis na ordem de uso (o número é a sequência):
 - `01-install.ps1` — instalador guiado (pt-BR), detecta hardware, escolhe modelo local.
+  Com `-Atualizar` sobe de versão no lugar (Ollama/opencode/9Router/AionUi), nunca duplica.
+  Com `-Limpo` remove a config antiga do KFAI e configura do zero (mantém chaves e modelos).
   (versão compilada: `KFAI-Instalador.exe`, gerado por `build/build-instalador.ps1`).
 - `02-kfai-config-chaves.ps1` — assistente de chaves gratuitas (salva direto no 9Router).
 - `03-kfai-config-provider-nodes.ps1` — provedores fora do catálogo do 9Router (opcional).
@@ -20,6 +22,10 @@ Executáveis na ordem de uso (o número é a sequência):
 - `05-kfai-start.ps1` — liga/desliga roteador + 9Router + Ollama (ou `-Register` no login).
 - `06-kfai-launch.ps1` — abre o agente (opencode/aionui/hermes) com os serviços certos.
 - `07-KFAI-Abrir-Opencode.vbs` e `08-KFAI-Abrir-AionUi.vbs` — atalhos de dois cliques.
+- `09-kfai-desinstalar.ps1` — desinstalador guiado: para serviços, tira autostart,
+  restaura a config do opencode e oferece desinstalar cada app (`-SoKfai` só config,
+  `-Tudo` desinstala tudo, `-Limpo` apaga também backups, temporários, 9router-src,
+  modelos do Ollama, dados do AionUi e a própria pasta).
 
 Outros:
 - `config/opencode/` — 3 combos: `full-cloud.json`, `cloud-plus-local.json`, `full-local.json`.

@@ -1,0 +1,87 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <!--
+    KFAI - Kit de Ferramentas de Agente de IA
+    Pacote MSI (instalador com wizard grafico).
+    Gere o Payload.wxs (componentes de arquivo) com .\build\build-msi.ps1
+  -->
+  <Package Name="KFAI"
+           Manufacturer="KFAI"
+           Version="$(var.Version)"
+           Language="1046"
+           UpgradeCode="CF196619-57D3-4E02-A4E0-B46767447488"
+           ProductCode="CE615709-43FE-40AC-BFAB-27E4D62B3EA4"
+           Scope="perUser">
+    <SummaryInformation Description="Kit de Ferramentas de Agente de IA - IA gratuita no seu PC e na nuvem"
+                        Keywords="KFAI;IA;Ollama;9Router;opencode;gratis" />
+    <MajorUpgrade DowngradeErrorMessage="Uma versao mais nova do KFAI ja esta instalada." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- destino padrao: pasta do usuario (sem admin). O wizard deixa trocar. -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="INSTALLFOLDER" Name="KFAI" />
+    </StandardDirectory>
+
+    <!-- atalhos no menu iniciar do usuario -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="KF_StartMenu" Name="KFAI" />
+    </StandardDirectory>
+
+    <Feature Id="Main"
+             Title="KFAI"
+             Description="Kit de Ferramentas de Agente de IA"
+             Level="1">
+      <ComponentGroupRef Id="KfaiPayloadFiles" />
+      <ComponentGroupRef Id="KfaiShortcuts" />
+    </Feature>
+
+    <!-- opcoes marcadas no wizard (default: tudo ligado). Publicas para
+         sobreviver do UI para a sequencia de instalacao. -->
+    <Property Id="KF_INSTALL_OLLAMA"    Value="1" Secure="yes" />
+    <Property Id="KF_INSTALL_OPENCODE"  Value="1" Secure="yes" />
+    <Property Id="KF_INSTALL_AIONUI"    Value="1" Secure="yes" />
+    <Property Id="KF_INSTALL_AUTOSTART" Value="1" Secure="yes" />
+    <Property Id="KF_INSTALL_SHORTCUTS" Value="1" Secure="yes" />
+
+    <ui:WixUI Id="WixUI_KFAI" InstallDirectory="INSTALLFOLDER" />
+
+    <!-- ================= custom actions =================
+      Fluxo: no fim da instalacao, abre uma janela de console e roda o
+      01-install.ps1 (baixa/instala Ollama, Node, opencode, 9Router, AionUi)
+      com as opcoes marcadas. Na desinstalacao roda o 09-kfai-desinstalar.ps1
+      (modo -SoKfai) para limpar configs e autostart antes de apagar os arquivos.
+    -->
+
+    <CustomAction Id="SetKfaiInstallData"
+                  Property="KfaiInstallData"
+                  Value="[INSTALLFOLDER]01-install.ps1;[KF_INSTALL_OLLAMA];[KF_INSTALL_OPENCODE];[KF_INSTALL_AIONUI];[KF_INSTALL_AUTOSTART]"
+                  Execute="immediate" />
+
+    <CustomAction Id="RunKfaiInstaller"
+                  Property="KfaiInstallData"
+                  ExeCommand="powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Normal -Command &quot;&amp; { param($d); $p,$opts = $d -split ';',2; &amp; $p -MsiOptions $opts } '[CustomActionData]'&quot;"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="check" />
+
+    <CustomAction Id="SetKfaiUninstallData"
+                  Property="KfaiUninstallData"
+                  Value="[INSTALLFOLDER]09-kfai-desinstalar.ps1"
+                  Execute="immediate" />
+
+    <CustomAction Id="RunKfaiUninstaller"
+                  Property="KfaiUninstallData"
+                  ExeCommand="powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -Command &quot;&amp; '[CustomActionData]' -SoKfai&quot;"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="check" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SetKfaiInstallData" Before="RunKfaiInstaller" Condition="NOT Installed AND NOT REMOVE" />
+      <Custom Action="RunKfaiInstaller" After="InstallFiles" Condition="NOT Installed AND NOT REMOVE" />
+      <Custom Action="SetKfaiUninstallData" Before="RunKfaiUninstaller" Condition="REMOVE" />
+      <Custom Action="RunKfaiUninstaller" Before="RemoveFiles" Condition="REMOVE" />
+    </InstallExecuteSequence>
+  </Package>
+</Wix>

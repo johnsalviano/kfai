@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="pt-BR">
+  <String Id="KfaiOptionsDlg_Title" Value="Opções de instalação" />
+  <String Id="KfaiOptionsDlgTitle" Value="Escolha o que instalar" />
+  <String Id="KfaiOptionsDlgDescription" Value="Selecione os componentes que deseja instalar. Você pode alterar depois pelo menu de configuração do KFAI." />
+  <String Id="KfaiOptionsDlgBannerBitmap" Value="WixUI_Bmp_Banner" />
+  <String Id="KfaiOptionsDlgCheckOllama" Value="Ollama + modelo local (IA no seu PC)" />
+  <String Id="KfaiOptionsDlgCheckOpencode" Value="OpenCode (terminal + app gráfico)" />
+  <String Id="KfaiOptionsDlgCheckAionUi" Value="AionUi (interface gráfica)" />
+  <String Id="KfaiOptionsDlgCheckAutostart" Value="Rodar o 9Router ao ligar o PC" />
+  <String Id="KfaiOptionsDlgCheckShortcuts" Value="Atalhos no Menu Iniciar" />
+</WixLocalization>

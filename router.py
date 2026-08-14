@@ -340,15 +340,63 @@ class Handler(BaseHTTPRequestHandler):
             items = [{"id": r, "object": "model", "created": 0, "owned_by": "kfai-router"}
                      for r in ROUTES]
             self._send(json.dumps({"object": "list", "data": items}))
+        elif self.path.startswith("/v1/models/"):
+            self._proxy_models_discovery()
         elif self.path == "/healthz":
             self._send(json.dumps({"ok": True, "rotas": len(ROUTES)}))
         else:
             self.send_error(404)
 
+    def _proxy_models_discovery(self):
+        """Proxy /v1/models/<kind> and /v1/models/info to 9Router uplink."""
+        target = self._get_9router_base()
+        if not target:
+            self.send_error(503, "9Router uplink nao configurado")
+            return
+        url = target.rstrip("/") + self.path
+        try:
+            req = urllib.request.Request(url, headers={"Authorization": self.headers.get("Authorization", "")})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = resp.read()
+                self._send(data.decode(), resp.getheader("Content-Type", "application/json"))
+        except urllib.error.HTTPError as e:
+            self.send_error(e.code, e.read().decode())
+        except Exception as e:
+            self.send_error(502, f"Falha ao consultar 9Router: {e}")
+
+    def _get_9router_base(self):
+        """Extrai base URL do 9Router (porta 20128) dos uplinks configurados."""
+        for uplinks in ROUTES.values():
+            for up in uplinks:
+                if "20128" in up["base"]:
+                    return up["base"].rstrip("/v1")
+        return None
+
     def do_POST(self):
-        if self.path != "/v1/chat/completions":
+        # Endpoints que fazem proxy direto pro 9Router (sem fallback KFAI)
+        proxy_endpoints = {
+            "/v1/images/generations",
+            "/v1/audio/speech",
+            "/v1/audio/transcriptions",
+            "/v1/embeddings",
+            "/v1/search",
+            "/v1/web/fetch",
+            "/v1/videos/generations",
+            "/v1/videos/edits",
+            "/v1/videos/extensions",
+        }
+
+        if self.path in proxy_endpoints:
+            self._proxy_to_9router()
+            return
+
+        if self.path == "/v1/messages":
+            # Anthropic format: roteia igual chat (usa route do body.model)
+            pass
+        elif self.path != "/v1/chat/completions":
             self.send_error(404)
             return
+
         # --- seguranca local: nada de abuso por sites maliciosos / processos locais ---
         # 1) Origin: requests vindos de paginas web so sao aceitos se forem do proprio
         #    localhost. Qualquer outro Origin (site na internet) e bloqueado com 403.
@@ -378,7 +426,10 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:  # noqa: BLE001 - entrada externa: so queremos um 400
             self.send_error(400, "Corpo JSON invalido")
             return
-        route = ROUTES.get(body.get("model", ""))
+
+        # Para /v1/messages, o model vem no body tambem
+        model_key = body.get("model", "")
+        route = ROUTES.get(model_key)
         if not route:
             self.send_error(404, "Rota nao encontrada. Confira router.conf.")
             return
@@ -397,7 +448,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_header("Content-Length", str(len(cached)))
                 self.end_headers()
                 self.wfile.write(cached)
-            log_event({"t": time.time(), "rota": body.get("model"), "cache": True,
+            log_event({"t": time.time(), "rota": model_key, "cache": True,
                        "ms": round((time.time() - t0) * 1000)})
             return
 
@@ -405,12 +456,12 @@ class Handler(BaseHTTPRequestHandler):
             resp, up, mode = call_upl(route, body)
         except NotRetryable as e:
             self.send_error(e.status or 400, f"Uplink rejeitou: {e}")
-            log_event({"t": time.time(), "rota": body.get("model"), "erro": e.status,
+            log_event({"t": time.time(), "rota": model_key, "erro": e.status,
                        "nao_retryable": True, "ms": round((time.time() - t0) * 1000)})
             return
         except Retryable as e:
-            self.send_error(e.status or 502, f"Todos os uplinks de {body.get('model','')} falharam")
-            log_event({"t": time.time(), "rota": body.get("model"), "erro": e.status,
+            self.send_error(e.status or 502, f"Todos os uplinks de {model_key} falharam")
+            log_event({"t": time.time(), "rota": model_key, "erro": e.status,
                        "ms": round((time.time() - t0) * 1000)})
             return
 
@@ -427,7 +478,7 @@ class Handler(BaseHTTPRequestHandler):
                 total += len(chunk)
                 self.wfile.write(chunk)
                 self.wfile.flush()
-            log_event({"t": time.time(), "rota": body.get("model"), "uplink": uplink_id(up),
+            log_event({"t": time.time(), "rota": model_key, "uplink": uplink_id(up),
                        "modo": mode, "stream": True, "bytes": total,
                        "ms": round((time.time() - t0) * 1000)})
         else:
@@ -438,11 +489,39 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
             self.wfile.write(data)
-            log_event({"t": time.time(), "rota": body.get("model"), "uplink": uplink_id(up),
+            log_event({"t": time.time(), "rota": model_key, "uplink": uplink_id(up),
                        "modo": mode, "cache": False, "bytes": len(data),
                        "ms": round((time.time() - t0) * 1000)})
 
-    def _send(self, payload):
+    def _proxy_to_9router(self):
+        """Proxy direto para o 9Router (pass-through) para endpoints de capacidade."""
+        target = self._get_9router_base()
+        if not target:
+            self.send_error(503, "9Router uplink nao configurado")
+            return
+        url = target.rstrip("/") + self.path
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length else b""
+            headers = {
+                "Content-Type": self.headers.get("Content-Type", "application/json"),
+                "Authorization": self.headers.get("Authorization", ""),
+            }
+            req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                data = resp.read()
+                ct = resp.getheader("Content-Type", "application/json")
+                self.send_response(resp.status)
+                self.send_header("Content-Type", ct)
+                self.send_header("Content-Length", str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+        except urllib.error.HTTPError as e:
+            self.send_error(e.code, e.read().decode())
+        except Exception as e:
+            self.send_error(502, f"Falha no proxy 9Router: {e}")
+
+    def _send(self, payload, content_type="application/json"):
         data = payload.encode()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")

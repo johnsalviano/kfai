@@ -64,8 +64,8 @@ required, and nothing is downloaded twice.
 
 | Combo | What it is | When to use it |
 |---|---|---|
-| **Full Cloud** | free cloud AIs only (Gemini, OpenRouter :free, NVIDIA NIM…) | modest PC, you want cloud AI |
-| **Cloud + Local** | cloud first; if the limit runs out, uses local AI | balance, almost always |
+| **Full Cloud** | free cloud AIs (Gemini, OpenRouter :free, NVIDIA NIM…) | almost always; works well on PCs without local AI support |
+| **Cloud + Local** | cloud first; if the limit runs out, uses local AI | **Default** — best balance, serves both worlds |
 | **Full Local** | 100% offline (Ollama) | no internet or for privacy; only if your PC can handle it |
 
 The KFAI installer already sets the combos up: it adds the **`kfai`** provider
@@ -75,15 +75,12 @@ profiles.
 
 There are also ready-made files for manual setup in `config/opencode/`:
 
-| Prefer | Files |
+| Use case | Files |
 |---|---|
-| Own router (no 9Router running) | `router-full-cloud.json`, `router-cloud-plus-local.json`, `router-full-local.json` |
-| 9Router | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
+| **Standard (via 9Router)** — keys in 9Router dashboard | `full-cloud.json`, `cloud-plus-local.json`, `full-local.json` |
+| **Advanced (direct in KFAI router)** — direct providers in `router.conf` | `router-full-cloud.json`, `router-cloud-plus-local.json`, `router-full-local.json` |
 
-**Own router:** run `python router.py`, fill in `router.conf` (copy the
-`.example`), choose by route `full` (text kept intact), `eco` (summarizes old
-history to save tokens) or `auto` (the router decides by heuristics: complex
-topic → `full`, simple question → `eco`). 9Router stays for those who prefer it.
+**KFAI Router (port 20129):** the default gateway. It forwards to **9Router (port 20128)** as cloud and **Ollama (port 11434)** as local fallback. Standard combos use 9Router; `router-*.json` configs are for advanced users who want direct provider config in `router.conf` (bypassing 9Router).
 
 The **3 default combos** already come ready in `router.conf.example`. Each line
 is an "uplink" (provider); lines with the same route form the fallback list:
@@ -213,6 +210,31 @@ agent WITHOUT the launcher and still have the services, start them manually with
 without opening an agent, run `.\05-kfai-start.ps1 -Register` (and `-Unregister` to
 revert).
 
+## Updating and uninstalling
+
+The installer **never creates a second copy**: if a program is already installed
+it is reused. Whenever a newer version exists it asks first (or updates
+automatically with `-Atualizar`):
+
+```powershell
+.\01-install.ps1            # asks before updating anything that has a newer version
+.\01-install.ps1 -Atualizar # updates directly, no prompts (Ollama, opencode, 9Router, AionUi)
+.\01-install.ps1 -Limpo     # wipes the old KFAI config and configures from scratch (fixes bugs)
+```
+
+`-Limpo` fixes a broken config **without touching your keys (9Router) or downloaded
+models (Ollama)**.
+
+Want to remove everything? Run the guided uninstaller:
+
+```powershell
+.\09-kfai-desinstalar.ps1           # asks what to remove (configs + apps)
+.\09-kfai-desinstalar.ps1 -SoKfai   # removes only KFAI config, keeps the apps
+.\09-kfai-desinstalar.ps1 -Tudo     # removes config and uninstalls the apps, no prompts
+.\09-kfai-desinstalar.ps1 -Limpo    # CLEAN uninstall: also removes old backups, temp
+                                    # files, 9router-src, Ollama models and AionUi data
+```
+
 ## Documentation
 
 - [What is KFAI](docs/O-QUE-E-KFAI.md) *(in Portuguese)*
@@ -322,12 +344,12 @@ The own router also protects against abuse:
   doesn't know the token.
 
 > **Current `01-install.ps1` hash (check before running):**<br>
-> `A5D93D321264ECC10695618F986625D3ACF704020B308CF4B664C9E0B8C3513B`<br>
+> `0433609BC0A95CA871DE30328FC92CFC21E27DEEC10106D847B5D0FE3E53CAC9`<br>
 > *(the script itself prints the same value at the end of the install — if it
 > diverges, the file may have been tampered with and **must not** be run)*
 
 > **Current `KFAI-Instalador.exe` hash (check before running):**<br>
-> `3C0142A100547FFF4A80DD910B00385C9B3BD0304E10A7E0E8958F4D01FD7A2C`<br>
+> `0A3A3B716204AC00D61597F8E031B7A4A5C303D92901A747CE9DF6923B6B3F66`<br>
 > *(if you downloaded the executable, check **this** value — the executable
 > prints the `.exe` hash at the end, not the script's)*
 

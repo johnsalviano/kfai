@@ -3,10 +3,17 @@
   Instalador (pt-BR, guiado)
   Nao instala Ollama em PC fraco demais. Detecta hardware e escolhe modelo certo.
   Nao toca em chaves de ninguem - tudo nasce com SUA_CHAVE_AQUI.
+  -Atualizar: sobe de versao (no lugar) os programas que ja estao instalados
+  e tiverem versao nova. NUNCA instala uma segunda copia do mesmo programa.
+  -Limpo: apaga a config/combos ANTIGOS do KFAI e configura do zero (resolve
+  bug de configuracao). NAO apaga suas chaves do 9Router nem os modelos baixados.
 #>
 [CmdletBinding()]
 param(
-  [switch]$SkipOllama
+  [switch]$SkipOllama,
+  [switch]$Atualizar,
+  [switch]$Limpo,
+  [string]$MsiOptions
 )
 $ErrorActionPreference = 'Stop'
 
@@ -20,6 +27,20 @@ if(-not $Root){
   try { $Root = Split-Path -Parent ([Diagnostics.Process]::GetCurrentProcess().MainModule.FileName) } catch {}
 }
 if(-not $Root){ $Root = Get-Location }
+
+# MSI (KFAI-Instalador.msi): recebe as opcoes marcadas no wizard como
+# "OLLAMA;OPENCODE;AIONUI;AUTOSTART" (cada campo "1" = marcado). Fora do MSI
+# (rodado na mao), $MsiOptions fica vazio e o comportamento nao muda.
+$SkipOpencode  = $false
+$SkipAionUi    = $false
+$SkipAutostart = $false
+if($MsiOptions){
+  $opt = $MsiOptions -split ';'
+  if($opt[0] -ne '1'){ $SkipOllama = $true }
+  if($opt[1] -ne '1'){ $SkipOpencode = $true }
+  if($opt[2] -ne '1'){ $SkipAionUi = $true }
+  if($opt[3] -ne '1'){ $SkipAutostart = $true }
+}
 
 $CanonicalRepoUrl = 'https://github.com/johnsalviano/kfai'
 
@@ -550,6 +571,156 @@ function Test-VersionOutdated {
   return $false
 }
 
+# --- versao do Ollama instalado (cliente) ---
+function Get-OllamaVersion {
+  $out = (& ollama --version 2>$null) -join "`n"
+  $m = $out | Select-String -Pattern 'version is\s+(v?[\d.]+)' | Select-Object -First 1
+  if($m){ return $m.Matches[0].Groups[1].Value.TrimStart('v') }
+  return ''
+}
+
+# --- versao do 9Router instalado via npm global ---
+function Get-NineRouterVersion {
+  $out = (& npm ls -g 9router --depth=0 2>$null) -join "`n"
+  $m = $out | Select-String -Pattern '9router@([\w.\-]+)' | Select-Object -First 1
+  if($m){ return $m.Matches[0].Groups[1].Value }
+  return ''
+}
+
+# --- pergunta se quer atualizar (s/N). Em modo -Atualizar nunca pergunta. ---
+function Confirm-Update([string]$Name,[string]$Ver,[string]$Latest){
+  try { $r = Read-Host "Atualizar $Name ($Ver -> $Latest) agora? (s/N)" } catch { $r = '' }
+  return ($r -match '^(s|sim|y|yes)$')
+}
+
+# --- atualiza (NO LUGAR) os programas que tiverem versao nova ---
+# Nunca instala segunda copia: Ollama/AionUi/OpenCode Desktop usam o instalador
+# oficial (que substitui a instalacao existente); opencode/9Router usam npm -g
+# (que substitui a versao global). Com -Atualizar atualiza sem perguntar.
+function Update-KfaiTools {
+  param([switch]$Auto)
+  $atualizado = 0
+  $nenhum = $true
+
+  # Ollama
+  $oll = Test-OllamaInstalled
+  if($oll.Cmd){
+    $ver = Get-OllamaVersion
+    $latest = Get-GitHubLatestTag -Repo 'ollama/ollama'
+    if($latest -and $ver -and (Test-VersionOutdated -Installed $ver -Latest $latest)){
+      $nenhum = $false
+      Write-Host "Ollama desatualizado ($ver -> $latest)." -ForegroundColor Yellow
+      if($Auto -or (Confirm-Update 'Ollama' $ver $latest)){
+        Install-FromOfficialUrl -DisplayName "Ollama ($latest)" -Url 'https://ollama.com/download/OllamaSetup.exe' -LocalName 'OllamaSetup.exe'
+        Start-Sleep -Seconds 3
+        $v2 = Get-OllamaVersion
+        if($v2 -and -not (Test-VersionOutdated -Installed $v2 -Latest $latest)){
+          Write-Host "Ollama atualizado para $v2." -ForegroundColor Green
+          $atualizado++
+        } else {
+          Write-Host "Ollama nao confirmou a atualizacao. Baixe em https://ollama.com/download quando puder." -ForegroundColor Yellow
+        }
+      } else {
+        Write-Host "Ok, Ollama fica em $ver." -ForegroundColor DarkGray
+      }
+    } else {
+      Write-Host "Ollama atualizado ($ver)." -ForegroundColor DarkGray
+    }
+  }
+
+  # Opencode CLI (npm -g substitui a mesma instalacao)
+  $oc = Test-OpencodeInstalled
+  if($oc.Ok){
+    $latest = Get-OpencodeLatestVersion
+    if($latest -and (Test-VersionOutdated -Installed $oc.Version -Latest $latest)){
+      $nenhum = $false
+      Write-Host "Opencode desatualizado ($($oc.Version) -> $latest)." -ForegroundColor Yellow
+      if($Auto -or (Confirm-Update 'Opencode' $oc.Version $latest)){
+        Write-Host "Atualizando opencode para $latest..." -ForegroundColor Cyan
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        npm install -g opencode-ai@latest 2>&1 | Out-Null
+        $npmOk = ($LASTEXITCODE -eq 0)
+        $ErrorActionPreference = $prevEap
+        $v2 = (Test-OpencodeInstalled).Version
+        if($npmOk -and $v2 -and -not (Test-VersionOutdated -Installed $v2 -Latest $latest)){
+          Write-Host "Opencode atualizado para $v2." -ForegroundColor Green
+          $atualizado++
+        } else {
+          Write-Host "Opencode nao confirmou a atualizacao; tente: opencode upgrade" -ForegroundColor Yellow
+        }
+      } else {
+        Write-Host "Ok, opencode fica em $($oc.Version)." -ForegroundColor DarkGray
+      }
+    } else {
+      Write-Host "Opencode atualizado ($($oc.Version))." -ForegroundColor DarkGray
+    }
+  }
+
+  # 9Router via npm global (9router-src nao mexe: e instalacao de desenvolvedor)
+  $nine = Test-NineRouterInstalled
+  if($nine.Ok -and $nine.ViaNpm){
+    $ver = Get-NineRouterVersion
+    $latest = (& npm view 9router version 2>$null | Select-Object -Last 1)
+    if($latest){ $latest = $latest.Trim() }
+    if($latest -and $ver -and (Test-VersionOutdated -Installed $ver -Latest $latest)){
+      $nenhum = $false
+      Write-Host "9Router desatualizado ($ver -> $latest)." -ForegroundColor Yellow
+      if($Auto -or (Confirm-Update '9Router' $ver $latest)){
+        Write-Host "Atualizando 9Router para $latest..." -ForegroundColor Cyan
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        npm install -g 9router@latest 2>&1 | Out-Null
+        $npmOk = ($LASTEXITCODE -eq 0)
+        $ErrorActionPreference = $prevEap
+        $v2 = Get-NineRouterVersion
+        if($npmOk -and $v2 -and -not (Test-VersionOutdated -Installed $v2 -Latest $latest)){
+          Write-Host "9Router atualizado para $v2." -ForegroundColor Green
+          $atualizado++
+        } else {
+          Write-Host "9Router nao confirmou a atualizacao." -ForegroundColor Yellow
+        }
+      } else {
+        Write-Host "Ok, 9Router fica em $ver." -ForegroundColor DarkGray
+      }
+    } else {
+      Write-Host "9Router atualizado ($ver)." -ForegroundColor DarkGray
+    }
+  }
+
+  # AionUi (instalador oficial substitui a instalacao existente)
+  $aui = Test-AionUiInstalled
+  if($aui.Ok){
+    $latest = Get-GitHubLatestTag -Repo 'iOfficeAI/AionUi'
+    if($latest -and $aui.Version -and (Test-VersionOutdated -Installed $aui.Version -Latest $latest)){
+      $nenhum = $false
+      Write-Host "AionUi desatualizado ($($aui.Version) -> $latest)." -ForegroundColor Yellow
+      if($Auto -or (Confirm-Update 'AionUi' $aui.Version $latest)){
+        $url = "https://static.aionui.com/releases/$latest/AionUi-$latest-win-x64.exe"
+        Install-FromOfficialUrl -DisplayName "AionUi ($latest)" -Url $url -LocalName "AionUi-$latest-win-x64.exe"
+        Start-Sleep -Seconds 3
+        $v2 = (Test-AionUiInstalled).Version
+        if($v2 -and -not (Test-VersionOutdated -Installed $v2 -Latest $latest)){
+          Write-Host "AionUi atualizado para $v2." -ForegroundColor Green
+          $atualizado++
+        } else {
+          Write-Host "AionUi nao confirmou a atualizacao (ele pode atualizar pelo menu do app)." -ForegroundColor Yellow
+        }
+      } else {
+        Write-Host "Ok, AionUi fica em $($aui.Version)." -ForegroundColor DarkGray
+      }
+    } else {
+      Write-Host "AionUi atualizado ($($aui.Version))." -ForegroundColor DarkGray
+    }
+  }
+
+  if($nenhum){
+    Write-Host "Tudo na versao mais recente. Nada a atualizar." -ForegroundColor Green
+  } elseif($atualizado -gt 0){
+    Write-Host "Atualizado(s) no lugar (sem criar versao nova): $atualizado." -ForegroundColor Green
+  }
+}
+
 # --- verifica se o AionUi esta instalado e sua versao ---
 function Test-AionUiInstalled {
   $exe = "$env:LOCALAPPDATA\Programs\AionUi\AionUi.exe"
@@ -592,22 +763,27 @@ function Ensure-AionUi {
 # --- garante as CLI globais do opencode e do 9Router via npm ---
 # Node.js ja veio antes. Usa npm install -g (pacote oficial no registry).
 function Ensure-NpmDeps {
-  $oc = Test-OpencodeInstalled
-  if($oc.Ok){
-    Write-Host "OpenCode CLI OK (versao $($oc.Version))."
-  } else {
-    Write-Host "OpenCode CLI nao encontrado. Instalando via npm global..."
-    $prevEap = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    npm install -g opencode-ai 2>&1 | Out-Null
-    $npmOk = ($LASTEXITCODE -eq 0)
-    $ErrorActionPreference = $prevEap
-    if($npmOk -and (Test-OpencodeInstalled).Ok){
-      Write-Host "OpenCode CLI instalado via npm." -ForegroundColor Green
+  param([bool]$SkipOpencode = $false)
+  if(-not $SkipOpencode){
+    $oc = Test-OpencodeInstalled
+    if($oc.Ok){
+      Write-Host "OpenCode CLI OK (versao $($oc.Version))."
     } else {
-      Write-Host "Nao consegui instalar o opencode-ai via npm." -ForegroundColor Yellow
-      Write-Host "Tente depois: npm install -g opencode-ai" -ForegroundColor Yellow
+      Write-Host "OpenCode CLI nao encontrado. Instalando via npm global..."
+      $prevEap = $ErrorActionPreference
+      $ErrorActionPreference = 'Continue'
+      npm install -g opencode-ai 2>&1 | Out-Null
+      $npmOk = ($LASTEXITCODE -eq 0)
+      $ErrorActionPreference = $prevEap
+      if($npmOk -and (Test-OpencodeInstalled).Ok){
+        Write-Host "OpenCode CLI instalado via npm." -ForegroundColor Green
+      } else {
+        Write-Host "Nao consegui instalar o opencode-ai via npm." -ForegroundColor Yellow
+        Write-Host "Tente depois: npm install -g opencode-ai" -ForegroundColor Yellow
+      }
     }
+  } else {
+    Write-Host "OpenCode CLI pulado por opcao (wizard MSI)." -ForegroundColor DarkGray
   }
 
   $nine = Test-NineRouterInstalled
@@ -784,40 +960,80 @@ if($useLocal){
 }
 
 Write-Step "Passo: dependencias npm (CLI do opencode + 9Router)"
-Ensure-NpmDeps
+Ensure-NpmDeps -SkipOpencode:$SkipOpencode
 
-Write-Step "Passo: OpenCode Desktop (app grafico)"
-Ensure-OpencodeDesktop
+if(-not $SkipOpencode){
+  Write-Step "Passo: OpenCode Desktop (app grafico)"
+  Ensure-OpencodeDesktop
+} else {
+  Write-Host "OpenCode Desktop pulado por opcao (wizard MSI)." -ForegroundColor DarkGray
+}
 
-Write-Step "Passo: AionUi (interface)"
-Ensure-AionUi
+if(-not $SkipAionUi){
+  Write-Step "Passo: AionUi (interface)"
+  Ensure-AionUi
+} else {
+  Write-Host "AionUi pulado por opcao (wizard MSI)." -ForegroundColor DarkGray
+}
 
 Show-AppsReport
 
-# se o opencode estiver desatualizado, oferece atualizar na hora
-if($script:OcOutdated){
-  $ocVer = (Test-OpencodeInstalled).Version
-  $ocLatest = Get-OpencodeLatestVersion
-  Write-Host "Opencode desatualizado ($ocVer -> $ocLatest)." -ForegroundColor Yellow
-  $resp = ''
-  try { $resp = Read-Host "Atualizar agora com 'opencode upgrade'? (s/N)" } catch { $resp = '' }
-  if($resp -match '^(s|sim|y|yes)$'){
-    opencode upgrade 2>&1 | Out-Null
-    if(Test-VersionOutdated -Installed (Test-OpencodeInstalled).Version -Latest $ocLatest){
-      Write-Host "Opencode nao atualizou (talvez a instalacao via npm nao siga o binario)." -ForegroundColor Yellow
-      Write-Host "Tente: npm install -g opencode-ai@latest" -ForegroundColor Yellow
-    } else {
-      Write-Host "Opencode atualizado para $((Test-OpencodeInstalled).Version)." -ForegroundColor Green
-    }
-  } else {
-    Write-Host "Ok, fica para depois. Rode 'opencode upgrade' quando quiser." -ForegroundColor DarkGray
-  }
-}
+# atualiza (no lugar) qualquer programa que tenha versao nova; com -Atualizar
+# faz sozinho, sem perguntar. Nunca cria segunda copia do mesmo programa.
+Write-Step "Atualizacoes (sobe de versao no lugar, sem duplicar)"
+Update-KfaiTools -Auto:$Atualizar
 
 Write-Step "Combos de IA - opencode + AionUi"
 Write-Host "Vou adicionar os combos do KFAI (provider kfai) no opencode e, se possivel, no AionUi."
-Apply-OpencodeCombos
-Apply-AionUiCombos
+
+# modo limpo: remove a config/combos ANTIGOS do KFAI antes de aplicar de novo.
+# Isso resolve config bugada sem apagar chaves (9Router) nem modelos (Ollama).
+if($Limpo){
+  Write-Step "Limpeza (modo limpo) - removendo config antiga do KFAI"
+  $cleanPath = Get-OpencodeGlobalPath
+  if(Test-Path -LiteralPath $cleanPath){
+    try {
+      $cfg = Get-Content -LiteralPath $cleanPath -Raw | ConvertFrom-Json
+      if($cfg.provider -and $cfg.provider.kfai){
+        $cfg.provider.PSObject.Properties.Remove('kfai') | Out-Null
+        Write-Host "Provider 'kfai' antigo removido do opencode." -ForegroundColor DarkGray
+      }
+      if([string]$cfg.model -like 'kfai/*'){
+        $cfg.PSObject.Properties.Remove('model') | Out-Null
+        Write-Host "Modelo padrao 'kfai/...' antigo removido (sera escolhido de novo)." -ForegroundColor DarkGray
+      }
+      $cfg | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $cleanPath -Encoding utf8
+    } catch {
+      Write-Host "Nao consegui limpar a config do opencode; vou sobrescrever o provider kfai de novo." -ForegroundColor Yellow
+    }
+  }
+  $cleanBak = Join-Path (Split-Path -Parent $cleanPath) "backup"
+  Get-ChildItem -LiteralPath $cleanBak -Filter "opencode.json.bak-*" -ErrorAction SilentlyContinue |
+    ForEach-Object { Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue }
+  Write-Host "Backups antigos de config apagados." -ForegroundColor DarkGray
+  Remove-Item -LiteralPath (Join-Path $env:TEMP "Modelfile-kfai") -Force -ErrorAction SilentlyContinue
+  Write-Host "Config antiga do KFAI removida. Aplicando do zero..." -ForegroundColor Green
+}
+if(-not $SkipOpencode){
+  Apply-OpencodeCombos
+} else {
+  Write-Host "Combos do opencode pulados por opcao (wizard MSI)." -ForegroundColor DarkGray
+}
+if(-not $SkipAionUi){
+  Apply-AionUiCombos
+}
+
+# Autostart (9Router + Ollama) no login do Windows — somente quando a
+# instalacao veio do wizard MSI com a opcao marcada (padrao: marcada).
+if($MsiOptions -and -not $SkipAutostart){
+  Write-Step "Autostart no login do Windows (9Router + Ollama)"
+  $start = Join-Path $Root "05-kfai-start.ps1"
+  if(Test-Path -LiteralPath $start){
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $start -Register
+  } else {
+    Write-Host "05-kfai-start.ps1 nao encontrado; autostart nao configurado." -ForegroundColor Yellow
+  }
+}
 
 Write-Step "Chaves de IA gratuitas (9Router)"
 $cfgChaves = Join-Path $Root "02-kfai-config-chaves.ps1"

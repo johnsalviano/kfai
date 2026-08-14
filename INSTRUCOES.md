@@ -50,8 +50,8 @@ Escolha o **combo** (modo de uso) na primeira conversa com o agente:
 
 | Você quer | Combo |
 |---|---|
-| Só IAs gratuitas na nuvem (PC fraco) | `kfai/full-cloud` |
-| Nuvem primeiro, seu PC como reserva | `kfai/cloud-plus-local` |
+| IAs gratuitas na nuvem (PCs sem suporte local) | `kfai/full-cloud` |
+| Nuvem primeiro, seu PC como reserva (padrão) | `kfai/cloud-plus-local` |
 | 100% offline (requer PC capaz) | `kfai/full-local` |
 
 ### No terminal (Opencode)
@@ -78,6 +78,10 @@ Escolha o **combo** (modo de uso) na primeira conversa com o agente:
 ## Dicas
 
 - PC **básico** (menos de 3 GB de RAM): use `full-cloud`, não force IA local.
+- **Atualizar tudo** que já estiver instalado sem duplicar: `.\01-install.ps1 -Atualizar`.
+- **Config quebrada**: `.\01-install.ps1 -Limpo` (configura do zero, mantém chaves e modelos).
+- **Desinstalar**: `.\09-kfai-desinstalar.ps1` (pergunta antes de cada coisa);
+  `.\09-kfai-desinstalar.ps1 -Limpo` para remoção **limpa** (apaga tudo, até a pasta).
 - Suas chaves ficam **só na sua máquina**. Não compartilhe e não envie arquivos
   de configuração para ninguém.
 - Guias detalhados: `docs\GUIA-CHAVES-GRATIS.md` (todas as chaves grátis) e
