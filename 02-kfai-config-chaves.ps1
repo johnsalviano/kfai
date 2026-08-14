@@ -3,13 +3,13 @@
 # Para cada um que falta, mostra o link do site onde gerar a chave.
 #
 # Uso:
-#   .\kfai-config-chaves.ps1             mostra o estado e guia a configuracao
-#   .\kfai-config-chaves.ps1 -Adicionar  fluxo interativo: voce cola a chave e o
+#   .\02-kfai-config-chaves.ps1             mostra o estado e guia a configuracao
+#   .\02-kfai-config-chaves.ps1 -Adicionar  fluxo interativo: voce cola a chave e o
 #                                        script SALVA DIRETO no 9Router (API local),
 #                                        testa e opcionalmente adiciona os modelos
 #                                        ao combo "todas-free" (usado pelos perfis).
-#   .\kfai-config-chaves.ps1 -Open       abre os sites das chaves que faltam
-#   .\kfai-config-chaves.ps1 -Test       so checa o estado (nao abre nada, nao pergunta)
+#   .\02-kfai-config-chaves.ps1 -Open       abre os sites das chaves que faltam
+#   .\02-kfai-config-chaves.ps1 -Test       so checa o estado (nao abre nada, nao pergunta)
 #
 # Seguranca: o script so le (somente-leitura) o banco local do 9Router para saber
 # quais provedores ja estao configurados. A chave digitada no -Adicionar vai
@@ -154,7 +154,7 @@ function Add-ProviderKeyInteractive {
     return
   }
   if(-not (Test-Port 20128)){
-    Write-Host "O 9Router esta PARADO. Inicie primeiro com: .\kfai-start.ps1" -ForegroundColor Yellow
+    Write-Host "O 9Router esta PARADO. Inicie primeiro com: .\05-kfai-start.ps1" -ForegroundColor Yellow
     return
   }
 
@@ -299,7 +299,7 @@ $NineUp = Test-Port 20128
 
 if(-not $Db -or -not $Better){
   Write-Host "O 9Router (roteador de IA em nuvem) ainda nao esta instalado." -ForegroundColor Yellow
-  Write-Host "Rode primeiro o instalador: .\install.ps1  (ele instala o 9Router)." -ForegroundColor Yellow
+  Write-Host "Rode primeiro o instalador: .\01-install.ps1  (ele instala o 9Router)." -ForegroundColor Yellow
   Write-Host "Depois volte aqui para configurar as chaves."
   exit 1
 }
@@ -342,7 +342,7 @@ foreach($p in $Configured){
   }
 }
 
-Write-Host "Estado do 9Router: $(if($NineUp){'rodando (porta 20128)'} else {'instalado mas PARADO (inicie com kfai-start.ps1)'})" -ForegroundColor $(if($NineUp){'Green'}else{'Yellow'})
+Write-Host "Estado do 9Router: $(if($NineUp){'rodando (porta 20128)'} else {'instalado mas PARADO (inicie com 05-kfai-start.ps1)'})" -ForegroundColor $(if($NineUp){'Green'}else{'Yellow'})
 Write-Host ""
 
 if($Ok.Count -gt 0){
@@ -380,7 +380,7 @@ if($Outros.Count -gt 0){
   Write-Host ""
 }
 
-Write-Host "Depois de gerar cada chave, rode:  .\kfai-config-chaves.ps1 -Adicionar" -ForegroundColor White
+Write-Host "Depois de gerar cada chave, rode:  .\02-kfai-config-chaves.ps1 -Adicionar" -ForegroundColor White
 Write-Host "Ele salva a chave direto no 9Router e testa, sem voce abrir o painel." -ForegroundColor DarkGray
 
 $doOpen = $Open
@@ -403,7 +403,7 @@ if($Test){ exit 2 }
 
 Write-Host ""
 Write-Host "Para salvar as chaves que voce gerou, tem duas opcoes:" -ForegroundColor Cyan
-Write-Host "  1) Automatico: .\kfai-config-chaves.ps1 -Adicionar  (cola a chave, salva e testa)" -ForegroundColor White
+Write-Host "  1) Automatico: .\02-kfai-config-chaves.ps1 -Adicionar  (cola a chave, salva e testa)" -ForegroundColor White
 Write-Host "  2) Manual:     abrir o painel http://localhost:20128/dashboard e colar cada chave" -ForegroundColor White
 Write-Host ""
 $resp = ''
@@ -411,7 +411,7 @@ try { $resp = Read-Host "Quer que eu rode o -Adicionar agora? (s/N)" } catch { $
 if($resp -match '^(s|sim|y|yes)$'){
   if(-not $NineUp){
     Write-Host "O 9Router esta parado. Iniciando..." -ForegroundColor Yellow
-    $start = Join-Path $Root "kfai-start.ps1"
+    $start = Join-Path $Root "05-kfai-start.ps1"
     if(Test-Path $start){
       & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $start | Out-Null
       Start-Sleep -Seconds 3
@@ -426,7 +426,7 @@ if($resp -match '^(s|sim|y|yes)$'){
   if($resp -match '^(s|sim|y|yes)$'){
     if(-not $NineUp){
       Write-Host "O 9Router esta parado. Iniciando..." -ForegroundColor Yellow
-      $start = Join-Path $Root "kfai-start.ps1"
+      $start = Join-Path $Root "05-kfai-start.ps1"
       if(Test-Path $start){
         & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $start | Out-Null
         Start-Sleep -Seconds 3
@@ -437,5 +437,5 @@ if($resp -match '^(s|sim|y|yes)$'){
 }
 Write-Host ""
 Write-Host "Depois de colar as chaves no painel, rode de novo:" -ForegroundColor Green
-Write-Host "  .\kfai-config-chaves.ps1   (para conferir se tudo ficou certo)" -ForegroundColor Green
+Write-Host "  .\02-kfai-config-chaves.ps1   (para conferir se tudo ficou certo)" -ForegroundColor Green
 Read-Host "Pressione Enter para fechar"

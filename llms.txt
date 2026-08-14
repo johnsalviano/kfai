@@ -21,11 +21,12 @@
 
 ## Ferramentas principais
 
-- `install.ps1` / `KFAI-Instalador.exe`: instalador com detecção de hardware e verificação de hash
+- `01-install.ps1` / `KFAI-Instalador.exe`: instalador com detecção de hardware e verificação de hash
 - `router.py`: roteador de IA com fallback automático entre nuvem gratuita e IA local (porta 20129)
-- `kfai-start.ps1`: inicia o roteador + 9Router + Ollama
-- `kfai-config-chaves.ps1`: assistente que mostra quais chaves gratuitas faltam e onde gerá-las
-- `kfai-launch.ps1`: abre o opencode já configurado com os combos do KFAI
+- `05-kfai-start.ps1`: inicia o roteador + 9Router + Ollama
+- `02-kfai-config-chaves.ps1`: assistente que mostra quais chaves gratuitas faltam e onde gerá-las
+- `03-kfai-config-provider-nodes.ps1`: assistente para conectar provedores fora do catálogo do 9Router (API compatível com OpenAI/Anthropic)
+- `06-kfai-launch.ps1`: abre o opencode já configurado com os combos do KFAI
 - `config/opencode/*.json`: presets de configuração (full-cloud, cloud-plus-local, full-local)
 
 ## Outros

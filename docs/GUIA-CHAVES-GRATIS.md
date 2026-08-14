@@ -22,8 +22,8 @@ link para gerar a chave de cada um e o jeito mais fácil de configurar.
 Rode o assistente. Ele mostra o que já está configurado e o que falta:
 
 ```
-.\kfai-config-chaves.ps1            # mostra o estado
-.\kfai-config-chaves.ps1 -Adicionar # cola a chave e salva direto no 9Router
+.\02-kfai-config-chaves.ps1            # mostra o estado
+.\02-kfai-config-chaves.ps1 -Adicionar # cola a chave e salva direto no 9Router
 ```
 
 O fluxo **-Adicionar** faz tudo sozinho:
@@ -55,7 +55,7 @@ ponte, não guarda nem imprime nada.
 
 ## 1) Provedores com chave de API (grátis)
 
-Para estes, use `.\kfai-config-chaves.ps1 -Adicionar`.
+Para estes, use `.\02-kfai-config-chaves.ps1 -Adicionar`.
 
 ### OpenRouter — o mais fácil para começar
 - Agrega **centenas de modelos** num lugar só, inclusive modelos `:free`.
@@ -208,4 +208,23 @@ gratuitos) e, para IA local, o Ollama (`qwen2.5-coder`, `llama3.2:3b`).
   as chaves de nuvem hoje. O KFAI só aponta para ele.
 - Nunca coloque a chave em arquivo que você vá mandar para alguém.
 - Se uma chave vazar ou parecer comprometida, **regere** no site do provedor e
-  adicione de novo com `.\kfai-config-chaves.ps1 -Adicionar`.
+  adicione de novo com `.\02-kfai-config-chaves.ps1 -Adicionar`.
+
+---
+
+## Provedor fora do catálogo (custom)
+
+O 9Router tem uma lista de provedores prontos, mas se você usa um serviço de IA
+**que não está nessa lista** (e que aceite API no formato OpenAI ou Anthropic),
+dá para conectar mesmo assim com o assistente de **provedores custom**:
+
+```
+.\03-kfai-config-provider-nodes.ps1            # mostra os que você já cadastrou
+.\03-kfai-config-provider-nodes.ps1 -Adicionar # conecta um novo (passo a passo)
+.\03-kfai-config-provider-nodes.ps1 -Remover   # apaga um que não quer mais
+```
+
+O assistente pede o tipo do endpoint, um nome, um **prefixo** (o "nome" do
+provedor dentro do 9Router e nos combos) e o **endereço base** da API; depois
+ele testa com a sua chave e salva direto no 9Router. Nos agentes, o modelo
+aparece como `<prefixo>/<modelo>` (ex.: `meu-gw/gpt-x`).

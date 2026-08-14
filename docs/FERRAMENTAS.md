@@ -78,7 +78,7 @@ open source que já existem. Abaixo, cada uma com seu papel, versão atual
 | **Para quê** | Interface gráfica completa para configurar e usar múltiplos provedores de IA (nuvem, local, combos) num só app. |
 | **O que faz** | App Windows com gerenciador de provedores, rotação multi-chave, suporte a MCP servers, agendamento de tarefas, geração de imagens. Plataforma "Custom" para Ollama local. |
 | **Versão** | 2.1.53 (GitHub release, ago/2026). Baixado de `static.aionui.com/releases/<ver>/AionUi-<ver>-win-x64.exe`. |
-| **Config no KFAI** | Script `kfai-aionui-combos.ps1` adiciona o provider "KFAI Router" com os três combos e remove perfis pagos (Anthropic/OpenAI). |
+| **Config no KFAI** | Script `04-kfai-aionui-combos.ps1` adiciona o provider "KFAI Router" com os três combos e remove perfis pagos (Anthropic/OpenAI). |
 | **Fonte oficial** | https://github.com/iOfficeAI/AionUi · Wiki: https://github.com/iOfficeAI/AionUi/wiki/LLM-Configuration · Site: https://aionui.com |
 
 ---

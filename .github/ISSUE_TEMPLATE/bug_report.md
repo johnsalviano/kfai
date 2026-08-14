@@ -26,7 +26,7 @@ Inclua a mensagem de erro e, se possível, o trecho relevante de
 - Versão do KFAI: (v0.2.0)
 - Windows: 10 / 11
 - RAM / GPU: (ex.: 16 GB / GTX 1660)
-- Instalou via: `install.ps1` / `KFAI-Instalador.exe`
+- Instalou via: `01-install.ps1` / `KFAI-Instalador.exe`
 - Combo usado: `kfai/full-cloud` / `kfai/cloud-plus-local` / `kfai/full-local`
 
 **Contexto adicional**

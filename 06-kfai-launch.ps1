@@ -1,11 +1,11 @@
 # KFAI - Abre um agente de IA ligando router + ollama apenas enquanto o agente estiver aberto.
 # Uso:
-#   .\kfai-launch.ps1 -App aionui     abre o AionUi (espera fechar) e desliga servicos
-#   .\kfai-launch.ps1 -App opencode   abre o opencode no terminal atual
-#   .\kfai-launch.ps1 -App hermes     abre o Hermes no terminal atual
-#   .\kfai-launch.ps1 -App "C:\caminho\app.exe"  abre qualquer executavel
-#   .\kfai-launch.ps1 -App opencode -KeepOn   abre mas NAO desliga os servicos ao fechar
-#   .\kfai-launch.ps1 -App aionui -With9Router  so IA em nuvem via 9Router (desliga Ollama local)
+#   .\06-kfai-launch.ps1 -App aionui     abre o AionUi (espera fechar) e desliga servicos
+#   .\06-kfai-launch.ps1 -App opencode   abre o opencode no terminal atual
+#   .\06-kfai-launch.ps1 -App hermes     abre o Hermes no terminal atual
+#   .\06-kfai-launch.ps1 -App "C:\caminho\app.exe"  abre qualquer executavel
+#   .\06-kfai-launch.ps1 -App opencode -KeepOn   abre mas NAO desliga os servicos ao fechar
+#   .\06-kfai-launch.ps1 -App aionui -With9Router  so IA em nuvem via 9Router (desliga Ollama local)
 [CmdletBinding()]
 param(
   [string]$App = "aionui",
@@ -14,7 +14,7 @@ param(
 )
 
 $Root   = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Start  = Join-Path $Root "kfai-start.ps1"
+$Start  = Join-Path $Root "05-kfai-start.ps1"
 $StartArgs = @()
 if($With9Router){ $StartArgs += "-With9Router" }
 

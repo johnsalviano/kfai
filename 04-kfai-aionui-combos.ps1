@@ -2,9 +2,9 @@
 # Rode ESTE script DENTRO do AionUi (PowerShell do proprio app), porque ele
 # usa a CLI interna do AionUi (aioncore), que so funciona com o app aberto.
 # Uso:
-#   .\kfai-aionui-combos.ps1            aplica combos e remove perfis pagos
-#   .\kfai-aionui-combos.ps1 -SkipPagos nao toca nos perfis pagos
-#   .\kfai-aionui-combos.ps1 -Show      so mostra o estado atual
+#   .\04-kfai-aionui-combos.ps1            aplica combos e remove perfis pagos
+#   .\04-kfai-aionui-combos.ps1 -SkipPagos nao toca nos perfis pagos
+#   .\04-kfai-aionui-combos.ps1 -Show      so mostra o estado atual
 [CmdletBinding()]
 param(
   [switch]$SkipPagos,
@@ -15,7 +15,7 @@ $ErrorActionPreference = 'Stop'
 $helper = $env:AIONUI_HELPER_BIN
 if(-not $helper -or -not (Test-Path -LiteralPath $helper)){
   Write-Host "AIONUI_HELPER_BIN nao encontrado. Rode este script de DENTRO do AionUi" -ForegroundColor Red
-  Write-Host "(menu do app: abra um PowerShell do proprio AionUi e rode .\kfai-aionui-combos.ps1)." -ForegroundColor Yellow
+  Write-Host "(menu do app: abra um PowerShell do proprio AionUi e rode .\04-kfai-aionui-combos.ps1)." -ForegroundColor Yellow
   exit 1
 }
 

@@ -42,7 +42,7 @@ You can run the installer in **two ways** — pick whichever you prefer:
 
 | Prefer | Do this |
 |---|---|
-| Script (transparent, you can read everything) | `.\install.ps1` in PowerShell |
+| Script (transparent, you can read everything) | `.\01-install.ps1` in PowerShell |
 | Executable (doesn't depend on Execution Policy) | download `KFAI-Instalador.exe` from the [releases](https://github.com/johnsalviano/kfai/releases) page and double-click it |
 
 > The executable is just the installer compiled — the kit itself remains
@@ -70,7 +70,7 @@ required, and nothing is downloaded twice.
 
 The KFAI installer already sets the combos up: it adds the **`kfai`** provider
 to your `opencode.json` (Full Cloud, Cloud + Local, Full Local) and, if you use
-AionUi, `kfai-aionui-combos.ps1` adds the same inside the app and removes paid
+AionUi, `04-kfai-aionui-combos.ps1` adds the same inside the app and removes paid
 profiles.
 
 There are also ready-made files for manual setup in `config/opencode/`:
@@ -147,7 +147,7 @@ Ollama uses a **4,096-token context by default** and **silently truncates**
 anything beyond that — which makes the local agent "forget" the middle of the
 task and **tool calls fail**. KFAI solves this in three places:
 
-1. **`kfai-start.ps1`** sets `OLLAMA_KEEP_ALIVE=30m` (the model stays in RAM,
+1. **`05-kfai-start.ps1`** sets `OLLAMA_KEEP_ALIVE=30m` (the model stays in RAM,
    no 3–10s cold start per request) and `OLLAMA_NUM_PARALLEL=2`.
 2. **Own router**: when an uplink is local Ollama, the router injects
    `options.num_ctx` into the request (`KFAI_NUM_CTX`, default **65536**).
@@ -171,18 +171,18 @@ By default, nothing sits idle. The launcher starts router + Ollama **when you
 open the agent** and stops them when you close it:
 
 ```powershell
-.\kfai-launch.ps1 -App aionui      # opens AionUi
-.\kfai-launch.ps1 -App opencode    # opens opencode in the terminal
-.\kfai-launch.ps1 -App hermes      # opens Hermes
-.\kfai-launch.ps1 -App "C:\path\app.exe"   # any executable
+.\06-kfai-launch.ps1 -App aionui      # opens AionUi
+.\06-kfai-launch.ps1 -App opencode    # opens opencode in the terminal
+.\06-kfai-launch.ps1 -App hermes      # opens Hermes
+.\06-kfai-launch.ps1 -App "C:\path\app.exe"   # any executable
 ```
 
 **Using 9Router (port 20128)?** Add `-With9Router` to prefer **local** AI and
 use 9Router only as backup. The two are **never** running at the same time:
 
 ```powershell
-.\kfai-launch.ps1 -App aionui -With9Router   # prefers local; falls back to 9Router on failure
-.\kfai-launch.ps1 -App opencode -With9Router
+.\06-kfai-launch.ps1 -App aionui -With9Router   # prefers local; falls back to 9Router on failure
+.\06-kfai-launch.ps1 -App opencode -With9Router
 ```
 
 **Automatic check at startup** (the launcher decides on its own):
@@ -197,7 +197,7 @@ use 9Router only as backup. The two are **never** running at the same time:
 3. If the PC supports it: starts Ollama, tests whether it responds and has a
    model (`/api/tags`). OK → uses local. Failed → stops local and starts 9Router.
 
-`kfai-start.ps1 -Status` shows the 3 ports **and the check result** (supported or
+`05-kfai-start.ps1 -Status` shows the 3 ports **and the check result** (supported or
 not, with the paths found). To force cloud only even on a capable PC, set
 `KFAI_FORCE_NO_LOCAL=1`.
 
@@ -207,10 +207,10 @@ closes. Use `-KeepOn` to keep the services running after closing the agent.
 
 The AionUi shortcut in the Start menu already points to the launcher. To open an
 agent WITHOUT the launcher and still have the services, start them manually with
-`.\kfai-start.ps1`.
+`.\05-kfai-start.ps1`.
 
 **"Always on" mode (optional):** if you prefer everything to start at login
-without opening an agent, run `.\kfai-start.ps1 -Register` (and `-Unregister` to
+without opening an agent, run `.\05-kfai-start.ps1 -Register` (and `-Unregister` to
 revert).
 
 ## Documentation
@@ -218,13 +218,14 @@ revert).
 - [What is KFAI](docs/O-QUE-E-KFAI.md) *(in Portuguese)*
 - [Setup guide](docs/GUIA-CONFIGURACAO.md) *(in Portuguese)*
 - [Free API keys guide](docs/GUIA-CHAVES-GRATIS.md) *(in Portuguese)* — how to get a free API key from each provider
-- `kfai-config-chaves.ps1` — helper that shows which keys are missing, opens each provider's site and, with `-Adicionar`, saves the key straight into the 9Router
+- `02-kfai-config-chaves.ps1` — helper that shows which keys are missing, opens each provider's site and, with `-Adicionar`, saves the key straight into the 9Router
+- `03-kfai-config-provider-nodes.ps1` — helper to connect providers **outside the 9Router catalog** (any OpenAI- or Anthropic-compatible API), with `-Adicionar` to create/test and `-Remover` to delete
 - [Models by hardware](docs/MODELOS-POR-HARDWARE.md) *(in Portuguese)* — which local model to download on your PC
 - [Credits](docs/CREDITOS.md) *(in Portuguese)* — who made each tool
 
 ## ❓ FAQ / Troubleshooting
 
-**PowerShell blocks `install.ps1` ("cannot be loaded")?**
+**PowerShell blocks `01-install.ps1` ("cannot be loaded")?**
 Restricted execution policy. Quick fix: download `KFAI-Instalador.exe` (double-click, no policy needed) **or** run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` and reopen PowerShell.
 
 **Getting 401/403 (unauthorized) errors from the router?**
@@ -246,9 +247,9 @@ can handle it.
 Short context. KFAI already sets `num_ctx 65536` (`-64k` model). See the
 "Local AI with context that actually works" section above.
 
-**How do I keep everything always on?** `.\kfai-start.ps1 -Register` (revert: `-Unregister`).
+**How do I keep everything always on?** `.\05-kfai-start.ps1 -Register` (revert: `-Unregister`).
 
-**Nothing works and I don't know where to start?** Run `.\kfai-start.ps1 -Status`
+**Nothing works and I don't know where to start?** Run `.\05-kfai-start.ps1 -Status`
 — it shows the ports, found paths and whether your PC supports local AI.
 
 **Another question?** Open an [issue](https://github.com/johnsalviano/kfai/issues)
@@ -320,8 +321,8 @@ The own router also protects against abuse:
 - optionally requires `KFAI_ROUTER_TOKEN` to block any local process that
   doesn't know the token.
 
-> **Current `install.ps1` hash (check before running):**<br>
-> `138BDA47546FE389E98887A5B44885EA70B62ABE4C3C495BDD647BF00B1BDCEA`<br>
+> **Current `01-install.ps1` hash (check before running):**<br>
+> `A5D93D321264ECC10695618F986625D3ACF704020B308CF4B664C9E0B8C3513B`<br>
 > *(the script itself prints the same value at the end of the install — if it
 > diverges, the file may have been tampered with and **must not** be run)*
 

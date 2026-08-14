@@ -38,8 +38,9 @@ Encontrou uma falha de segurança? **Não abra uma issue pública.**
 | `router.py` (porta 20129) | só localhost; valida `Origin`; opcionalmente exige `KFAI_ROUTER_TOKEN`; limite de corpo `KFAI_MAX_BODY_BYTES`; chave sanitizada no header |
 | `9Router` (porta 20128) | chaves ficam no banco local do app |
 | `Ollama` (porta 11434) | serviço local |
-| `install.ps1` | verifica origem (remote oficial), verifica hash próprio e dos downloads |
-| `kfai-config-chaves.ps1` | sem `-Adicionar`: leitura somente-leitura do banco do 9Router, sem expor segredos; com `-Adicionar`: envia a chave digitada apenas para a API local do 9Router (`localhost:20128`), nunca grava em arquivo |
+| `01-install.ps1` | verifica origem (remote oficial), verifica hash próprio e dos downloads |
+| `02-kfai-config-chaves.ps1` | sem `-Adicionar`: leitura somente-leitura do banco do 9Router, sem expor segredos; com `-Adicionar`: envia a chave digitada apenas para a API local do 9Router (`localhost:20128`), nunca grava em arquivo |
+| `03-kfai-config-provider-nodes.ps1` | igual ao assistente de chaves: a chave de API digitada vai apenas para a API local do 9Router (`localhost:20128`), nunca é exibida nem gravada em arquivo pelo KFAI |
 
 ## Suporte
 

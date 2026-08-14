@@ -42,7 +42,7 @@ Você pode rodar o instalador de **duas formas** — escolha a que preferir:
 
 | Prefere | Faça |
 |---|---|
-| Script (transparente, dá para ler tudo) | `.\install.ps1` no PowerShell |
+| Script (transparente, dá para ler tudo) | `.\01-install.ps1` no PowerShell |
 | Executável (não depende da Execution Policy) | baixe o `KFAI-Instalador.exe` na página de [releases](https://github.com/johnsalviano/kfai/releases) e dê dois cliques |
 
 > O executável é apenas o instalador compilado — o kit em si continua sendo
@@ -70,7 +70,7 @@ administrador e sem baixar nada duas vezes.
 
 O instalador do KFAI já deixa os combos prontos: adiciona o **provider `kfai`**
 no seu `opencode.json` (Full Cloud, Cloud + Local, Full Local) e, se você usa
-AionUi, o `kfai-aionui-combos.ps1` adiciona o mesmo no app e remove perfis pagos.
+AionUi, o `04-kfai-aionui-combos.ps1` adiciona o mesmo no app e remove perfis pagos.
 
 Também há arquivos prontos para configurar à mão na pasta `config/opencode/`:
 
@@ -146,7 +146,7 @@ O Ollama usa contexto **4.096 tokens por padrão** e **trunca silenciosamente**
 o que passar disso — isso faz o agente local "esquecer" o meio da tarefa e as
 **tool calls falharem**. O KFAI resolve isso em três pontos:
 
-1. **`kfai-start.ps1`** define `OLLAMA_KEEP_ALIVE=30m` (o modelo fica na RAM,
+1. **`05-kfai-start.ps1`** define `OLLAMA_KEEP_ALIVE=30m` (o modelo fica na RAM,
    sem cold start de 3–10s a cada request) e `OLLAMA_NUM_PARALLEL=2`.
 2. **Router próprio**: quando um uplink é o Ollama local, o router injeta
    `options.num_ctx` no request (`KFAI_NUM_CTX`, padrão **65536**).
@@ -169,10 +169,10 @@ Por padrão, nada fica rodando ocioso. O launcher liga router + Ollama **quando
 você abre o agente** e desliga quando você o fecha:
 
 ```powershell
-.\kfai-launch.ps1 -App aionui      # abre o AionUi
-.\kfai-launch.ps1 -App opencode    # abre o opencode no terminal
-.\kfai-launch.ps1 -App hermes      # abre o Hermes
-.\kfai-launch.ps1 -App "C:\caminho\app.exe"   # qualquer executável
+.\06-kfai-launch.ps1 -App aionui      # abre o AionUi
+.\06-kfai-launch.ps1 -App opencode    # abre o opencode no terminal
+.\06-kfai-launch.ps1 -App hermes      # abre o Hermes
+.\06-kfai-launch.ps1 -App "C:\caminho\app.exe"   # qualquer executável
 ```
 
 **Usa o 9Router (porta 20128)?** Adicione `-With9Router` para preferir a IA
@@ -180,8 +180,8 @@ você abre o agente** e desliga quando você o fecha:
 mesmo tempo:
 
 ```powershell
-.\kfai-launch.ps1 -App aionui -With9Router   # prefere local; cai pro 9Router se falhar
-.\kfai-launch.ps1 -App opencode -With9Router
+.\06-kfai-launch.ps1 -App aionui -With9Router   # prefere local; cai pro 9Router se falhar
+.\06-kfai-launch.ps1 -App opencode -With9Router
 ```
 
 **Verificação automática no início** (o launcher decide sozinho):
@@ -195,7 +195,7 @@ mesmo tempo:
 3. Se o PC suporta: sobe o Ollama, testa se responde e tem modelo (`/api/tags`).
    OK → usa o local. Falhou → derruba o local e sobe o 9Router.
 
-`kfai-start.ps1 -Status` mostra as 3 portas **e o resultado da verificação**
+`05-kfai-start.ps1 -Status` mostra as 3 portas **e o resultado da verificação**
 (compatível ou não, com os caminhos encontrados). Para forçar só nuvem mesmo em
 PC capaz, defina `KFAI_FORCE_NO_LOCAL=1`.
 
@@ -205,23 +205,24 @@ agente fecha. Use `-KeepOn` para manter os serviços após fechar o agente.
 
 O atalho do AionUi no menu Iniciar já aponta para o launcher. Para abrir um
 agente SEM launcher e mesmo assim ter os serviços, ligue manualmente com
-`.\kfai-start.ps1`.
+`.\05-kfai-start.ps1`.
 
 **Modo "sempre ligado" (opcional):** se preferir que tudo suba no login sem
-abrir agente, rode `.\kfai-start.ps1 -Register` (e `-Unregister` para reverter).
+abrir agente, rode `.\05-kfai-start.ps1 -Register` (e `-Unregister` para reverter).
 
 ## 📚 Documentação
 
 - [O que é o KFAI](docs/O-QUE-E-KFAI.md)
 - [Guia de configuração](docs/GUIA-CONFIGURACAO.md)
 - [Guia de chaves gratuitas](docs/GUIA-CHAVES-GRATIS.md) — como gerar sua API key grátis de cada provedor
-- `kfai-config-chaves.ps1` — assistente que mostra quais chaves faltam, abre o site de cada provedor e, com `-Adicionar`, salva a chave direto no 9Router
+- `02-kfai-config-chaves.ps1` — assistente que mostra quais chaves faltam, abre o site de cada provedor e, com `-Adicionar`, salva a chave direto no 9Router
+- `03-kfai-config-provider-nodes.ps1` — assistente para conectar **provedores fora do catálogo** do 9Router (qualquer API compatível com OpenAI ou Anthropic), com `-Adicionar` para criar/testar e `-Remover` para apagar
 - [Modelos por hardware](docs/MODELOS-POR-HARDWARE.md) — qual modelo local baixar no seu PC
 - [Créditos](docs/CREDITOS.md) — quem fez cada ferramenta
 
 ## ❓ FAQ / Dúvidas frequentes
 
-**O PowerShell bloqueia o `install.ps1` ("não pode ser carregado")?**
+**O PowerShell bloqueia o `01-install.ps1` ("não pode ser carregado")?**
 Política de execução restrita. Solução rápida: baixe o `KFAI-Instalador.exe`
 (dá dois cliques, sem depender da política) **ou** rode `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` e abra o PowerShell de novo.
 
@@ -243,9 +244,9 @@ detecta o hardware e o launcher só tenta subir o Ollama se a máquina aguentar.
 Contexto curto. O KFAI já configura `num_ctx 65536` (modelo `-64k`). Veja a seção
 "IA local com contexto que funciona" acima.
 
-**Como deixo tudo sempre ligado?** `.\kfai-start.ps1 -Register` (reverter: `-Unregister`).
+**Como deixo tudo sempre ligado?** `.\05-kfai-start.ps1 -Register` (reverter: `-Unregister`).
 
-**Nada funciona e não sei por onde começar?** Rode `.\kfai-start.ps1 -Status`
+**Nada funciona e não sei por onde começar?** Rode `.\05-kfai-start.ps1 -Status`
 — mostra as portas, caminhos encontrados e se o PC é compatível com IA local.
 
 **Tenho outra dúvida?** Abra uma [issue](https://github.com/johnsalviano/kfai/issues)
@@ -315,8 +316,8 @@ O roteador próprio também se protege contra abuso:
 - opcionalmente exige `KFAI_ROUTER_TOKEN` para bloquear qualquer processo local
   que não conheça o token.
 
-> **Hash do `install.ps1` atual (confira antes de rodar):**<br>
-> `138BDA47546FE389E98887A5B44885EA70B62ABE4C3C495BDD647BF00B1BDCEA`<br>
+> **Hash do `01-install.ps1` atual (confira antes de rodar):**<br>
+> `A5D93D321264ECC10695618F986625D3ACF704020B308CF4B664C9E0B8C3513B`<br>
 > *(o próprio script imprime o mesmo valor no final da instalação — se divergir,
 > o arquivo pode ter sido adulterado e **não** deve ser executado)*
 

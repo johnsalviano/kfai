@@ -41,14 +41,14 @@ full-cloud|todas-free|http://localhost:20128/v1||full
 #
 # =========================== 2) CLOUD + LOCAL =============================
 # Nuvem primeiro (via 9Router); quando falhar/limite (429), cai para o Ollama
-# local. Use o modelo local que o install.ps1 escolheu para a sua maquina.
+# local. Use o modelo local que o 01-install.ps1 escolheu para a sua maquina.
 cloud-plus-local|todas-free|http://localhost:20128/v1||full
 cloud-plus-local|qwen3:4b|http://localhost:11434/v1||full
 cloud-plus-local|llama3.2:3b|http://localhost:11434/v1||full
 # cloud-plus-local|qwen3:8b|http://localhost:11434/v1||full   # PC com GPU 8GB+
 #
 # ============================= 3) FULL LOCAL ==============================
-# Somente Ollama local. Escolha o modelo do seu PC (install.ps1 decide).
+# Somente Ollama local. Escolha o modelo do seu PC (01-install.ps1 decide).
 full-local|qwen3:4b|http://localhost:11434/v1||full
 full-local|llama3.2:3b|http://localhost:11434/v1||full
 # full-local|qwen3:8b|http://localhost:11434/v1||full           # PC com GPU 8GB+
@@ -56,7 +56,7 @@ full-local|llama3.2:3b|http://localhost:11434/v1||full
 # full-local|qwen2.5:1.5b|http://localhost:11434/v1||full         # PC muito fraco
 #
 # PC fraco (nao roda Ollama): use SOMENTE full-cloud. Nao crie full-local
-# nem cloud-plus-local (o install.ps1 ja faz isso sozinho).
+# nem cloud-plus-local (o 01-install.ps1 ja faz isso sozinho).
 #
 # Ajustes (env):
 #   KFAI_ECO_MODE=full|eco|auto  modo padrao quando linha nao define

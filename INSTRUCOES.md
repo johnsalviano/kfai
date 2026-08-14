@@ -13,7 +13,7 @@ Kit **v0.2.0** · Guia simples começando do zero. Tudo grátis.
 5. Terminou quando a tela mostrar **Integridade (SHA-256)**.
 
 > Quer ver tudo que será executado antes? Rode o script no PowerShell em vez do
-> `.exe`: `.\install.ps1` (abaixo). O resultado é o mesmo.
+> `.exe`: `.\01-install.ps1` (abaixo). O resultado é o mesmo.
 
 > Atalho oficial: `ollama launch opencode` já configura o opencode com o Ollama
 > local sozinho, sem mexer na sua config. Veja os docs em
@@ -27,14 +27,14 @@ Os combos de nuvem (Full Cloud) precisam de pelo menos uma chave gratuita.
 2. Rode o assistente de chaves:
 
    ```powershell
-   .\kfai-config-chaves.ps1
+   .\02-kfai-config-chaves.ps1
    ```
 
 3. Ele mostra **quais chaves faltam** e abre o site de cada fornecedor. Gere a
    chave de graça e rode o fluxo automático para salvá-la:
 
    ```powershell
-   .\kfai-config-chaves.ps1 -Adicionar
+   .\02-kfai-config-chaves.ps1 -Adicionar
    ```
 
    (alternativa manual: colar a chave no 9Router, painel em
@@ -59,7 +59,7 @@ Escolha o **combo** (modo de uso) na primeira conversa com o agente:
 1. Abra um terminal na pasta e rode:
 
    ```powershell
-   .\kfai-launch.ps1
+   .\06-kfai-launch.ps1
    ```
 
 2. Quando o agente perguntar qual modelo, escolha um dos combos acima.
@@ -69,7 +69,7 @@ Escolha o **combo** (modo de uso) na primeira conversa com o agente:
 1. No app, abra o terminal interno e rode:
 
    ```powershell
-   .\kfai-aionui-combos.ps1
+   .\04-kfai-aionui-combos.ps1
    ```
 
 2. Esse script adiciona o provider **KFAI Router** com os três combos e remove

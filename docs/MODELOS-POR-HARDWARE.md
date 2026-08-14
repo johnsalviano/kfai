@@ -50,7 +50,7 @@ na mão, use esta tabela.
 - Use modelos **menores** (qwen3:4b em vez de qwen3:8b);
 - Use **quantizações** mais leves (ex.: `q4_K_M` já é padrão em muitos);
 - Feche outros programas pesados (navegador com dezenas de abas);
-- O `kfai-start.ps1` define `OLLAMA_KEEP_ALIVE=30m` para o modelo não ficar
+- O `05-kfai-start.ps1` define `OLLAMA_KEEP_ALIVE=30m` para o modelo não ficar
   preso na RAM para sempre, `OLLAMA_NUM_PARALLEL=2` e
   `OLLAMA_KV_CACHE_TYPE=q8_0` (corta ~50% da memória do cache de contexto).
 

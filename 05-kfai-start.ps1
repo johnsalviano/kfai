@@ -1,11 +1,11 @@
 # KFAI - Inicia o roteador proprio e o Ollama em SEGUNDO PLANO (sem janelas)
 # Uso:
-#   .\kfai-start.ps1           inicia router + ollama escondidos
-#   .\kfai-start.ps1 -Stop     para tudo
-#   .\kfai-start.ps1 -Status   mostra o que esta rodando + compatibilidade do PC
-#   .\kfai-start.ps1 -Register adiciona ao login do Windows (autostart)
-#   .\kfai-start.ps1 -Unregister remove do login
-#   .\kfai-start.ps1 -With9Router  SO IA em nuvem via 9Router (porta 20128);
+#   .\05-kfai-start.ps1           inicia router + ollama escondidos
+#   .\05-kfai-start.ps1 -Stop     para tudo
+#   .\05-kfai-start.ps1 -Status   mostra o que esta rodando + compatibilidade do PC
+#   .\05-kfai-start.ps1 -Register adiciona ao login do Windows (autostart)
+#   .\05-kfai-start.ps1 -Unregister remove do login
+#   .\05-kfai-start.ps1 -With9Router  SO IA em nuvem via 9Router (porta 20128);
 #                                  nao sobe o Ollama local. Para PC fraco.
 #
 # O 9Router e o GATEWAY de nuvem do KFAI (full-cloud / cloud-plus-local): ele
@@ -290,7 +290,7 @@ if($Stop){
 if($Register){
   if(-not $script:OllamaCmd){ Write-Error "Ollama nao encontrado; nao posso registrar autostart."; exit 1 }
   $ps = (Get-Command powershell).Source
-  New-ItemProperty -Path $RunKey -Name $RunName -PropertyType String -Value "`"$ps`" -NoProfile -WindowStyle Hidden -File `"$Root\kfai-start.ps1`"" -Force | Out-Null
+  New-ItemProperty -Path $RunKey -Name $RunName -PropertyType String -Value "`"$ps`" -NoProfile -WindowStyle Hidden -File `"$Root\05-kfai-start.ps1`"" -Force | Out-Null
   if($script:OllamaCmd -match ' app\.exe$'){
     New-ItemProperty -Path $RunKey -Name $OllamaRunName -PropertyType String -Value "`"$script:OllamaCmd`"" -Force | Out-Null
   } else {

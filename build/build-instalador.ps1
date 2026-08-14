@@ -1,6 +1,6 @@
 <#
   KFAI - Build do instalador em executavel (.exe)
-  Converte install.ps1 em KFAI-Instalador.exe usando o ps2exe.
+  Converte 01-install.ps1 em KFAI-Instalador.exe usando o ps2exe.
   Quem preferir pode usar o .ps1 direto; o .exe e so uma comodidade
   para quem tem a Execution Policy do PowerShell bloqueada.
 
@@ -13,11 +13,11 @@ param(
 )
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$In   = Join-Path $Root "install.ps1"
+$In   = Join-Path $Root "01-install.ps1"
 $Out  = Join-Path $Root "KFAI-Instalador.exe"
 
 if(-not (Test-Path -LiteralPath $In)){
-  Write-Error "install.ps1 nao encontrado em $In"
+  Write-Error "01-install.ps1 nao encontrado em $In"
   exit 1
 }
 
@@ -30,7 +30,7 @@ if(-not (Get-Command Invoke-ps2exe -ErrorAction SilentlyContinue)){
   Install-Module -Name ps2exe -Scope CurrentUser -Force -AllowClobber
 }
 
-Write-Host "Gerando executavel a partir de install.ps1..." -ForegroundColor Cyan
+Write-Host "Gerando executavel a partir de 01-install.ps1..." -ForegroundColor Cyan
 # Sem -NoError/-NoOutput: essas flags do ps2exe suprimem TODA saida e prompts
 # do exe (tela preta "sem nada"). O instalador precisa mostrar o que faz.
 Invoke-ps2exe -InputFile $In -OutputFile $Out -Verbose:$false

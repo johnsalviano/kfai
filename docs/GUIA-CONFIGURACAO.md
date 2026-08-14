@@ -23,7 +23,7 @@ Passo a passo em português simples para deixar seu kit de agentes de IA funcion
 Abra o PowerShell na pasta do KFAI e rode:
 
 ```powershell
-.\install.ps1
+.\01-install.ps1
 ```
 
 O script:
@@ -56,7 +56,7 @@ No **Full Local**, se preciso, troque o nome do modelo no arquivo
 Se você usa o **AionUi**, abra o app e rode (no PowerShell do próprio AionUi):
 
 ```powershell
-.\kfai-aionui-combos.ps1
+.\04-kfai-aionui-combos.ps1
 ```
 
 Esse script adiciona o provider **KFAI Router** com os três combos e remove os
@@ -68,14 +68,14 @@ Rode o assistente de chaves para ver na tela **quais chaves faltam** e o **link
 de cada uma**:
 
 ```powershell
-.\kfai-config-chaves.ps1
+.\02-kfai-config-chaves.ps1
 ```
 
 Depois de gerar cada chave, salve-a no 9Router com o fluxo automático (ele
 testa e adiciona os modelos ao combo `todas-free`):
 
 ```powershell
-.\kfai-config-chaves.ps1 -Adicionar
+.\02-kfai-config-chaves.ps1 -Adicionar
 ```
 
 Também pode seguir o [Guia de Chaves Gratuitas](GUIA-CHAVES-GRATIS.md) para
@@ -88,6 +88,37 @@ passam a funcionar sem precisar mexer em variáveis de ambiente.
 > **Por que assim?** O 9Router guarda as chaves dele em um banco local seguro.
 > O router KFAI não copia suas chaves: ele só pede ao 9Router para responder,
 > e o 9Router usa as chaves que você já cadastrou.
+
+## Passo 4.5 — Provedor que não está no catálogo (opcional)
+
+O 9Router já conhece dezenas de provedores de graça. Mas se você usa algum
+serviço de IA **que não está na lista** dele — desde que o serviço aceite o
+formato de API da OpenAI (`.../v1/chat/completions`) ou da Anthropic
+(`.../v1/messages`) — dá para conectar mesmo assim. O KFAI chama isso de
+**provedor custom**:
+
+```powershell
+.\03-kfai-config-provider-nodes.ps1            # mostra os que você já cadastrou
+.\03-kfai-config-provider-nodes.ps1 -Adicionar # conecta um novo (passo a passo)
+.\03-kfai-config-provider-nodes.ps1 -Remover   # apaga um que não quer mais
+```
+
+O assistente pede apenas:
+
+1. **Tipo** do endpoint (OpenAI-compatible ou Anthropic-compatible);
+2. **Nome** (só para você reconhecer depois);
+3. **Prefixo** curto — é o "nome" do provedor dentro do 9Router e nos combos
+   (ex.: prefixo `meu-gw` + modelo `gpt-x` = `meu-gw/gpt-x`);
+4. **Endereço base** da API (a "tomada" do serviço);
+5. (recomendado) a **chave de API**, para testar antes e salvar direto no 9Router.
+
+Depois de criado, o provedor custom aparece no dashboard do 9Router como
+qualquer outro provedor: dá para testar, adicionar aos combos (perfil
+`full-cloud` / `cloud-plus-local`) e usar nos agentes com o nome
+`<prefixo>/<modelo>`.
+
+> A chave vai do seu teclado direto para o 9Router (via API local), nunca é
+> gravada em arquivo pelo KFAI — mesma garantia do assistente de chaves.
 
 ## Passo 5 — Usar as skills (otimizar seu PC)
 

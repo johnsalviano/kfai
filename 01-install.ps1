@@ -691,18 +691,18 @@ function Apply-OpencodeCombos {
 
 # --- aplica os combos no AionUi, quando der (so funciona DENTRO do AionUi) ---
 # Se este instalador rodar de dentro do AionUi (aioncore disponivel), aplica na
-# hora. Caso contrario, avisa como fazer (script kfai-aionui-combos.ps1).
+# hora. Caso contrario, avisa como fazer (script 04-kfai-aionui-combos.ps1).
 function Apply-AionUiCombos {
   if($env:AIONUI_HELPER_BIN -and (Test-Path -LiteralPath $env:AIONUI_HELPER_BIN)){
     Write-Host "AionUi detectado no ambiente. Aplicando combos e removendo perfis pagos..." -ForegroundColor Cyan
-    $aux = Join-Path $Root "kfai-aionui-combos.ps1"
+    $aux = Join-Path $Root "04-kfai-aionui-combos.ps1"
     if(Test-Path -LiteralPath $aux){
       & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $aux
       return
     }
   }
   Write-Host "AionUi nao aplica combos agora (so funciona dentro do app)." -ForegroundColor Yellow
-  Write-Host "Para aplicar no AionUi, abra o app e rode: .\kfai-aionui-combos.ps1" -ForegroundColor Yellow
+  Write-Host "Para aplicar no AionUi, abra o app e rode: .\04-kfai-aionui-combos.ps1" -ForegroundColor Yellow
 }
 
 # --- relatorio de apps e dependencias (instalado? versao? atualizado?) ---
@@ -820,14 +820,14 @@ Apply-OpencodeCombos
 Apply-AionUiCombos
 
 Write-Step "Chaves de IA gratuitas (9Router)"
-$cfgChaves = Join-Path $Root "kfai-config-chaves.ps1"
+$cfgChaves = Join-Path $Root "02-kfai-config-chaves.ps1"
 if(Test-Path -LiteralPath $cfgChaves){
   # passo 1: checa o estado sem abrir nada nem perguntar
   # exit 0 = tudo OK | 1 = nao leu o 9Router | 2 = faltam chaves
   & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $cfgChaves -Test
   $exitKey = $LASTEXITCODE
   if($exitKey -eq 1){
-    Write-Host "Nao deu para ler o 9Router agora. Depois rode: .\kfai-config-chaves.ps1" -ForegroundColor Yellow
+    Write-Host "Nao deu para ler o 9Router agora. Depois rode: .\02-kfai-config-chaves.ps1" -ForegroundColor Yellow
   } elseif($exitKey -eq 2){
     Write-Host ""
     $resp = ''
@@ -836,20 +836,20 @@ if(Test-Path -LiteralPath $cfgChaves){
       & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $cfgChaves
     } else {
       Write-Host "Ok. Guia completo em: $(Join-Path $Root 'docs\GUIA-CHAVES-GRATIS.md')" -ForegroundColor DarkGray
-      Write-Host "Ou rode depois: .\kfai-config-chaves.ps1" -ForegroundColor DarkGray
+      Write-Host "Ou rode depois: .\02-kfai-config-chaves.ps1" -ForegroundColor DarkGray
     }
   } else {
     Write-Host "Todas as chaves ja configuradas no 9Router." -ForegroundColor Green
   }
 } else {
-  Write-Host "Assistente de chaves nao encontrado (kfai-config-chaves.ps1)." -ForegroundColor Yellow
+  Write-Host "Assistente de chaves nao encontrado (02-kfai-config-chaves.ps1)." -ForegroundColor Yellow
 }
 
 Write-Step "Guia de proximos passos"
 $guiaChaves = Join-Path $Root "docs\GUIA-CHAVES-GRATIS.md"
 Write-Host @"
 1. Abra o 9Router e ative as conexoes gratuitas de sua escolha.
-2. Adicione suas chaves gratuitas: rode .\kfai-config-chaves.ps1
+2. Adicione suas chaves gratuitas: rode .\02-kfai-config-chaves.ps1
    (ele abre os sites das chaves que faltam; guia completo em:
     $guiaChaves)
 3. Escolha o combo ja instalado no opencode (mudar o modelo):
