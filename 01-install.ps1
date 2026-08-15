@@ -1077,7 +1077,22 @@ Write-Host @"
    - kfai/full-local      -> somente seu PC (Ollama)
    Tambem pode trocar o arquivo inteiro usando os presets em config\opencode\.
 $(if($script:NumCtxModel){ "   Modelo local recomendado (contexto 64k): $($script:NumCtxModel)`n" })
-   Pronto! Use as skills da pasta skills\ para otimizar seu PC.
+    Pronto! Use as skills da pasta skills\ para otimizar seu PC.
 "@ -ForegroundColor Cyan
+
+# ===== CONFIGURACAO DE CHAVES (FINAL DO INSTALADOR) =====
+# No MSI, abre a janela grafica ANTES de concluir, para o usuario configurar as chaves.
+# Fora do MSI (rodando na mao), mantem o comportamento de perguntar via Read-Host.
+if($MsiOptions){
+  $cfgChavesGui = Join-Path $Root "03-kfai-config-chaves-gui.ps1"
+  if(Test-Path -LiteralPath $cfgChavesGui){
+    Write-Host ""
+    Write-Host "=== Configuracao de chaves de IA (antes de concluir) ===" -ForegroundColor Cyan
+    try { & $cfgChavesGui } catch { Write-Host "Aviso: erro ao abrir GUI de chaves: $($_.Exception.Message)" -ForegroundColor Yellow }
+  }
+}
+# Fora do MSI: o fluxo anterior (Read-Host) ja cuidou se o usuario quis configurar agora.
+# Se nao configurou, pode rodar depois: .\03-kfai-config-chaves-gui.ps1
+
 Show-IntegrityHash
 Write-Host "`nKFAI instalado. Curto e simples." -ForegroundColor Green

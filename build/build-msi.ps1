@@ -38,8 +38,8 @@ if(-not $SkipStaging){
 
   # Arquivos da raiz que entram no pacote (nunca router.conf: tem chaves reais).
   $Raiz = @(
-    "01-install.ps1","02-kfai-config-chaves.ps1","03-kfai-config-provider-nodes.ps1",
-    "04-kfai-aionui-combos.ps1","05-kfai-start.ps1","06-kfai-launch.ps1",
+    "01-install.ps1","02-kfai-config-chaves.ps1","03-kfai-config-chaves-gui.ps1",
+    "03-kfai-config-provider-nodes.ps1","04-kfai-aionui-combos.ps1","05-kfai-start.ps1","06-kfai-launch.ps1",
     "07-KFAI-Abrir-Opencode.vbs","08-KFAI-Abrir-AionUi.vbs","09-kfai-desinstalar.ps1",
     "router.py","router.conf.example","VERSION","LICENSE","AGENTS.md",
     "CONTRIBUTING.md","INSTRUCOES.md","README.md","README.en.md","SECURITY.md","llms.txt"
@@ -144,6 +144,10 @@ Write-Host "Payload.wxs gerado: $Payload" -ForegroundColor Green
 
 # ============ 4) build do MSI ============
 Write-Host "Compilando KFAI v$Version (MSI, wizard pt-BR)..." -ForegroundColor Cyan
+# ProductCode NOVO a cada build: sem isso, instalar por cima de uma versao
+# instalada com o mesmo ProductCode trava com "ja foi instalada outra versao".
+# O UpgradeCode permanece fixo, entao o MajorUpgrade substitui a versao antiga.
+$ProductCode = [guid]::NewGuid().ToString().ToUpperInvariant()
 $uiExt = "WixToolset.UI.wixext/4.0.6"
 $uiExtDll = Join-Path $env:USERPROFILE ".wix\extensions\WixToolset.UI.wixext\4.0.6\wixext4\WixToolset.UI.wixext.dll"
 if(Test-Path -LiteralPath $uiExtDll){ $uiExt = $uiExtDll }
@@ -156,6 +160,7 @@ $args = @(
   "-culture","pt-BR",
   "-loc",(Join-Path $MsiDir "pt-BR.wxl"),
   "-d","Version=$Version",
+  "-d","ProductCode=$ProductCode",
   "-o",$Out,
   "-pdbtype","none"
 )

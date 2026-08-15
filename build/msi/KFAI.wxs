@@ -11,7 +11,7 @@
            Version="$(var.Version)"
            Language="1046"
            UpgradeCode="CF196619-57D3-4E02-A4E0-B46767447488"
-           ProductCode="CE615709-43FE-40AC-BFAB-27E4D62B3EA4"
+           ProductCode="$(var.ProductCode)"
            Scope="perUser">
     <SummaryInformation Description="Kit de Ferramentas de Agente de IA - IA gratuita no seu PC e na nuvem"
                         Keywords="KFAI;IA;Ollama;9Router;opencode;gratis" />
